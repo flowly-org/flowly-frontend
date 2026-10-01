@@ -51,7 +51,7 @@ export class DayBoard {
 
   protected readonly statuses = STATUSES;
   private readonly wsId = this.store.currentId()!;
-  private readonly prefsKey = `mk.board.${this.wsId}`;
+  private readonly prefsKey = `flowly.board.${this.wsId}`;
 
   protected date = signal(today());
   protected groupBy = signal<GroupBy>('project');

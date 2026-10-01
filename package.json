@@ -1,5 +1,5 @@
 {
-  "name": "multikanban-frontend",
+  "name": "flowly-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",

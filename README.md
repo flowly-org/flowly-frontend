@@ -1,8 +1,8 @@
-# Multikanban – frontend
+# Flowly – frontend
 
-Angular 22 client for Multikanban: plan your day across projects as a kanban board with **swimlanes**.
+Angular 22 client for Flowly: plan your day across projects as a kanban board with **swimlanes**.
 
-The Django API lives in the separate `multikanban-backend` repository.
+The Django API lives in the separate `flowly-backend` repository.
 
 ## Features
 

@@ -22,7 +22,7 @@ export class Home implements OnInit {
     }
     let lastId: number | null = null;
     try {
-      lastId = Number(localStorage.getItem('mk.lastWorkspace')) || null;
+      lastId = Number(localStorage.getItem('flowly.lastWorkspace')) || null;
     } catch {}
     const target = list.find((w) => w.id === lastId) ?? list[0];
     if (target) this.router.navigate(['/w', target.id, 'day'], { replaceUrl: true });

@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "multikanban-frontend": {
+    "flowly-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -86,10 +86,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "multikanban-frontend:build:production"
+              "buildTarget": "flowly-frontend:build:production"
             },
             "development": {
-              "buildTarget": "multikanban-frontend:build:development"
+              "buildTarget": "flowly-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

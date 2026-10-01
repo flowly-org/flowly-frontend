@@ -6,8 +6,8 @@ import { Observable, firstValueFrom, map, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { AuthResponse, User } from './models';
 
-const ACCESS = 'mk.access';
-const REFRESH = 'mk.refresh';
+const ACCESS = 'flowly.access';
+const REFRESH = 'flowly.refresh';
 
 function storageGet(key: string): string | null {
   try {

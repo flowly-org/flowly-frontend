@@ -113,7 +113,7 @@ export class MembersPage implements OnInit {
       await this.api.deleteWorkspace(this.wsId);
       await this.store.loadWorkspaces();
       try {
-        localStorage.removeItem('mk.lastWorkspace');
+        localStorage.removeItem('flowly.lastWorkspace');
       } catch {}
       this.router.navigateByUrl('/');
     } catch (err) {

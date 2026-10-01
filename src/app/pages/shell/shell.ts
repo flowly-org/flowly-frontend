@@ -39,7 +39,7 @@ export class Shell {
             return;
           }
           try {
-            localStorage.setItem('mk.lastWorkspace', String(id));
+            localStorage.setItem('flowly.lastWorkspace', String(id));
           } catch {}
           this.ready.set(true);
         },
