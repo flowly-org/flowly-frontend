@@ -29,6 +29,7 @@ export class WorkspaceStore {
       id: ws.id,
       name: ws.name,
       color: ws.color,
+      time_tracking: ws.time_tracking,
       my_role: ws.my_role,
       projects: this.projects(),
       tag_groups: this.tagGroups(),
@@ -52,6 +53,9 @@ export class WorkspaceStore {
     const ws = this.workspaces().find((w) => w.id === this.navId());
     return ws?.my_role === 'owner' || ws?.my_role === 'admin';
   });
+
+  /** Whether time tracking is on in the workspace the nav points at. */
+  readonly navTimeTracking = computed(() => this.workspaces().find((w) => w.id === this.navId())?.time_tracking ?? true);
 
   /** Workspace the workspace-level nav should point at: current, else last used, else first. */
   readonly navId = computed(() => {

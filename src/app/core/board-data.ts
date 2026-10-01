@@ -49,6 +49,13 @@ export class BoardData {
     return this.ctx(wsId)?.tag_groups.find((g) => g.kind === 'priority')?.tags ?? [];
   }
 
+  /** Time can be tracked on this task (workspace and project both allow it). */
+  canTrack(task: Task): boolean {
+    if (this.ctx(task.workspace)?.time_tracking === false) return false;
+    const project = task.project === null ? null : this.projectById().get(task.project);
+    return project?.time_tracking !== false;
+  }
+
   isDone(task: Task): boolean {
     return this.tagById().get(task.status)?.is_done ?? false;
   }

@@ -29,6 +29,7 @@ export class TaskCard {
   private data = inject(BoardData);
   protected timer = inject(TimerService);
   protected timing = computed(() => this.timer.isRunningOn(this.task().id));
+  protected trackable = computed(() => this.data.canTrack(this.task()));
 
   protected toggleTimer(event: Event) {
     event.stopPropagation();

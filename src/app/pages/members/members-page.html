@@ -84,24 +84,6 @@
   <p class="muted">Your name, GitHub username and concierge live in <a routerLink="/settings">Settings</a>.</p>
 
   @if (store.canManage()) {
-    <section class="panel">
-      <h2>Workspace</h2>
-      <form class="inline-form" (ngSubmit)="rename()">
-        <input type="color" name="wsColor" [(ngModel)]="wsColor" aria-label="Workspace colour" title="Workspace colour (tints the logo)" />
-        <input name="wsName" [(ngModel)]="wsName" aria-label="Workspace name" />
-        <button class="btn" type="submit">Save</button>
-      </form>
-      @if (store.current()?.my_role === 'owner') {
-        <div class="row">
-          <div class="grow muted">Deleting the workspace removes all of its projects, tags and tasks for everyone.</div>
-          @if (confirming() === 'ws') {
-            <button class="btn danger small" type="button" (click)="deleteWorkspace()">Delete forever</button>
-            <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
-          } @else {
-            <button class="btn danger small" type="button" (click)="confirming.set('ws')">Delete workspace</button>
-          }
-        </div>
-      }
-    </section>
+    <p class="muted">Name, colour, time tracking, billing and deleting the workspace are in <a routerLink="../settings">Workspace settings</a>.</p>
   }
 </div>

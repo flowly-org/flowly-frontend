@@ -339,3 +339,16 @@ textarea {
     overflow: visible !important;
   }
 }
+
+label.opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+
+  input {
+    width: auto;
+  }
+}

@@ -71,7 +71,7 @@ export class ApiService {
   createWorkspace(name: string) {
     return this.run(this.http.post<Workspace>(this.url('workspaces/'), { name }));
   }
-  updateWorkspace(id: number, data: Partial<Pick<Workspace, 'name' | 'color'>>) {
+  updateWorkspace(id: number, data: Partial<Pick<Workspace, 'name' | 'color' | 'time_tracking'>>) {
     return this.run(this.http.patch<Workspace>(this.url(`workspaces/${id}/`), data));
   }
   deleteWorkspace(id: number) {

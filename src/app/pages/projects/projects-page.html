@@ -64,6 +64,18 @@
       <button class="btn ghost icon" type="button" [disabled]="first" (click)="move(p, -1)" aria-label="Move up">↑</button>
       <button class="btn ghost icon" type="button" [disabled]="last" (click)="move(p, 1)" aria-label="Move down">↓</button>
     }
+    @if (store.current()?.time_tracking) {
+      <label class="opt" title="Timers and logged time on this project's tasks">
+        <input type="checkbox" [checked]="p.time_tracking" (change)="update(p, { time_tracking: $any($event.target).checked })" />
+        Time
+      </label>
+      @if (store.canManage() && store.current()?.billing_enabled) {
+        <label class="opt" title="Include this project's time in billing and invoices">
+          <input type="checkbox" [checked]="p.billable" [disabled]="!p.time_tracking" (change)="update(p, { billable: $any($event.target).checked })" />
+          Billable
+        </label>
+      }
+    }
     <a class="btn ghost small" [routerLink]="['../integrations']" [queryParams]="{ project: p.id }">Integrations</a>
     <button class="btn small" type="button" (click)="update(p, { archived: !p.archived })">
       {{ p.archived ? 'Restore' : 'Archive' }}

@@ -22,6 +22,8 @@ export interface Workspace {
   id: number;
   name: string;
   color: string;
+  time_tracking: boolean;
+  billing_enabled: boolean;
   created_at: string;
   my_role: Role;
   member_count: number;
@@ -58,6 +60,8 @@ export interface Project {
   description: string;
   color: string;
   archived: boolean;
+  time_tracking: boolean;
+  billable: boolean;
   position: number;
   open_task_count: number;
   created_at: string;
@@ -87,6 +91,7 @@ export interface WorkspaceContext {
   id: number;
   name: string;
   color: string;
+  time_tracking?: boolean;
   my_role: Role;
   projects: Project[];
   tag_groups: TagGroup[];

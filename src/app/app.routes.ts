@@ -68,6 +68,10 @@ export const routes: Routes = [
           },
           { path: 'projects', loadComponent: () => import('./pages/projects/projects-page').then((m) => m.ProjectsPage) },
           { path: 'tags', loadComponent: () => import('./pages/tags/tags-page').then((m) => m.TagsPage) },
+          {
+            path: 'settings',
+            loadComponent: () => import('./pages/workspace-settings/workspace-settings').then((m) => m.WorkspaceSettings),
+          },
           { path: 'time', loadComponent: () => import('./pages/time/time-page').then((m) => m.TimePage) },
           { path: 'billing', loadComponent: () => import('./pages/billing/billing-page').then((m) => m.BillingPage) },
           {

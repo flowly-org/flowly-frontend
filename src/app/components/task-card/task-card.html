@@ -46,7 +46,9 @@
   </div>
 </div>
 
+@if (trackable() || timing()) {
 <button type="button" class="play" (click)="toggleTimer($event)" (mousedown)="$event.stopPropagation()"
   [attr.aria-label]="timing() ? 'Stop timer' : 'Start timer'" [title]="timing() ? 'Stop timer' : 'Track time'">
   {{ timing() ? '■' : '▶' }}
 </button>
+}

@@ -23,8 +23,6 @@ export class MembersPage implements OnInit {
   protected invitations = signal<Invitation[]>([]);
   protected inviteEmail = '';
   protected inviteRole: Role = 'member';
-  protected wsName = this.store.current()?.name ?? '';
-  protected wsColor = this.store.current()?.color ?? '#4f46e5';
   protected confirming = signal<string | null>(null);
 
   private get wsId() {
@@ -112,31 +110,6 @@ export class MembersPage implements OnInit {
     try {
       await this.api.revokeInvitation(this.wsId, inv.id);
       await this.loadInvitations();
-    } catch (err) {
-      this.toast.error(errorMessage(err));
-    }
-  }
-
-  async rename() {
-    const name = this.wsName.trim();
-    if (!name) return;
-    try {
-      await this.api.updateWorkspace(this.wsId, { name, color: this.wsColor });
-      await this.store.loadWorkspaces();
-      this.toast.show('Workspace updated.');
-    } catch (err) {
-      this.toast.error(errorMessage(err));
-    }
-  }
-
-  async deleteWorkspace() {
-    try {
-      await this.api.deleteWorkspace(this.wsId);
-      await this.store.loadWorkspaces();
-      try {
-        localStorage.removeItem('flowly.lastWorkspace');
-      } catch {}
-      this.router.navigateByUrl('/');
     } catch (err) {
       this.toast.error(errorMessage(err));
     }

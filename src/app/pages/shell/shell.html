@@ -29,12 +29,17 @@
       <a [routerLink]="['/w', id, 'board']" routerLinkActive="active">Board</a>
       <a [routerLink]="['/w', id, 'projects']" routerLinkActive="active">Projects</a>
       <a [routerLink]="['/w', id, 'tags']" routerLinkActive="active">Tags</a>
-      <a [routerLink]="['/w', id, 'time']" routerLinkActive="active">Time</a>
-      @if (store.navCanManage()) {
-        <a [routerLink]="['/w', id, 'billing']" routerLinkActive="active">Billing</a>
+      @if (store.navTimeTracking()) {
+        <a [routerLink]="['/w', id, 'time']" routerLinkActive="active">Time</a>
+        @if (store.navCanManage()) {
+          <a [routerLink]="['/w', id, 'billing']" routerLinkActive="active">Billing</a>
+        }
       }
       <a [routerLink]="['/w', id, 'integrations']" routerLinkActive="active">Integrations</a>
       <a [routerLink]="['/w', id, 'members']" routerLinkActive="active">Members</a>
+      @if (store.navCanManage()) {
+        <a [routerLink]="['/w', id, 'settings']" routerLinkActive="active">Settings</a>
+      }
     }
   </nav>
 
