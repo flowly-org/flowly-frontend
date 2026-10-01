@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiService } from './api.service';
-import { Membership, Project, Tag, TagGroup, Workspace } from './models';
+import { Membership, Project, Tag, TagGroup, Workspace, WorkspaceContext } from './models';
 
 /** Workspace-level reference data shared by every page under /w/:wsId. */
 @Injectable({ providedIn: 'root' })
@@ -20,6 +20,21 @@ export class WorkspaceStore {
   readonly canManage = computed(() => ['owner', 'admin'].includes(this.current()?.my_role ?? ''));
   readonly activeProjects = computed(() => this.projects().filter((p) => !p.archived));
   readonly freeTags = computed(() => this.tags().filter((t) => t.group === null));
+
+  /** The current workspace's data in the shape the board uses. */
+  readonly context = computed<WorkspaceContext | null>(() => {
+    const ws = this.current();
+    if (!ws) return null;
+    return {
+      id: ws.id,
+      name: ws.name,
+      my_role: ws.my_role,
+      projects: this.projects(),
+      tag_groups: this.tagGroups(),
+      tags: this.tags(),
+      members: this.members(),
+    };
+  });
   readonly projectById = computed(() => new Map(this.projects().map((p) => [p.id, p])));
   readonly tagById = computed(() => new Map(this.tags().map((t) => [t.id, t])));
   readonly userById = computed(() => new Map(this.members().map((m) => [m.user.id, m.user])));
@@ -27,8 +42,21 @@ export class WorkspaceStore {
   async loadWorkspaces(): Promise<Workspace[]> {
     const list = await this.api.workspaces();
     this.workspaces.set(list);
+    if (!list.some((w) => w.id === this.currentId())) this.currentId.set(null);
     return list;
   }
+
+  /** Workspace the workspace-level nav should point at: current, else last used, else first. */
+  readonly navId = computed(() => {
+    const list = this.workspaces();
+    const current = this.currentId();
+    if (current !== null) return current;
+    let last: number | null = null;
+    try {
+      last = Number(localStorage.getItem('flowly.lastWorkspace')) || null;
+    } catch {}
+    return list.find((w) => w.id === last)?.id ?? list[0]?.id ?? null;
+  });
 
   async open(wsId: number): Promise<boolean> {
     if (!this.workspaces().length) await this.loadWorkspaces();

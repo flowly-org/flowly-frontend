@@ -2,20 +2,34 @@ import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskDialog } from '../../components/task-dialog/task-dialog';
-import { ApiService, errorMessage } from '../../core/api.service';
+import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { BoardData } from '../../core/board-data';
 import { addDays, formatLong, isValidIsoDate, today } from '../../core/dates';
-import { STATUSES, Task, TaskInput, TaskStatus } from '../../core/models';
+import { Task, TaskInput } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
-import { GroupBy, Lane, buildLanes, groupIdOf, laneKeyOf, positionAt } from './lanes';
+import {
+  Column,
+  GroupBy,
+  Lane,
+  accepts,
+  buildColumns,
+  buildLanes,
+  columnKeyOf,
+  groupNameOf,
+  groupOptions,
+  laneKeyOf,
+  positionAt,
+} from './lanes';
 
 type Scope = 'me' | 'all';
-type DropTarget = { kind: 'cell'; lane: Lane; status: TaskStatus } | { kind: 'backlog' };
+type Mode = 'global' | 'workspace';
+type DropTarget = { kind: 'cell'; lane: Lane; column: Column } | { kind: 'backlog' };
 
 interface Prefs {
   groupBy: GroupBy;
@@ -24,34 +38,32 @@ interface Prefs {
   hideEmpty: boolean;
   showBacklog: boolean;
   collapsed: string[];
+  targetWs: number | null;
 }
 
-const DEFAULT_PREFS: Prefs = {
-  groupBy: 'project',
-  scope: 'me',
-  includeOverdue: true,
-  hideEmpty: false,
-  showBacklog: true,
-  collapsed: [],
-};
-
+/**
+ * The day board. In "global" mode (My day) it spans every workspace the user is in;
+ * in "workspace" mode it's the board of the workspace in the URL.
+ */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog],
+  providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
 })
 export class DayBoard {
-  protected store = inject(WorkspaceStore);
+  private store = inject(WorkspaceStore);
+  protected data = inject(BoardData);
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  protected readonly statuses = STATUSES;
-  private readonly wsId = this.store.currentId()!;
-  private readonly prefsKey = `flowly.board.${this.wsId}`;
+  protected readonly mode: Mode = this.route.snapshot.data['mode'] === 'workspace' ? 'workspace' : 'global';
+  private readonly wsId = this.mode === 'workspace' ? this.store.currentId() : null;
+  private readonly prefsKey = this.mode === 'workspace' ? `flowly.board.${this.wsId}` : 'flowly.myday';
 
   protected date = signal(today());
   protected groupBy = signal<GroupBy>('project');
@@ -60,6 +72,8 @@ export class DayBoard {
   protected hideEmpty = signal(false);
   protected showBacklog = signal(true);
   protected collapsed = signal<Set<string>>(new Set());
+  /** Workspace new tasks are created in (My day only). */
+  protected targetWs = signal<number | null>(null);
 
   protected tasks = signal<Task[]>([]);
   protected backlog = signal<Task[]>([]);
@@ -71,38 +85,38 @@ export class DayBoard {
   protected quickAddTitle = '';
   protected backlogTitle = '';
 
+  protected readonly title = computed(() =>
+    this.mode === 'global' ? 'My day' : (this.store.current()?.name ?? 'Board'),
+  );
   protected readonly isToday = computed(() => this.date() === today());
   protected readonly dateLabel = computed(() => formatLong(this.date()));
-  protected readonly hiddenTagGroup = computed(() => groupIdOf(this.groupBy()));
+  protected readonly hiddenGroup = computed(() => groupNameOf(this.groupBy()));
+  protected readonly contexts = this.data.contexts;
+  protected readonly newTaskWs = computed(() => this.wsId ?? this.targetWs() ?? this.contexts()[0]?.id ?? null);
 
-  protected readonly lanes = computed(() =>
-    buildLanes(this.groupBy(), {
-      projects: this.store.projects(),
-      members: this.store.members(),
-      tagGroups: this.store.tagGroups(),
-      tasks: this.tasks(),
-    }),
-  );
+  protected readonly columns = computed(() => buildColumns(this.contexts()));
+  protected readonly lanes = computed(() => buildLanes(this.groupBy(), this.contexts(), this.tasks()));
+  protected readonly groupChoices = computed(() => groupOptions(this.contexts()));
+  protected readonly gridColumns = computed(() => `repeat(${this.columns().length || 1}, minmax(220px, 1fr))`);
 
-  /** laneKey → status → tasks sorted by position. */
+  /** laneKey → columnKey → tasks sorted by position. */
   protected readonly cells = computed(() => {
     const groupBy = this.groupBy();
-    const groups = this.store.tagGroups();
-    const cells = new Map<string, Record<TaskStatus, Task[]>>();
-    for (const lane of this.lanes()) cells.set(lane.key, { todo: [], in_progress: [], done: [] });
-    for (const task of this.tasks()) cells.get(laneKeyOf(task, groupBy, groups))?.[task.status].push(task);
-    for (const cell of cells.values()) for (const list of Object.values(cell)) list.sort(byPosition);
+    const byId = this.data.byId();
+    const tagById = this.data.tagById();
+    const cells = new Map<string, Map<string, Task[]>>();
+    for (const lane of this.lanes()) cells.set(lane.key, new Map(this.columns().map((c) => [c.key, []])));
+    for (const task of this.tasks()) {
+      const col = columnKeyOf(task, tagById);
+      if (col !== null) cells.get(laneKeyOf(task, groupBy, byId, tagById))?.get(col)?.push(task);
+    }
+    for (const lane of cells.values()) for (const list of lane.values()) list.sort(byPosition);
     return cells;
   });
 
   protected readonly visibleLanes = computed(() => {
-    const cells = this.cells();
     const lanes = this.lanes();
-    if (!this.hideEmpty()) return lanes;
-    return lanes.filter((l) => {
-      const c = cells.get(l.key)!;
-      return c.todo.length + c.in_progress.length + c.done.length > 0;
-    });
+    return this.hideEmpty() ? lanes.filter((l) => this.laneCount(l.key) > 0) : lanes;
   });
 
   protected readonly filteredBacklog = computed(() => {
@@ -113,19 +127,25 @@ export class DayBoard {
 
   protected readonly progress = computed(() => {
     const all = this.tasks();
-    const done = all.filter((t) => t.status === 'done').length;
+    const done = all.filter((t) => this.data.isDone(t)).length;
     return { done, total: all.length, pct: all.length ? Math.round((done / all.length) * 100) : 0 };
   });
 
-  protected readonly groupOptions = computed(() => [
-    { value: 'project', label: 'Project' },
-    { value: 'assignee', label: 'Assignee' },
-    ...this.store.tagGroups().map((g) => ({ value: `group:${g.id}`, label: g.name })),
-    { value: 'none', label: 'No grouping' },
-  ]);
+  protected readonly showWorkspaceOnCards = computed(
+    () => this.data.multi() && this.groupBy() !== 'workspace' && this.groupBy() !== 'project',
+  );
 
   constructor() {
     this.restorePrefs();
+
+    if (this.mode === 'workspace') {
+      effect(() => {
+        const ctx = this.store.context();
+        this.data.contexts.set(ctx ? [ctx] : []);
+      });
+    } else {
+      this.loadContexts();
+    }
 
     // Keep URL and stored prefs in sync with the view settings.
     effect(() => {
@@ -140,10 +160,11 @@ export class DayBoard {
       untracked(() => this.load(query.date, query.scope, query.overdue));
     });
 
-    // Fall back if the grouped-by tag group was deleted.
+    // Fall back if the grouping no longer exists (e.g. its tag group was deleted).
     effect(() => {
-      const gid = groupIdOf(this.groupBy());
-      if (gid !== null && !this.store.loading() && !this.store.tagGroups().some((g) => g.id === gid)) {
+      const choices = this.groupChoices();
+      const current = this.groupBy();
+      if (this.contexts().length && !choices.some((c) => c.value.toLowerCase() === current.toLowerCase())) {
         this.groupBy.set('project');
       }
     });
@@ -151,7 +172,19 @@ export class DayBoard {
 
   // --- data ---------------------------------------------------------------
 
+  private async loadContexts() {
+    try {
+      this.data.contexts.set(await this.api.myContext());
+    } catch (err) {
+      this.toast.error(errorMessage(err, 'Could not load your workspaces.'));
+    }
+  }
+
   private loadSeq = 0;
+
+  private fetch(query: TaskQuery): Promise<Task[]> {
+    return this.wsId === null ? this.api.myTasks(query) : this.api.tasks(this.wsId, query);
+  }
 
   private async load(date: string, scope: Scope, includeOverdue: boolean) {
     const seq = ++this.loadSeq;
@@ -159,8 +192,8 @@ export class DayBoard {
     const assignee = scope === 'me' ? ('me' as const) : undefined;
     try {
       const [tasks, backlog] = await Promise.all([
-        this.api.tasks(this.wsId, { day: date, include_overdue: includeOverdue, assignee }),
-        this.api.tasks(this.wsId, { unscheduled: true, assignee }),
+        this.fetch({ day: date, include_overdue: includeOverdue, assignee }),
+        this.fetch({ unscheduled: true, assignee }),
       ]);
       if (seq !== this.loadSeq) return;
       this.tasks.set(tasks);
@@ -173,6 +206,7 @@ export class DayBoard {
   }
 
   protected reload() {
+    if (this.mode === 'global') this.loadContexts();
     this.load(this.date(), this.scope(), this.includeOverdue());
   }
 
@@ -181,13 +215,13 @@ export class DayBoard {
     const without = (list: Task[]) => list.filter((t) => t.id !== task.id);
     this.tasks.update(without);
     this.backlog.update(without);
-    const me = this.auth.user()?.id;
-    if (this.scope() === 'me' && task.assignee !== me) return;
+    if (this.scope() === 'me' && task.assignee !== this.auth.user()?.id) return;
+    if (this.wsId !== null && task.workspace !== this.wsId) return;
     if (task.planned_date === null) {
       this.backlog.update((l) => [...l, task]);
     } else if (
       task.planned_date === this.date() ||
-      (this.includeOverdue() && task.planned_date < this.date() && task.status !== 'done')
+      (this.includeOverdue() && task.planned_date < this.date() && !this.data.isDone(task))
     ) {
       this.tasks.update((l) => [...l, task]);
     }
@@ -201,7 +235,7 @@ export class DayBoard {
   private async patch(task: Task, changes: TaskInput) {
     this.place({ ...task, ...changes } as Task); // optimistic
     try {
-      this.place(await this.api.updateTask(this.wsId, task.id, changes));
+      this.place(await this.api.updateTask(task.workspace, task.id, changes));
     } catch (err) {
       this.toast.error(errorMessage(err, 'Could not update the task.'));
       this.reload();
@@ -210,16 +244,26 @@ export class DayBoard {
 
   // --- drag & drop ----------------------------------------------------------
 
-  protected cellTarget(lane: Lane, status: TaskStatus): DropTarget {
-    return { kind: 'cell', lane, status };
+  protected cellTarget(lane: Lane, column: Column): DropTarget {
+    return { kind: 'cell', lane, column };
   }
 
   protected readonly backlogTarget: DropTarget = { kind: 'backlog' };
+
+  /** Cards can't move between workspaces, so cells whose lane/column don't exist in the card's workspace refuse it. */
+  protected readonly canEnter = (drag: CdkDrag<Task>, drop: CdkDropList<DropTarget>): boolean => {
+    const target = drop.data;
+    if (target.kind === 'backlog') return true;
+    const ws = drag.data.workspace;
+    return accepts(target.lane, ws) && target.column.statusIds.has(ws);
+  };
 
   protected drop(event: CdkDragDrop<DropTarget>) {
     const task = event.item.data as Task;
     const target = event.container.data;
     if (event.previousContainer === event.container && event.previousIndex === event.currentIndex) return;
+    // Released over a cell that refused the card: cancel instead of using the last cell it passed through.
+    if (!event.isPointerOverContainer) return;
 
     if (target.kind === 'backlog') {
       const list = this.filteredBacklog().filter((t) => t.id !== task.id);
@@ -227,10 +271,12 @@ export class DayBoard {
       return;
     }
 
-    const list = this.cells().get(target.lane.key)![target.status].filter((t) => t.id !== task.id);
+    const status = target.column.statusIds.get(task.workspace);
+    if (status === undefined || !accepts(target.lane, task.workspace)) return;
+    const list = this.cellTasks(target.lane.key, target.column.key).filter((t) => t.id !== task.id);
     const changes: TaskInput = {
       ...target.lane.assign(task),
-      status: target.status,
+      status,
       position: positionAt(list, event.currentIndex, task.position),
     };
     // Dropping a backlog or carried-over task onto the board schedules it for the viewed day.
@@ -239,15 +285,22 @@ export class DayBoard {
   }
 
   protected toggleDone(task: Task) {
-    this.patch(task, { status: task.status === 'done' ? 'todo' : 'done' });
+    const status = this.data.toggledStatus(task);
+    if (status === null) {
+      this.toast.error('This workspace has no "done" status. Mark one on the Tags page.');
+      return;
+    }
+    this.patch(task, { status });
   }
 
   // --- creating & editing ---------------------------------------------------
 
   protected openNew(defaults: TaskInput = {}) {
+    const ws = this.newTaskWs();
+    if (ws === null) return;
     this.editing.set({
       task: null,
-      defaults: { planned_date: this.date(), assignee: this.auth.user()?.id ?? null, ...defaults },
+      defaults: { workspace: ws, planned_date: this.date(), assignee: this.auth.user()?.id ?? null, ...defaults },
     });
   }
 
@@ -258,6 +311,7 @@ export class DayBoard {
   protected onSaved(task: Task) {
     this.editing.set(null);
     this.place(task);
+    if (this.mode === 'global') this.targetWs.set(task.workspace);
   }
 
   protected onDeleted(id: number) {
@@ -266,25 +320,39 @@ export class DayBoard {
     this.toast.show('Task deleted.');
   }
 
+  /** Workspace a quick-added task in `lane` goes to: the preferred one if the lane allows it. */
+  private laneWorkspace(lane: Lane): number | null {
+    const preferred = this.newTaskWs();
+    if (preferred !== null && accepts(lane, preferred)) return preferred;
+    return lane.workspaces?.[0] ?? preferred;
+  }
+
+  protected canQuickAdd(lane: Lane): boolean {
+    const ws = this.laneWorkspace(lane);
+    return ws !== null && accepts(lane, ws);
+  }
+
   protected startQuickAdd(lane: Lane) {
     this.quickAddTitle = '';
     this.quickAddLane.set(lane.key);
   }
 
-  protected async quickAdd(lane: Lane) {
+  protected async quickAdd(lane: Lane, column: Column) {
     const title = this.quickAddTitle.trim();
-    if (!title) {
+    const ws = this.laneWorkspace(lane);
+    if (!title || ws === null) {
       this.quickAddLane.set(null);
       return;
     }
     this.quickAddTitle = '';
+    const status = column.statusIds.get(ws);
     try {
-      const task = await this.api.createTask(this.wsId, {
+      const task = await this.api.createTask(ws, {
         title,
-        status: 'todo',
         planned_date: this.date(),
         assignee: this.auth.user()?.id ?? null,
-        ...lane.assign(),
+        ...(status !== undefined ? { status } : {}),
+        ...lane.assign({ workspace: ws, tags: [] }),
       });
       this.place(task);
     } catch (err) {
@@ -294,12 +362,11 @@ export class DayBoard {
 
   protected async addToBacklog() {
     const title = this.backlogTitle.trim();
-    if (!title) return;
+    const ws = this.newTaskWs();
+    if (!title || ws === null) return;
     this.backlogTitle = '';
     try {
-      this.place(
-        await this.api.createTask(this.wsId, { title, planned_date: null, assignee: this.auth.user()?.id ?? null }),
-      );
+      this.place(await this.api.createTask(ws, { title, planned_date: null, assignee: this.auth.user()?.id ?? null }));
     } catch (err) {
       this.toast.error(errorMessage(err, 'Could not add the task.'));
     }
@@ -326,37 +393,59 @@ export class DayBoard {
       else next.add(key);
       return next;
     });
-    this.savePrefs();
+  }
+
+  protected cellTasks(laneKey: string, columnKey: string): Task[] {
+    return this.cells().get(laneKey)?.get(columnKey) ?? [];
   }
 
   protected laneCount(key: string): number {
-    const c = this.cells().get(key);
-    return c ? c.todo.length + c.in_progress.length + c.done.length : 0;
+    let n = 0;
+    for (const list of this.cells().get(key)?.values() ?? []) n += list.length;
+    return n;
   }
 
   protected laneDone(key: string): number {
-    return this.cells().get(key)?.done.length ?? 0;
+    let n = 0;
+    for (const col of this.columns()) if (col.isDone) n += this.cellTasks(key, col.key).length;
+    return n;
+  }
+
+  protected columnCount(key: string): number {
+    let n = 0;
+    for (const lane of this.cells().values()) n += lane.get(key)?.length ?? 0;
+    return n;
   }
 
   private restorePrefs() {
-    let prefs = DEFAULT_PREFS;
+    const defaults: Prefs = {
+      groupBy: 'project',
+      scope: this.mode === 'global' ? 'me' : 'all',
+      includeOverdue: true,
+      hideEmpty: this.mode === 'global',
+      showBacklog: true,
+      collapsed: [],
+      targetWs: null,
+    };
+    let prefs = defaults;
     try {
-      prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(this.prefsKey) ?? '{}') };
+      prefs = { ...defaults, ...JSON.parse(localStorage.getItem(this.prefsKey) ?? '{}') };
     } catch {}
     const qp = this.route.snapshot.queryParamMap;
     const date = qp.get('date');
     const group = qp.get('group') as GroupBy | null;
     const scope = qp.get('scope');
     this.date.set(isValidIsoDate(date) ? date : today());
-    this.groupBy.set(group && /^(project|assignee|none|group:\d+)$/.test(group) ? group : prefs.groupBy);
+    this.groupBy.set(group && /^(workspace|project|assignee|none|tags:.+)$/.test(group) ? group : prefs.groupBy);
     this.scope.set(scope === 'all' || scope === 'me' ? scope : prefs.scope);
     this.includeOverdue.set(prefs.includeOverdue);
     this.hideEmpty.set(prefs.hideEmpty);
     this.showBacklog.set(prefs.showBacklog && window.innerWidth > 900);
     this.collapsed.set(new Set(prefs.collapsed));
+    this.targetWs.set(prefs.targetWs);
   }
 
-  protected savePrefs() {
+  private savePrefs() {
     const prefs: Prefs = {
       groupBy: this.groupBy(),
       scope: this.scope(),
@@ -364,6 +453,7 @@ export class DayBoard {
       hideEmpty: this.hideEmpty(),
       showBacklog: this.showBacklog(),
       collapsed: [...this.collapsed()],
+      targetWs: this.targetWs(),
     };
     try {
       localStorage.setItem(this.prefsKey, JSON.stringify(prefs));

@@ -5,7 +5,10 @@
       <button class="btn" type="button" [disabled]="isToday()" (click)="goToday()">Today</button>
       <button class="btn icon" type="button" aria-label="Next day" (click)="shiftDay(1)">›</button>
     </div>
-    <h1>{{ dateLabel() }}</h1>
+    <div class="titles">
+      <span class="eyebrow">{{ title() }}</span>
+      <h1>{{ dateLabel() }}</h1>
+    </div>
     <label class="sr-only" for="board-date">Pick a date</label>
     <input id="board-date" class="date-input" type="date" [value]="date()" (change)="setDate($any($event.target).value)" />
   </div>
@@ -19,7 +22,7 @@
     <label class="field">
       <span>Swimlanes</span>
       <select [ngModel]="groupBy()" (ngModelChange)="groupBy.set($event)">
-        @for (opt of groupOptions(); track opt.value) {
+        @for (opt of groupChoices(); track opt.value) {
           <option [value]="opt.value">{{ opt.label }}</option>
         }
       </select>
@@ -42,16 +45,28 @@
     <button class="btn" type="button" [class.active]="showBacklog()" (click)="showBacklog.set(!showBacklog())">
       Backlog <span class="count">{{ backlog().length }}</span>
     </button>
+    @if (mode === 'global' && data.multi()) {
+      <label class="field" title="Workspace new tasks are added to">
+        <span>Add to</span>
+        <select [ngModel]="newTaskWs()" (ngModelChange)="targetWs.set(+$event)">
+          @for (c of contexts(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </label>
+    }
     <button class="btn primary" type="button" (click)="openNew()">+ New task</button>
   </div>
 </div>
 
 <div class="layout" cdkDropListGroup>
   <div class="board-scroll" cdkScrollable [class.loading]="loading()">
-    <div class="board">
-      <div class="col-heads">
-        @for (s of statuses; track s.key) {
-          <div class="col-head" [attr.data-status]="s.key">{{ s.label }}</div>
+    <div class="board" [style.min-width.px]="columns().length * 232 + 32">
+      <div class="col-heads" [style.grid-template-columns]="gridColumns()">
+        @for (col of columns(); track col.key) {
+          <div class="col-head" [style.--col]="col.color">
+            {{ col.label }} <span class="col-count">{{ columnCount(col.key) }}</span>
+          </div>
         }
       </div>
 
@@ -64,20 +79,24 @@
                 <span class="dot" [style.background]="lane.color"></span>
               }
               <span class="lane-name">{{ lane.label }}</span>
+              @if (lane.sublabel) {
+                <span class="lane-sub">{{ lane.sublabel }}</span>
+              }
               <span class="lane-count">{{ laneDone(lane.key) }}/{{ laneCount(lane.key) }}</span>
             </button>
           </header>
 
           @if (!collapsed().has(lane.key)) {
-            <div class="cells">
-              @for (s of statuses; track s.key) {
+            <div class="cells" [style.grid-template-columns]="gridColumns()">
+              @for (col of columns(); track col.key; let first = $first) {
                 <div
                   class="cell"
                   cdkDropList
-                  [cdkDropListData]="cellTarget(lane, s.key)"
+                  [cdkDropListData]="cellTarget(lane, col)"
+                  [cdkDropListEnterPredicate]="canEnter"
                   (cdkDropListDropped)="drop($event)"
                 >
-                  @for (task of cells().get(lane.key)![s.key]; track task.id) {
+                  @for (task of cellTasks(lane.key, col.key); track task.id) {
                     <app-task-card
                       cdkDrag
                       [cdkDragData]="task"
@@ -86,16 +105,17 @@
                       [day]="date()"
                       [showProject]="groupBy() !== 'project'"
                       [showAssignee]="scope() === 'all' && groupBy() !== 'assignee'"
-                      [hideTagGroup]="hiddenTagGroup()"
+                      [showWorkspace]="showWorkspaceOnCards()"
+                      [hideGroup]="hiddenGroup()"
                       (open)="openTask($event)"
                       (toggleDone)="toggleDone($event)"
                     >
                       <div class="drop-placeholder" *cdkDragPlaceholder></div>
                     </app-task-card>
                   }
-                  @if (s.key === 'todo') {
+                  @if (first && canQuickAdd(lane)) {
                     @if (quickAddLane() === lane.key) {
-                      <form class="quick-add" (ngSubmit)="quickAdd(lane)">
+                      <form class="quick-add" (ngSubmit)="quickAdd(lane, col)">
                         <input
                           name="quick"
                           [(ngModel)]="quickAddTitle"
@@ -103,7 +123,7 @@
                           aria-label="New task title"
                           autofocus
                           (keydown.escape)="quickAddLane.set(null)"
-                          (blur)="quickAdd(lane)"
+                          (blur)="quickAdd(lane, col)"
                         />
                       </form>
                     } @else {
@@ -117,8 +137,11 @@
         </section>
       } @empty {
         <p class="center-note">
-          No swimlanes here yet. Add tags to this group on the <a routerLink="../tags">Tags</a> page,
-          or pick a different grouping.
+          @if (hideEmpty() && lanes().length) {
+            Nothing planned for this day. Drag tasks from the backlog or add a new one.
+          } @else {
+            No swimlanes here yet. Add tags to this group on the Tags page, or pick a different grouping.
+          }
         </p>
       }
     </div>
@@ -152,6 +175,7 @@
             [cdkDragStartDelay]="{ touch: 250, mouse: 0 }"
             [task]="task"
             [showAssignee]="scope() === 'all'"
+            [showWorkspace]="data.multi()"
             (open)="openTask($event)"
             (toggleDone)="toggleDone($event)"
           >

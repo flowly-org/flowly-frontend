@@ -53,9 +53,23 @@
 
 .nav {
   display: flex;
+  align-items: center;
   gap: 2px;
   flex: 1 1 auto;
   overflow-x: auto;
+
+  .divider {
+    width: 1px;
+    height: 20px;
+    background: var(--line);
+    margin: 0 8px;
+    flex: none;
+  }
+
+  .ws-select {
+    margin-right: 4px;
+    flex: none;
+  }
 
   a {
     color: var(--muted);

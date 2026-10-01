@@ -1,7 +1,12 @@
 <div class="backdrop" (click)="closed.emit()"></div>
 <form class="dialog" role="dialog" aria-modal="true" aria-labelledby="task-dialog-title" (ngSubmit)="save()">
   <header>
-    <h2 id="task-dialog-title">{{ task() ? 'Edit task' : 'New task' }}</h2>
+    <h2 id="task-dialog-title">
+      {{ task() ? 'Edit task' : 'New task' }}
+      @if (data.multi() && task()) {
+        <span class="muted ws-name">in {{ ctx()?.name }}</span>
+      }
+    </h2>
     <button class="btn ghost icon" type="button" aria-label="Close" (click)="closed.emit()">✕</button>
   </header>
 
@@ -10,11 +15,21 @@
     <textarea name="description" [(ngModel)]="model.description" placeholder="Notes (optional)" rows="3"></textarea>
 
     <div class="grid">
+      @if (data.multi() && !task()) {
+        <label>
+          Workspace
+          <select name="workspace" [ngModel]="wsId()" (ngModelChange)="changeWorkspace($event)">
+            @for (c of data.contexts(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </label>
+      }
       <label>
         Project
         <select name="project" [(ngModel)]="model.project">
           <option [ngValue]="null">No project</option>
-          @for (p of store.projects(); track p.id) {
+          @for (p of ctx()?.projects ?? []; track p.id) {
             @if (!p.archived || p.id === model.project) {
               <option [ngValue]="p.id">{{ p.name }}{{ p.archived ? ' (archived)' : '' }}</option>
             }
@@ -25,7 +40,7 @@
         Assignee
         <select name="assignee" [(ngModel)]="model.assignee">
           <option [ngValue]="null">Unassigned</option>
-          @for (m of store.members(); track m.id) {
+          @for (m of ctx()?.members ?? []; track m.id) {
             <option [ngValue]="m.user.id">{{ m.user.full_name || m.user.email }}</option>
           }
         </select>
@@ -33,16 +48,17 @@
       <label>
         Status
         <select name="status" [(ngModel)]="model.status">
-          @for (s of statuses; track s.key) {
-            <option [ngValue]="s.key">{{ s.label }}</option>
+          @for (s of statuses(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
           }
         </select>
       </label>
       <label>
         Priority
         <select name="priority" [(ngModel)]="model.priority">
-          @for (p of priorities; track p.value) {
-            <option [ngValue]="p.value">{{ p.label }}</option>
+          <option [ngValue]="null">None</option>
+          @for (p of priorities(); track p.id) {
+            <option [ngValue]="p.id">{{ p.name }}</option>
           }
         </select>
       </label>
@@ -54,7 +70,7 @@
         Due
         <input type="date" name="due" [(ngModel)]="model.due_date" />
       </label>
-      @for (group of store.tagGroups(); track group.id) {
+      @for (group of customGroups(); track group.id) {
         <label>
           {{ group.name }}
           <select [name]="'group-' + group.id" [(ngModel)]="model.grouped[group.id]">
@@ -67,10 +83,10 @@
       }
     </div>
 
-    @if (store.freeTags().length) {
+    @if (freeTags().length) {
       <fieldset class="free-tags">
         <legend>Tags</legend>
-        @for (tag of store.freeTags(); track tag.id) {
+        @for (tag of freeTags(); track tag.id) {
           <button
             type="button"
             class="chip toggle"

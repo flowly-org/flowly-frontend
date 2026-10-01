@@ -16,22 +16,33 @@ export const routes: Routes = [
     data: { mode: 'register' },
   },
   {
-    path: 'w/:wsId',
+    path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/shell/shell').then((m) => m.Shell),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'day' },
-      { path: 'day', loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard) },
-      { path: 'projects', loadComponent: () => import('./pages/projects/projects-page').then((m) => m.ProjectsPage) },
-      { path: 'tags', loadComponent: () => import('./pages/tags/tags-page').then((m) => m.TagsPage) },
-      { path: 'members', loadComponent: () => import('./pages/members/members-page').then((m) => m.MembersPage) },
+      {
+        path: 'day',
+        loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard),
+        data: { mode: 'global' },
+      },
+      {
+        path: 'w/:wsId',
+        loadComponent: () => import('./pages/workspace-host/workspace-host').then((m) => m.WorkspaceHost),
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'board' },
+          { path: 'day', redirectTo: 'board' },
+          {
+            path: 'board',
+            loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard),
+            data: { mode: 'workspace' },
+          },
+          { path: 'projects', loadComponent: () => import('./pages/projects/projects-page').then((m) => m.ProjectsPage) },
+          { path: 'tags', loadComponent: () => import('./pages/tags/tags-page').then((m) => m.TagsPage) },
+          { path: 'members', loadComponent: () => import('./pages/members/members-page').then((m) => m.MembersPage) },
+        ],
+      },
     ],
-  },
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [authGuard],
-    loadComponent: () => import('./pages/home/home').then((m) => m.Home),
   },
   { path: '**', redirectTo: '' },
 ];

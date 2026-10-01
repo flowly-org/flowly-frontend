@@ -316,3 +316,24 @@ textarea {
 .grow-form {
   flex: 1;
 }
+
+.group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-hint {
+  margin: 0;
+  padding: 10px 16px 0;
+  font-size: 0.82rem;
+}
+
+.done-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}

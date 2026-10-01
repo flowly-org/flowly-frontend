@@ -3,9 +3,10 @@
     <div>
       <h1>Tags</h1>
       <p class="muted">
-        A <strong>tag group</strong> is a dimension you want to plan by, like <em>Context</em> (&#64;office, &#64;home,
-        &#64;errands) or <em>Energy</em> (deep, light). Each group can be used as swimlanes on
-        <a routerLink="../day">My day</a>, and a task gets at most one tag per group. Free tags are plain labels.
+        Every tag group is a way to slice your day. <strong>Status</strong> tags are the board columns,
+        <strong>Priority</strong> tags rank tasks, and you can add your own groups, like <em>Context</em>
+        (&#64;office, &#64;home) or <em>Energy</em> (deep, light). Any group except Status can be used as swimlanes,
+        and a task gets at most one tag per group. Free tags are plain labels.
       </p>
     </div>
   </header>
@@ -17,34 +18,53 @@
     </form>
   </section>
 
-  @for (group of store.tagGroups(); track group.id) {
+  @for (group of groups(); track group.id) {
     <section class="panel">
       <h2>
-        @if (editing() === 'g' + group.id) {
-          <form (ngSubmit)="saveGroupName(group)" class="grow-form">
-            <input name="gname" [(ngModel)]="editName" (blur)="saveGroupName(group)" (keydown.escape)="editing.set(null)" autofocus />
-          </form>
-        } @else {
-          <button class="btn ghost name-btn" type="button" title="Rename" (click)="startEdit('g' + group.id, group.name)">
-            {{ group.name }}
-          </button>
-        }
-        <span>
-          @if (confirming() === 'g' + group.id) {
-            <button class="btn danger small" type="button" (click)="deleteGroup(group)">Delete group and its tags</button>
-            <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+        <span class="group-title">
+          @if (editing() === 'g' + group.id) {
+            <form (ngSubmit)="saveGroupName(group)" class="grow-form">
+              <input name="gname" [(ngModel)]="editName" (blur)="saveGroupName(group)" (keydown.escape)="editing.set(null)" autofocus />
+            </form>
           } @else {
-            <button class="btn ghost danger small" type="button" (click)="confirming.set('g' + group.id)">Delete</button>
+            <button class="btn ghost name-btn" type="button" title="Rename" (click)="startEdit('g' + group.id, group.name)">
+              {{ group.name }}
+            </button>
+          }
+          @if (group.kind === 'status') {
+            <span class="chip">Board columns</span>
+          } @else if (group.kind === 'priority') {
+            <span class="chip">Task priority</span>
           }
         </span>
+        @if (group.kind === 'custom') {
+          <span>
+            @if (confirming() === 'g' + group.id) {
+              <button class="btn danger small" type="button" (click)="deleteGroup(group)">Delete group and its tags</button>
+              <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+            } @else {
+              <button class="btn ghost danger small" type="button" (click)="confirming.set('g' + group.id)">Delete</button>
+            }
+          </span>
+        }
       </h2>
-      @for (tag of group.tags; track tag.id) {
-        <ng-container *ngTemplateOutlet="tagRow; context: { $implicit: tag }" />
+      @if (group.kind === 'status') {
+        <p class="group-hint muted">
+          Columns appear in this order. Tasks in a status marked <em>counts as done</em> are ticked off and don't carry over.
+          Deleting a status moves its tasks to another one.
+        </p>
+      }
+      @for (tag of group.tags; track tag.id; let first = $first, last = $last) {
+        <ng-container *ngTemplateOutlet="tagRow; context: { $implicit: tag, group, first, last }" />
       } @empty {
         <p class="empty">No tags in this group yet.</p>
       }
       <form class="inline-form" (ngSubmit)="createTag(group)">
-        <input [name]="'t' + group.id" [(ngModel)]="drafts[group.id]" [placeholder]="'Add a ' + group.name.toLowerCase() + ' tag'" />
+        <input
+          [name]="'t' + group.id"
+          [(ngModel)]="drafts[group.id]"
+          [placeholder]="group.kind === 'status' ? 'Add a status, e.g. Review' : 'Add a ' + group.name.toLowerCase() + ' tag'"
+        />
         <button class="btn" type="submit">Add</button>
       </form>
     </section>
@@ -53,7 +73,7 @@
   <section class="panel">
     <h2>Free tags</h2>
     @for (tag of store.freeTags(); track tag.id) {
-      <ng-container *ngTemplateOutlet="tagRow; context: { $implicit: tag }" />
+      <ng-container *ngTemplateOutlet="tagRow; context: { $implicit: tag, group: null, first: true, last: true }" />
     } @empty {
       <p class="empty">No free tags yet.</p>
     }
@@ -64,7 +84,7 @@
   </section>
 </div>
 
-<ng-template #tagRow let-tag>
+<ng-template #tagRow let-tag let-group="group" let-first="first" let-last="last">
   <div class="row">
     <input type="color" [value]="tag.color" (change)="setTagColor(tag, $any($event.target).value)" [attr.aria-label]="'Color of ' + tag.name" />
     <div class="grow">
@@ -78,6 +98,16 @@
         </button>
       }
     </div>
+    @if (group?.kind === 'status') {
+      <label class="done-toggle">
+        <input type="checkbox" [checked]="tag.is_done" (change)="setDone(tag, $any($event.target).checked)" />
+        counts as done
+      </label>
+    }
+    @if (group) {
+      <button class="btn ghost icon" type="button" [disabled]="first" (click)="move(group, tag, -1)" aria-label="Move up">↑</button>
+      <button class="btn ghost icon" type="button" [disabled]="last" (click)="move(group, tag, 1)" aria-label="Move down">↓</button>
+    }
     @if (confirming() === 't' + tag.id) {
       <button class="btn danger small" type="button" (click)="deleteTag(tag)">Confirm delete</button>
       <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>

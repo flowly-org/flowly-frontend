@@ -1,26 +1,27 @@
-<button class="check" type="button" (click)="onToggle($event)" (mousedown)="$event.stopPropagation()"
-  [attr.aria-label]="task().status === 'done' ? 'Mark as not done' : 'Mark as done'">
-  @if (task().status === 'done') {
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8.5l2.5 2.5L12 5.5" /></svg>
-  }
-</button>
+@if (canToggle()) {
+  <button class="check" type="button" (click)="onToggle($event)" (mousedown)="$event.stopPropagation()"
+    [attr.aria-label]="done() ? 'Mark as not done' : 'Mark as done'">
+    @if (done()) {
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8.5l2.5 2.5L12 5.5" /></svg>
+    }
+  </button>
+}
 
 <div class="body" (click)="open.emit(task())" (keydown.enter)="open.emit(task())" tabindex="0" role="button">
-  <div class="title">
-    @if (task().priority === 3) {
-      <span class="prio high" title="High priority">!!</span>
-    } @else if (task().priority === 2) {
-      <span class="prio" title="Medium priority">!</span>
-    }
-    {{ task().title }}
-  </div>
+  <div class="title">{{ task().title }}</div>
 
   <div class="meta">
+    @if (workspace(); as ws) {
+      <span class="workspace">{{ ws }}</span>
+    }
+    @if (priority(); as p) {
+      <span class="chip priority" [style.--chip]="p.color" title="Priority">{{ p.name }}</span>
+    }
     @if (showProject() && project(); as p) {
       <span class="project"><span class="dot" [style.background]="p.color"></span>{{ p.name }}</span>
     }
-    @for (tag of tags(); track tag!.id) {
-      <span class="chip" [style.--chip]="tag!.color">{{ tag!.name }}</span>
+    @for (tag of tags(); track tag.id) {
+      <span class="chip" [style.--chip]="tag.color">{{ tag.name }}</span>
     }
     @if (carriedFrom(); as from) {
       <span class="badge late" title="Planned for an earlier day and not done yet">↻ {{ from }}</span>

@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { PALETTE, Tag, TagGroup } from '../../core/models';
@@ -10,7 +9,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-tags-page',
-  imports: [FormsModule, NgTemplateOutlet, RouterLink],
+  imports: [FormsModule, NgTemplateOutlet],
   templateUrl: './tags-page.html',
 })
 export class TagsPage {
@@ -24,6 +23,12 @@ export class TagsPage {
   protected editing = signal<string | null>(null);
   protected editName = '';
   protected confirming = signal<string | null>(null);
+
+  /** Built-in groups first (status, priority), then the user's own. */
+  protected readonly groups = computed(() => {
+    const rank = { status: 0, priority: 1, custom: 2 } as const;
+    return [...this.store.tagGroups()].sort((a, b) => rank[a.kind] - rank[b.kind] || a.position - b.position);
+  });
 
   private get wsId() {
     return this.store.currentId()!;
@@ -75,6 +80,22 @@ export class TagsPage {
 
   setTagColor(tag: Tag, color: string) {
     this.run(() => this.api.updateTag(this.wsId, tag.id, { color }));
+  }
+
+  setDone(tag: Tag, isDone: boolean) {
+    this.run(() => this.api.updateTag(this.wsId, tag.id, { is_done: isDone }));
+  }
+
+  /** Swap a tag with its neighbour and renumber the group so positions stay dense. */
+  move(group: TagGroup, tag: Tag, delta: number) {
+    const list = [...group.tags];
+    const i = list.findIndex((t) => t.id === tag.id);
+    const j = i + delta;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    this.run(() =>
+      Promise.all(list.map((t, idx) => (t.position === idx ? null : this.api.updateTag(this.wsId, t.id, { position: idx })))),
+    );
   }
 
   deleteGroup(group: TagGroup) {

@@ -13,6 +13,7 @@ import {
   Task,
   TaskInput,
   Workspace,
+  WorkspaceContext,
 } from './models';
 
 export interface TaskQuery {
@@ -21,6 +22,7 @@ export interface TaskQuery {
   unscheduled?: boolean;
   assignee?: 'me' | 'none' | number;
   project?: number | 'none';
+  workspace?: number;
   q?: string;
 }
 
@@ -119,11 +121,14 @@ export class ApiService {
 
   // Tasks
   tasks(wsId: number, query: TaskQuery) {
-    let params = new HttpParams();
-    for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined && value !== null && value !== '') params = params.set(key, String(value));
-    }
-    return this.run(this.http.get<Task[]>(this.ws(wsId, 'tasks/'), { params }));
+    return this.run(this.http.get<Task[]>(this.ws(wsId, 'tasks/'), { params: toParams(query) }));
+  }
+  /** Tasks across all the user's workspaces. */
+  myTasks(query: TaskQuery) {
+    return this.run(this.http.get<Task[]>(this.url('my/tasks/'), { params: toParams(query) }));
+  }
+  myContext() {
+    return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));
   }
   createTask(wsId: number, data: TaskInput) {
     return this.run(this.http.post<Task>(this.ws(wsId, 'tasks/'), data));
@@ -134,6 +139,14 @@ export class ApiService {
   deleteTask(wsId: number, id: number) {
     return this.run(this.http.delete<void>(this.ws(wsId, `tasks/${id}/`)));
   }
+}
+
+function toParams(query: TaskQuery): HttpParams {
+  let params = new HttpParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== null && value !== '') params = params.set(key, String(value));
+  }
+  return params;
 }
 
 /** Flattens DRF validation errors into one readable line. */

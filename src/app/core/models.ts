@@ -1,5 +1,5 @@
 export type Role = 'owner' | 'admin' | 'member';
-export type TaskStatus = 'todo' | 'in_progress' | 'done';
+export type TagGroupKind = 'custom' | 'status' | 'priority';
 
 export interface User {
   id: number;
@@ -52,21 +52,39 @@ export interface Tag {
   color: string;
   group: number | null;
   position: number;
+  /** Status tags only: tasks in this status count as finished. */
+  is_done: boolean;
 }
 
 export interface TagGroup {
   id: number;
   name: string;
+  /** "status" tags are the board columns, "priority" tags the task priorities. */
+  kind: TagGroupKind;
   position: number;
   tags: Tag[];
 }
 
+/** Everything about one workspace the board needs (GET /my/context/). */
+export interface WorkspaceContext {
+  id: number;
+  name: string;
+  my_role: Role;
+  projects: Project[];
+  tag_groups: TagGroup[];
+  tags: Tag[];
+  members: Membership[];
+}
+
 export interface Task {
   id: number;
+  workspace: number;
   title: string;
   description: string;
-  status: TaskStatus;
-  priority: 0 | 1 | 2 | 3;
+  /** Id of a tag in the workspace's status group. */
+  status: number;
+  /** Id of a tag in the workspace's priority group. */
+  priority: number | null;
   project: number | null;
   assignee: number | null;
   tags: number[];
@@ -80,19 +98,6 @@ export interface Task {
 }
 
 export type TaskInput = Partial<Omit<Task, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at'>>;
-
-export const STATUSES: { key: TaskStatus; label: string }[] = [
-  { key: 'todo', label: 'To do' },
-  { key: 'in_progress', label: 'In progress' },
-  { key: 'done', label: 'Done' },
-];
-
-export const PRIORITIES = [
-  { value: 0, label: 'None' },
-  { value: 1, label: 'Low' },
-  { value: 2, label: 'Medium' },
-  { value: 3, label: 'High' },
-] as const;
 
 export const PALETTE = [
   '#4f46e5', '#0ea5e9', '#14b8a6', '#22c55e', '#eab308',

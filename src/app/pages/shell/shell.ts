@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -14,38 +14,18 @@ import { WorkspaceStore } from '../../core/workspace.store';
   styleUrl: './shell.scss',
 })
 export class Shell {
-  readonly wsId = input.required<string>();
-
   protected store = inject(WorkspaceStore);
   protected auth = inject(AuthService);
   private api = inject(ApiService);
   private router = inject(Router);
   private toast = inject(ToastService);
 
-  protected ready = signal(false);
   protected creating = signal(false);
   protected newName = '';
   protected menuOpen = signal(false);
 
   constructor() {
-    effect(() => {
-      const id = Number(this.wsId());
-      this.ready.set(false);
-      this.store.open(id).then(
-        (ok) => {
-          if (!ok) {
-            this.toast.error('That workspace does not exist or you are not a member.');
-            this.router.navigateByUrl('/');
-            return;
-          }
-          try {
-            localStorage.setItem('flowly.lastWorkspace', String(id));
-          } catch {}
-          this.ready.set(true);
-        },
-        (err) => this.toast.error(errorMessage(err, 'Could not load the workspace.')),
-      );
-    });
+    this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, 'Could not load your workspaces.')));
   }
 
   protected switchTo(value: string) {
@@ -53,7 +33,8 @@ export class Shell {
       this.creating.set(true);
       return;
     }
-    const section = this.router.url.split('?')[0].split('/')[3] ?? 'day';
+    const parts = this.router.url.split('?')[0].split('/');
+    const section = parts[1] === 'w' && parts[3] ? parts[3] : 'board';
     this.router.navigate(['/w', value, section]);
   }
 
@@ -65,7 +46,7 @@ export class Shell {
       await this.store.loadWorkspaces();
       this.creating.set(false);
       this.newName = '';
-      this.router.navigate(['/w', ws.id, 'day']);
+      this.router.navigate(['/w', ws.id, 'board']);
     } catch (err) {
       this.toast.error(errorMessage(err));
     }

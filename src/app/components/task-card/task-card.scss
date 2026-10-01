@@ -58,14 +58,16 @@
   overflow-wrap: anywhere;
 }
 
-.prio {
-  color: var(--warn);
-  font-weight: 700;
-  margin-right: 2px;
+.priority {
+  font-weight: 600;
+}
 
-  &.high {
-    color: var(--danger);
-  }
+.workspace {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
 .meta {
