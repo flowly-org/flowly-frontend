@@ -43,3 +43,8 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 .env
+# Capacitor build outputs
+android/app/build/
+android/.gradle/
+ios/App/build/
+ios/DerivedData/
