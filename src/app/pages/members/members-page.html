@@ -85,8 +85,9 @@
     <section class="panel">
       <h2>Workspace</h2>
       <form class="inline-form" (ngSubmit)="rename()">
+        <input type="color" name="wsColor" [(ngModel)]="wsColor" aria-label="Workspace colour" title="Workspace colour (tints the logo)" />
         <input name="wsName" [(ngModel)]="wsName" aria-label="Workspace name" />
-        <button class="btn" type="submit">Rename</button>
+        <button class="btn" type="submit">Save</button>
       </form>
       @if (store.current()?.my_role === 'owner') {
         <div class="row">

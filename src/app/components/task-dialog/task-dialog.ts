@@ -1,6 +1,8 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { TaskAttachments } from '../task-attachments/task-attachments';
+import { TaskDiscussion } from '../task-discussion/task-discussion';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { BoardData } from '../../core/board-data';
 import { Task, TaskInput } from '../../core/models';
@@ -21,10 +23,10 @@ interface FormModel {
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, TaskDiscussion, TaskAttachments],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
-  host: { '(document:keydown.escape)': 'closed.emit()' },
+  host: { '(document:keydown.escape)': 'close()' },
 })
 export class TaskDialog implements OnInit {
   /** Task to edit, or null to create one using `defaults` (which should include `workspace`). */
@@ -34,6 +36,8 @@ export class TaskDialog implements OnInit {
   readonly saved = output<Task>();
   readonly deleted = output<number>();
   readonly closed = output<void>();
+  /** Comments or attachments changed: the board should refetch this task's counts. */
+  readonly touched = output<number>();
 
   protected data = inject(BoardData);
   private api = inject(ApiService);
@@ -49,8 +53,29 @@ export class TaskDialog implements OnInit {
   protected busy = signal(false);
   protected error = signal<string | null>(null);
   protected confirmDelete = signal(false);
+  protected tab = signal<'details' | 'discussion' | 'files'>('details');
+  protected commentCount = signal(0);
+  protected attachmentCount = signal(0);
+  private dirty = false;
+
+  /** Open straight on a tab (e.g. from the card's comment badge). */
+  readonly initialTab = input<'details' | 'discussion' | 'files'>('details');
+
+  protected close() {
+    const task = this.task();
+    if (this.dirty && task) this.touched.emit(task.id);
+    this.closed.emit();
+  }
+
+  protected onCount(kind: 'comments' | 'files', n: number) {
+    this.dirty = true;
+    (kind === 'comments' ? this.commentCount : this.attachmentCount).set(n);
+  }
 
   ngOnInit() {
+    this.tab.set(this.task() ? this.initialTab() : 'details');
+    this.commentCount.set(this.task()?.comment_count ?? 0);
+    this.attachmentCount.set(this.task()?.attachment_count ?? 0);
     const src: TaskInput = this.task() ?? this.defaults();
     this.wsId.set(src.workspace ?? this.data.contexts()[0]?.id ?? 0);
     this.model = {

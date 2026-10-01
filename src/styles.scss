@@ -167,24 +167,6 @@ textarea {
   font-size: 0.9rem;
 }
 
-.logo {
-  display: inline-grid;
-  grid-template-columns: repeat(3, 6px);
-  gap: 2px;
-  align-items: end;
-
-  i {
-    display: block;
-    width: 6px;
-    border-radius: 2px;
-    background: var(--accent);
-  }
-
-  i:nth-child(1) { height: 18px; }
-  i:nth-child(2) { height: 12px; opacity: 0.7; }
-  i:nth-child(3) { height: 8px; opacity: 0.45; }
-}
-
 .dot {
   display: inline-block;
   width: 10px;

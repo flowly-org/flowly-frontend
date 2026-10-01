@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { Logo, logoSvg } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { Theme, ThemeService } from '../../core/theme.service';
@@ -10,9 +11,10 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
+  host: { '[style.--brand]': 'brandColor()' },
 })
 export class Shell {
   protected store = inject(WorkspaceStore);
@@ -31,7 +33,16 @@ export class Shell {
   protected newName = '';
   protected menuOpen = signal(false);
 
+  /** Colour of the workspace being viewed (default accent on My day). */
+  protected readonly brandColor = computed(() => {
+    const onWorkspace = this.url().startsWith('/w/');
+    return (onWorkspace && this.store.current()?.color) || '#4f46e5';
+  });
+  private url = signal(this.router.url);
+
   constructor() {
+    this.router.events.subscribe(() => this.url.set(this.router.url));
+    effect(() => setFavicon(this.brandColor()));
     this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, 'Could not load your workspaces.')));
   }
 
@@ -67,4 +78,16 @@ export class Shell {
       .map((s) => s[0]!.toUpperCase())
       .join('');
   }
+}
+
+function setFavicon(color: string) {
+  let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  link.type = 'image/svg+xml';
+  link.href = 'data:image/svg+xml,' + encodeURIComponent(logoSvg(color));
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
 }

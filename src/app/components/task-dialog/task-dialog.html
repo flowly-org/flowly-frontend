@@ -1,4 +1,4 @@
-<div class="backdrop" (click)="closed.emit()"></div>
+<div class="backdrop" (click)="close()"></div>
 <form class="dialog" role="dialog" aria-modal="true" aria-labelledby="task-dialog-title" (ngSubmit)="save()">
   <header>
     <h2 id="task-dialog-title">
@@ -7,10 +7,32 @@
         <span class="muted ws-name">in {{ ctx()?.name }}</span>
       }
     </h2>
-    <button class="btn ghost icon" type="button" aria-label="Close" (click)="closed.emit()">✕</button>
+    <button class="btn ghost icon" type="button" aria-label="Close" (click)="close()">✕</button>
   </header>
 
-  <div class="content">
+  @if (task(); as t) {
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" [class.on]="tab() === 'details'" [attr.aria-selected]="tab() === 'details'" (click)="tab.set('details')">Details</button>
+      <button type="button" role="tab" [class.on]="tab() === 'discussion'" [attr.aria-selected]="tab() === 'discussion'" (click)="tab.set('discussion')">
+        Discussion @if (commentCount()) {<span class="count">{{ commentCount() }}</span>}
+      </button>
+      <button type="button" role="tab" [class.on]="tab() === 'files'" [attr.aria-selected]="tab() === 'files'" (click)="tab.set('files')">
+        Documents @if (attachmentCount()) {<span class="count">{{ attachmentCount() }}</span>}
+      </button>
+    </nav>
+    @if (tab() === 'discussion') {
+      <div class="content">
+        <app-task-discussion [wsId]="t.workspace" [taskId]="t.id" (changed)="onCount('comments', $event)" />
+      </div>
+    }
+    @if (tab() === 'files') {
+      <div class="content">
+        <app-task-attachments [wsId]="t.workspace" [taskId]="t.id" (changed)="onCount('files', $event)" />
+      </div>
+    }
+  }
+
+  <div class="content" [hidden]="tab() !== 'details'">
     <input class="title-input" name="title" [(ngModel)]="model.title" placeholder="What needs doing?" required autofocus />
     <textarea name="description" [(ngModel)]="model.description" placeholder="Notes (optional)" rows="3"></textarea>
 
@@ -106,7 +128,7 @@
     }
   </div>
 
-  <footer>
+  <footer [hidden]="tab() !== 'details'">
     @if (task()) {
       @if (confirmDelete()) {
         <span class="confirm">Delete this task?</span>
@@ -117,7 +139,7 @@
       }
     }
     <span class="spacer"></span>
-    <button class="btn" type="button" (click)="closed.emit()">Cancel</button>
+    <button class="btn" type="button" (click)="close()">Cancel</button>
     <button class="btn primary" type="submit" [disabled]="busy()">{{ task() ? 'Save' : 'Add task' }}</button>
   </footer>
 </form>

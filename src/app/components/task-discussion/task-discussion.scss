@@ -1,0 +1,102 @@
+:host {
+  display: grid;
+  gap: 12px;
+}
+
+.thread {
+  display: grid;
+  gap: 12px;
+}
+
+.comment {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+}
+
+.bubble {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 8px 12px;
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.8rem;
+
+    time {
+      color: var(--muted);
+    }
+  }
+}
+
+.via {
+  font-size: 0.72rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #24292f;
+  color: #fff;
+  text-decoration: none;
+}
+
+.tools {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+button.link {
+  font: inherit;
+  font-size: 0.78rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &.danger:hover {
+    color: var(--danger);
+  }
+}
+
+.body {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.composer {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+
+  textarea {
+    min-height: 70px;
+  }
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}

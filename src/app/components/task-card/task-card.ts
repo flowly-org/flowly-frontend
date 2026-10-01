@@ -21,6 +21,8 @@ export class TaskCard {
   readonly hideGroup = input<string | null>(null);
 
   readonly open = output<Task>();
+  /** Open the task straight on a dialog tab. */
+  readonly openOn = output<{ task: Task; tab: 'discussion' | 'files' }>();
   readonly toggleDone = output<Task>();
 
   private data = inject(BoardData);
@@ -79,6 +81,11 @@ export class TaskCard {
       .slice(0, 2)
       .map((s) => s[0]!.toUpperCase())
       .join('');
+  }
+
+  protected openTab(event: Event, tab: 'discussion' | 'files') {
+    event.stopPropagation();
+    this.openOn.emit({ task: this.task(), tab });
   }
 
   protected onToggle(event: Event) {

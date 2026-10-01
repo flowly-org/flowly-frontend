@@ -28,6 +28,7 @@ export class WorkspaceStore {
     return {
       id: ws.id,
       name: ws.name,
+      color: ws.color,
       my_role: ws.my_role,
       projects: this.projects(),
       tag_groups: this.tagGroups(),

@@ -2,7 +2,7 @@ server {
   listen 80;
   root /usr/share/nginx/html;
   index index.html;
-  client_max_body_size 10m;
+  client_max_body_size 30m;
 
   # Same-origin proxy to the Flowly API, so the app works on any host/IP without CORS.
   location ~ ^/(api|admin|static)/ {

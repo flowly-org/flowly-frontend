@@ -15,7 +15,7 @@
 
 .dialog {
   position: relative;
-  width: min(620px, 100%);
+  width: min(680px, 100%);
   max-height: calc(100dvh - 32px);
   display: flex;
   flex-direction: column;
@@ -116,4 +116,41 @@ footer {
   font-weight: 400;
   font-size: 0.85rem;
   margin-left: 4px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid var(--line);
+
+  button {
+    font: inherit;
+    font-weight: 500;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 6px 10px 8px;
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    &.on {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+    }
+  }
+
+  .count {
+    font-size: 0.72rem;
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 0 6px;
+  }
+}
+
+[hidden] {
+  display: none !important;
 }

@@ -1,6 +1,6 @@
 <header class="topbar">
   <a class="brand" routerLink="/" aria-label="Flowly home">
-    <span class="logo" aria-hidden="true"><i></i><i></i><i></i></span>
+    <app-logo [color]="brandColor()" [size]="26" />
     <span class="brand-name">Flowly</span>
   </a>
 
@@ -15,6 +15,7 @@
         <button class="btn ghost small" type="button" (click)="creating.set(false)">Cancel</button>
       </form>
     } @else {
+      <span class="ws-dot" [style.background]="store.current()?.color ?? 'var(--line)'" aria-hidden="true"></span>
       <select class="ws-select" aria-label="Workspace" (change)="switchTo($any($event.target).value)">
         @for (ws of store.workspaces(); track ws.id) {
           <option [value]="ws.id" [selected]="ws.id === store.navId()">{{ ws.name }}</option>

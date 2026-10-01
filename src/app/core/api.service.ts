@@ -4,7 +4,10 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  Attachment,
+  Comment,
   Delivery,
+  PublicConfig,
   GitHubAppInfo,
   Integration,
   Invitation,
@@ -53,8 +56,8 @@ export class ApiService {
   createWorkspace(name: string) {
     return this.run(this.http.post<Workspace>(this.url('workspaces/'), { name }));
   }
-  renameWorkspace(id: number, name: string) {
-    return this.run(this.http.patch<Workspace>(this.url(`workspaces/${id}/`), { name }));
+  updateWorkspace(id: number, data: Partial<Pick<Workspace, 'name' | 'color'>>) {
+    return this.run(this.http.patch<Workspace>(this.url(`workspaces/${id}/`), data));
   }
   deleteWorkspace(id: number) {
     return this.run(this.http.delete<void>(this.url(`workspaces/${id}/`)));
@@ -191,6 +194,47 @@ export class ApiService {
   updateTask(wsId: number, id: number, data: TaskInput) {
     return this.run(this.http.patch<Task>(this.ws(wsId, `tasks/${id}/`), data));
   }
+  task(wsId: number, id: number) {
+    return this.run(this.http.get<Task>(this.ws(wsId, `tasks/${id}/`)));
+  }
+
+  // Discussion & attachments
+  comments(wsId: number, taskId: number) {
+    return this.run(this.http.get<Comment[]>(this.ws(wsId, `tasks/${taskId}/comments/`)));
+  }
+  addComment(wsId: number, taskId: number, body: string) {
+    return this.run(this.http.post<Comment>(this.ws(wsId, `tasks/${taskId}/comments/`), { body }));
+  }
+  editComment(wsId: number, taskId: number, id: number, body: string) {
+    return this.run(this.http.patch<Comment>(this.ws(wsId, `tasks/${taskId}/comments/${id}/`), { body }));
+  }
+  deleteComment(wsId: number, taskId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `tasks/${taskId}/comments/${id}/`)));
+  }
+  attachments(wsId: number, taskId: number) {
+    return this.run(this.http.get<Attachment[]>(this.ws(wsId, `tasks/${taskId}/attachments/`)));
+  }
+  addAttachment(wsId: number, taskId: number, data: Partial<Attachment>) {
+    return this.run(this.http.post<Attachment>(this.ws(wsId, `tasks/${taskId}/attachments/`), data));
+  }
+  uploadAttachment(wsId: number, taskId: number, file: File) {
+    const form = new FormData();
+    form.append('kind', 'file');
+    form.append('file', file, file.name);
+    return this.run(this.http.post<Attachment>(this.ws(wsId, `tasks/${taskId}/attachments/`), form));
+  }
+  deleteAttachment(wsId: number, taskId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `tasks/${taskId}/attachments/${id}/`)));
+  }
+  attachmentUrl(wsId: number, taskId: number, id: number) {
+    return this.run(this.http.get<{ url: string }>(this.ws(wsId, `tasks/${taskId}/attachments/${id}/download/`)));
+  }
+  private configPromise: Promise<PublicConfig> | null = null;
+  publicConfig() {
+    this.configPromise ??= this.run(this.http.get<PublicConfig>(this.url('config/')));
+    return this.configPromise;
+  }
+
   deleteTask(wsId: number, id: number) {
     return this.run(this.http.delete<void>(this.ws(wsId, `tasks/${id}/`)));
   }

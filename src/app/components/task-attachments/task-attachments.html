@@ -1,0 +1,72 @@
+<div class="sources">
+  @if (config()?.uploads?.enabled) {
+    <label class="btn">
+      <input type="file" multiple hidden (change)="onFiles($any($event.target).files); $any($event.target).value = ''" />
+      ⤒ Upload
+    </label>
+  }
+  @if (config()?.google) {
+    <button class="btn" type="button" (click)="fromGoogle()"><span class="src g">G</span> Google Drive</button>
+  }
+  @if (config()?.microsoft) {
+    <button class="btn" type="button" (click)="fromOneDrive()"><span class="src ms">☁</span> OneDrive / SharePoint</button>
+  }
+  <button class="btn" type="button" (click)="showLinkForm.set(!showLinkForm())">🔗 Add link</button>
+</div>
+
+@if (showLinkForm()) {
+  <form class="link-form" (ngSubmit)="addLink()">
+    <input name="url" type="url" [(ngModel)]="linkUrl" placeholder="https://…" required aria-label="Link URL" autofocus />
+    <input name="name" [(ngModel)]="linkName" placeholder="Title (optional)" aria-label="Link title" />
+    <button class="btn primary" type="submit">Attach</button>
+  </form>
+}
+
+<div
+  class="list"
+  [class.drop]="config()?.uploads?.enabled"
+  [class.over]="dragOver()"
+  (dragover)="$event.preventDefault(); dragOver.set(true)"
+  (dragleave)="dragOver.set(false)"
+  (drop)="onDrop($event)"
+>
+  @for (a of items(); track a.id) {
+    <div class="item">
+      <span class="kind" [attr.data-kind]="a.kind">
+        @if (a.meta['iconUrl']) {
+          <img [src]="a.meta['iconUrl']" alt="" width="16" height="16" />
+        } @else {
+          {{ icon(a) }}
+        }
+      </span>
+      <button type="button" class="name" (click)="open(a)" [title]="a.kind === 'file' ? 'Open file' : a.url">{{ a.name }}</button>
+      <span class="meta muted">
+        {{ size(a.size) }}
+        {{ a.added_by?.full_name || a.added_by?.email }} · {{ a.created_at | date: 'MMM d' }}
+      </span>
+      @if (canRemove(a)) {
+        @if (confirming() === a.id) {
+          <button class="btn danger small" type="button" (click)="remove(a)">Remove</button>
+          <button class="btn ghost small" type="button" (click)="confirming.set(null)">Keep</button>
+        } @else {
+          <button class="btn ghost icon small" type="button" aria-label="Remove attachment" (click)="confirming.set(a.id)">✕</button>
+        }
+      }
+    </div>
+  } @empty {
+    <p class="empty">
+      @if (config()?.uploads?.enabled) {
+        Drop files here, or attach documents and links with the buttons above.
+      } @else {
+        No documents yet. Attach a link or a cloud document above.
+      }
+    </p>
+  }
+  @if (uploading()) {
+    <p class="muted uploading">Uploading {{ uploading() }} file{{ uploading() > 1 ? 's' : '' }}…</p>
+  }
+</div>
+
+@if (config() && !config()!.uploads.enabled && !config()!.google && !config()!.microsoft) {
+  <p class="hint muted">File uploads, Google Drive and OneDrive aren't configured on this server yet; links work.</p>
+}

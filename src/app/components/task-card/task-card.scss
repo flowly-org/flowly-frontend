@@ -111,3 +111,17 @@
 .assignee {
   margin-left: auto;
 }
+
+.count-badge {
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ink);
+  }
+}

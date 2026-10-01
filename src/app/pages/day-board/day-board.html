@@ -108,6 +108,8 @@
                       [showWorkspace]="showWorkspaceOnCards()"
                       [hideGroup]="hiddenGroup()"
                       (open)="openTask($event)"
+            (openOn)="openTask($event.task, $event.tab)"
+                      (openOn)="openTask($event.task, $event.tab)"
                       (toggleDone)="toggleDone($event)"
                     >
                       <div class="drop-placeholder" *cdkDragPlaceholder></div>
@@ -177,6 +179,7 @@
             [showAssignee]="scope() === 'all'"
             [showWorkspace]="data.multi()"
             (open)="openTask($event)"
+            (openOn)="openTask($event.task, $event.tab)"
             (toggleDone)="toggleDone($event)"
           >
             <div class="drop-placeholder" *cdkDragPlaceholder></div>
@@ -193,6 +196,8 @@
   <app-task-dialog
     [task]="e.task"
     [defaults]="e.defaults"
+    [initialTab]="e.tab ?? 'details'"
+    (touched)="refreshTask($event)"
     (saved)="onSaved($event)"
     (deleted)="onDeleted($event)"
     (closed)="editing.set(null)"

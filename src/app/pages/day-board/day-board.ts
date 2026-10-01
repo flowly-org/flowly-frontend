@@ -80,7 +80,7 @@ export class DayBoard {
   protected backlogQuery = signal('');
   protected loading = signal(false);
 
-  protected editing = signal<{ task: Task | null; defaults: TaskInput } | null>(null);
+  protected editing = signal<{ task: Task | null; defaults: TaskInput; tab?: 'details' | 'discussion' | 'files' } | null>(null);
   protected quickAddLane = signal<string | null>(null);
   protected quickAddTitle = '';
   protected backlogTitle = '';
@@ -304,8 +304,17 @@ export class DayBoard {
     });
   }
 
-  protected openTask(task: Task) {
-    this.editing.set({ task, defaults: {} });
+  protected openTask(task: Task, tab: 'details' | 'discussion' | 'files' = 'details') {
+    this.editing.set({ task, defaults: {}, tab });
+  }
+
+  /** Comments/attachments changed in the dialog: refresh that card's counts. */
+  protected async refreshTask(id: number) {
+    const task = [...this.tasks(), ...this.backlog()].find((t) => t.id === id);
+    if (!task) return;
+    try {
+      this.place(await this.api.task(task.workspace, id));
+    } catch {}
   }
 
   protected onSaved(task: Task) {

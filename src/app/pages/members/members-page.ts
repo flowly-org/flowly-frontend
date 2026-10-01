@@ -24,6 +24,7 @@ export class MembersPage implements OnInit {
   protected inviteEmail = '';
   protected inviteRole: Role = 'member';
   protected wsName = this.store.current()?.name ?? '';
+  protected wsColor = this.store.current()?.color ?? '#4f46e5';
   protected profileName = this.auth.user()?.full_name ?? '';
   protected githubLogin = this.auth.user()?.github_login ?? '';
   protected confirming = signal<string | null>(null);
@@ -99,11 +100,11 @@ export class MembersPage implements OnInit {
 
   async rename() {
     const name = this.wsName.trim();
-    if (!name || name === this.store.current()?.name) return;
+    if (!name) return;
     try {
-      await this.api.renameWorkspace(this.wsId, name);
+      await this.api.updateWorkspace(this.wsId, { name, color: this.wsColor });
       await this.store.loadWorkspaces();
-      this.toast.show('Workspace renamed.');
+      this.toast.show('Workspace updated.');
     } catch (err) {
       this.toast.error(errorMessage(err));
     }

@@ -37,7 +37,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--accent);
+  color: var(--brand, var(--accent));
+  transition: color 0.4s ease;
 }
 
 .btn-group {

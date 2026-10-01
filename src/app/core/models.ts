@@ -18,6 +18,7 @@ export interface AuthResponse {
 export interface Workspace {
   id: number;
   name: string;
+  color: string;
   created_at: string;
   my_role: Role;
   member_count: number;
@@ -71,6 +72,7 @@ export interface TagGroup {
 export interface WorkspaceContext {
   id: number;
   name: string;
+  color: string;
   my_role: Role;
   projects: Project[];
   tag_groups: TagGroup[];
@@ -97,9 +99,46 @@ export interface Task {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  comment_count?: number;
+  attachment_count?: number;
 }
 
-export type TaskInput = Partial<Omit<Task, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at'>>;
+export type TaskInput = Partial<
+  Omit<Task, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count'>
+>;
+
+export interface Comment {
+  id: number;
+  task: number;
+  author: User | null;
+  body: string;
+  source: 'flowly' | 'github';
+  external_author: string;
+  external_url: string;
+  created_at: string;
+  edited_at: string | null;
+}
+
+export type AttachmentKind = 'file' | 'link' | 'google_drive' | 'onedrive';
+
+export interface Attachment {
+  id: number;
+  task: number;
+  kind: AttachmentKind;
+  name: string;
+  url: string;
+  size: number | null;
+  content_type: string;
+  meta: Record<string, string | number | boolean>;
+  added_by: User | null;
+  created_at: string;
+}
+
+export interface PublicConfig {
+  uploads: { enabled: boolean; max_mb: number };
+  google: { client_id: string; api_key: string; app_id: string } | null;
+  microsoft: { client_id: string } | null;
+}
 
 export const PALETTE = [
   '#4f46e5', '#0ea5e9', '#14b8a6', '#22c55e', '#eab308',

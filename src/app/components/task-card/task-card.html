@@ -29,6 +29,12 @@
     @if (due(); as d) {
       <span class="badge" [class.late]="d.late" [class.today]="d.today" title="Due date">⚑ {{ d.label }}</span>
     }
+    @if (task().comment_count) {
+      <button type="button" class="badge count-badge" title="Discussion" (click)="openTab($event, 'discussion')" (mousedown)="$event.stopPropagation()">💬 {{ task().comment_count }}</button>
+    }
+    @if (task().attachment_count) {
+      <button type="button" class="badge count-badge" title="Documents" (click)="openTab($event, 'files')" (mousedown)="$event.stopPropagation()">📎 {{ task().attachment_count }}</button>
+    }
     @if (showAssignee() && assignee(); as u) {
       <span class="avatar assignee" [title]="u.full_name || u.email">{{ initials(u.full_name || u.email) }}</span>
     }
