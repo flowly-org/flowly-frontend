@@ -4,6 +4,12 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  ApiTokenRow,
+  BillingSettings,
+  Invoice,
+  ProjectBillingRow,
+  TimeEntry,
+  TimeReport,
   InvitationPreview,
   SharedTask,
   TaskLinkView,
@@ -322,6 +328,80 @@ export class ApiService {
     return this.run(this.http.patch<AdminUser>(this.url(`admin/users/${id}/`), data));
   }
 
+  // Time tracking & billing
+  timer() {
+    return this.run(this.http.get<{ entry: TimeEntry | null }>(this.url('my/timer/')));
+  }
+  startTimer(workspace: number, task?: number | null, description = '', project?: number | null) {
+    return this.run(
+      this.http.post<{ entry: TimeEntry }>(this.url('my/timer/'), { action: 'start', workspace, task, description, project }),
+    );
+  }
+  stopTimer() {
+    return this.run(this.http.post<{ entry: null; stopped: TimeEntry | null }>(this.url('my/timer/'), { action: 'stop' }));
+  }
+  timeEntries(wsId: number, query: Record<string, string | number | undefined> = {}) {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query)) if (v !== undefined && v !== '') params = params.set(k, String(v));
+    return this.run(this.http.get<TimeEntry[]>(this.ws(wsId, 'time-entries/'), { params }));
+  }
+  createTimeEntry(wsId: number, data: Partial<TimeEntry> & { duration_seconds?: number }) {
+    return this.run(this.http.post<TimeEntry>(this.ws(wsId, 'time-entries/'), data));
+  }
+  updateTimeEntry(wsId: number, id: number, data: Partial<TimeEntry>) {
+    return this.run(this.http.patch<TimeEntry>(this.ws(wsId, `time-entries/${id}/`), data));
+  }
+  deleteTimeEntry(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `time-entries/${id}/`)));
+  }
+  timeReport(wsId: number, query: Record<string, string | undefined>) {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query)) if (v) params = params.set(k, v);
+    return this.run(this.http.get<TimeReport>(this.ws(wsId, 'time-entries/report/'), { params }));
+  }
+  billing(wsId: number) {
+    return this.run(
+      this.http.get<{ settings: BillingSettings; projects: ProjectBillingRow[]; can_manage: boolean }>(this.ws(wsId, 'billing/')),
+    );
+  }
+  updateBilling(wsId: number, data: Partial<BillingSettings>) {
+    return this.run(
+      this.http.patch<{ settings: BillingSettings; projects: ProjectBillingRow[]; can_manage: boolean }>(this.ws(wsId, 'billing/'), data),
+    );
+  }
+  updateProjectBilling(wsId: number, projectId: number, data: Partial<ProjectBillingRow>) {
+    return this.run(this.http.patch(this.ws(wsId, `billing/projects/${projectId}/`), data));
+  }
+  invoices(wsId: number) {
+    return this.run(this.http.get<Invoice[]>(this.ws(wsId, 'invoices/')));
+  }
+  invoice(wsId: number, id: number) {
+    return this.run(this.http.get<Invoice>(this.ws(wsId, `invoices/${id}/`)));
+  }
+  createInvoice(wsId: number, data: { project: number | null; period_start: string; period_end: string; group_by: string }) {
+    return this.run(this.http.post<Invoice>(this.ws(wsId, 'invoices/'), data));
+  }
+  updateInvoice(wsId: number, id: number, data: Partial<Invoice>) {
+    return this.run(this.http.patch<Invoice>(this.ws(wsId, `invoices/${id}/`), data));
+  }
+  deleteInvoice(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `invoices/${id}/`)));
+  }
+  invoiceCsv(wsId: number, id: number) {
+    return this.run(this.http.get(this.ws(wsId, `invoices/${id}/csv/`), { responseType: 'text' }));
+  }
+
+  // API tokens (MCP / API)
+  apiTokens() {
+    return this.run(this.http.get<ApiTokenRow[]>(this.url('auth/tokens/')));
+  }
+  createApiToken(name: string) {
+    return this.run(this.http.post<ApiTokenRow>(this.url('auth/tokens/'), { name }));
+  }
+  deleteApiToken(id: number) {
+    return this.run(this.http.delete<void>(this.url(`auth/tokens/${id}/`)));
+  }
+
   private configPromise: Promise<PublicConfig> | null = null;
   publicConfig() {
     this.configPromise ??= this.run(this.http.get<PublicConfig>(this.url('config/')));
@@ -346,7 +426,8 @@ export function errorMessage(err: unknown, fallback = 'Something went wrong.'): 
   const e = err as { error?: unknown; status?: number };
   if (e?.status === 0) return 'Cannot reach the server.';
   const body = e?.error;
-  if (typeof body === 'string' && body.length < 200) return body;
+  if ((e?.status ?? 0) >= 500) return `Server error (${e.status}). Please try again.`;
+  if (typeof body === 'string' && body.length < 200 && !body.trimStart().startsWith('<')) return body;
   if (body && typeof body === 'object') {
     const parts: string[] = [];
     for (const [key, value] of Object.entries(body as Record<string, unknown>)) {

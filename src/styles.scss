@@ -328,3 +328,14 @@ textarea {
   color: var(--muted);
   white-space: nowrap;
 }
+
+@media print {
+  .topbar,
+  app-toast-host {
+    display: none !important;
+  }
+
+  .main {
+    overflow: visible !important;
+  }
+}

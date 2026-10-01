@@ -43,6 +43,49 @@
     </div>
   </section>
 
+  <section class="panel">
+    <h2>Claude & API tokens</h2>
+    <p class="intro muted">
+      Connect Claude to Flowly through MCP: it can read your day, add and update tasks, comment and track time, with your permissions.
+      Workspaces with an exclusive AI endpoint stay hidden. Tokens also work for the REST API.
+    </p>
+    <form class="inline-form" (ngSubmit)="createToken()">
+      <input name="tokenName" [(ngModel)]="tokenName" placeholder="Token name, e.g. Claude Code on laptop" aria-label="Token name" />
+      <button class="btn primary" type="submit">Create token</button>
+    </form>
+    @if (newToken(); as t) {
+      <div class="new-token">
+        <strong>Copy your token now. It won't be shown again.</strong>
+        <div class="copy-line">
+          <code>{{ t.token }}</code>
+          <button class="btn small" type="button" (click)="copy(t.token!)">Copy</button>
+        </div>
+        <div class="setup">
+          <div class="small muted">Claude Code</div>
+          <div class="copy-line">
+            <code>{{ claudeCodeCommand(t.token!) }}</code>
+            <button class="btn small" type="button" (click)="copy(claudeCodeCommand(t.token!))">Copy</button>
+          </div>
+          <div class="small muted">Claude Desktop: add to <code>claude_desktop_config.json</code></div>
+          <div class="copy-line">
+            <pre>{{ desktopConfig(t.token!) }}</pre>
+            <button class="btn small" type="button" (click)="copy(desktopConfig(t.token!))">Copy</button>
+          </div>
+          <div class="small muted">Any other MCP client: Streamable HTTP at <code>{{ mcpUrl() }}</code> with the header <code>Authorization: Bearer &lt;token&gt;</code>.</div>
+        </div>
+      </div>
+    }
+    @for (t of tokens(); track t.id) {
+      <div class="row">
+        <span class="grow">
+          <strong>{{ t.name }}</strong> <code class="small">{{ t.hint }}…</code>
+          <span class="muted small"> · created {{ t.created_at | date: 'MMM d, y' }} · {{ t.last_used_at ? 'last used ' + (t.last_used_at | date: 'MMM d, HH:mm') : 'never used' }}</span>
+        </span>
+        <button class="btn ghost danger small" type="button" (click)="revokeToken(t)">Revoke</button>
+      </div>
+    }
+  </section>
+
   @if (state(); as s) {
     <section class="panel concierge">
       <h2>

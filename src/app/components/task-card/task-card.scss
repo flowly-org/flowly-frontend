@@ -1,4 +1,5 @@
 :host {
+  position: relative;
   display: flex;
   gap: 8px;
   align-items: flex-start;
@@ -129,4 +130,44 @@
 .vis {
   font-size: 0.75rem;
   margin-right: 2px;
+}
+
+.play {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.6rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+:host(:hover) .play,
+.play:focus-visible {
+  opacity: 1;
+}
+
+:host(.timing) {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
+
+  .play {
+    opacity: 1;
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+}
+
+.body {
+  padding-right: 18px;
 }

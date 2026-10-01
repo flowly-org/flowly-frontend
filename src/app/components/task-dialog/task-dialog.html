@@ -24,10 +24,16 @@
       <button type="button" role="tab" [class.on]="tab() === 'files'" [attr.aria-selected]="tab() === 'files'" (click)="tab.set('files')">
         Documents @if (attachmentCount()) {<span class="count">{{ attachmentCount() }}</span>}
       </button>
+      <button type="button" role="tab" [class.on]="tab() === 'time'" [attr.aria-selected]="tab() === 'time'" (click)="tab.set('time')">Time</button>
       <button type="button" role="tab" [class.on]="tab() === 'share'" [attr.aria-selected]="tab() === 'share'" (click)="tab.set('share')">
         Share <span class="vis-icon" aria-hidden="true">{{ view()?.visibility?.icon }}</span>
       </button>
     </nav>
+    @if (tab() === 'time') {
+      <div class="content">
+        <app-task-time [task]="t" />
+      </div>
+    }
     @if (tab() === 'share') {
       <div class="content">
         <app-task-share [task]="t" (changed)="onVisibility($event)" />

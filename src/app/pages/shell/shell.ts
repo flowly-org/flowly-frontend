@@ -9,6 +9,8 @@ import { DatePipe } from '@angular/common';
 
 import { AppNotification } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
+import { TimerService } from '../../core/timer.service';
+import { formatDuration } from '../../core/models';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
@@ -38,6 +40,8 @@ export class Shell {
   protected menuOpen = signal(false);
   protected bellOpen = signal(false);
   protected notifications = inject(NotificationService);
+  protected timer = inject(TimerService);
+  protected readonly formatDuration = formatDuration;
   protected readonly icons: Record<string, string> = { urgent: '🔴', assigned: '📌', comment: '💬', brief: '☀', shared: '🔗' };
 
   /** Colour of the workspace being viewed (default accent on My day). */
@@ -51,7 +55,13 @@ export class Shell {
     this.router.events.subscribe(() => this.url.set(this.router.url));
     effect(() => setFavicon(this.brandColor()));
     this.notifications.start();
+    this.timer.start();
     this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, 'Could not load your workspaces.')));
+  }
+
+  protected openTimerTask() {
+    const e = this.timer.entry();
+    if (e?.task) this.router.navigate(['/w', e.workspace, 'board'], { queryParams: { task: e.task } });
   }
 
   protected openNotification(n: AppNotification) {

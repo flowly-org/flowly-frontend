@@ -1,9 +1,10 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
-import { ConciergeState } from '../../core/models';
+import { ApiTokenRow, ConciergeState } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
@@ -15,7 +16,7 @@ interface ChatLine {
 
 @Component({
   selector: 'app-settings-page',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.scss',
 })
@@ -34,6 +35,10 @@ export class SettingsPage implements OnInit {
   protected chat = signal<ChatLine[]>([]);
   protected chatDraft = '';
   protected confirmForget = signal(false);
+  protected tokens = signal<ApiTokenRow[]>([]);
+  protected newToken = signal<ApiTokenRow | null>(null);
+  protected tokenName = 'Claude';
+  protected mcpUrl = signal('');
   protected systemNotifications = signal('Notification' in window ? Notification.permission : 'unsupported');
   protected readonly timezones: string[] = (Intl as any).supportedValuesOf?.('timeZone') ?? ['UTC', 'Europe/Rome', 'Europe/London', 'America/New_York'];
   protected readonly themes: { value: Theme; label: string }[] = [
@@ -43,7 +48,60 @@ export class SettingsPage implements OnInit {
   ];
 
   async ngOnInit() {
-    await this.load();
+    await Promise.all([this.load(), this.loadTokens()]);
+    try {
+      const cfg = await this.api.publicConfig();
+      this.mcpUrl.set(cfg.mcp_url.startsWith('http') ? cfg.mcp_url : `${window.location.origin}/api/mcp/`);
+    } catch {}
+  }
+
+  private async loadTokens() {
+    try {
+      this.tokens.set(await this.api.apiTokens());
+    } catch {}
+  }
+
+  async createToken() {
+    try {
+      const t = await this.api.createApiToken(this.tokenName.trim() || 'Claude');
+      this.newToken.set(t);
+      await this.loadTokens();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async revokeToken(t: ApiTokenRow) {
+    await this.api.deleteApiToken(t.id);
+    if (this.newToken()?.id === t.id) this.newToken.set(null);
+    await this.loadTokens();
+  }
+
+  protected claudeCodeCommand(token: string) {
+    return `claude mcp add --transport http flowly ${this.mcpUrl()} --header "Authorization: Bearer ${token}"`;
+  }
+
+  protected desktopConfig(token: string) {
+    return JSON.stringify(
+      { mcpServers: { flowly: { command: 'npx', args: ['-y', 'mcp-remote', this.mcpUrl(), '--header', `Authorization: Bearer ${token}`] } } },
+      null,
+      2,
+    );
+  }
+
+  protected copy(text: string) {
+    const done = () => this.toast.show('Copied.');
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done);
+      return;
+    }
+    const area = document.createElement('textarea');
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand('copy');
+    area.remove();
+    done();
   }
 
   private async load() {

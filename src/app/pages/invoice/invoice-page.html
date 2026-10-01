@@ -1,0 +1,79 @@
+<div class="page">
+  @if (invoice(); as inv) {
+    <div class="toolbar no-print">
+      <a class="btn ghost small" routerLink="../..">← Billing</a>
+      <span class="spacer"></span>
+      @if (inv.status === 'draft') {
+        @if (confirmDelete()) {
+          <span class="small">Delete draft and release its time?</span>
+          <button class="btn danger small" type="button" (click)="remove()">Delete</button>
+          <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">Keep</button>
+        } @else {
+          <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">Delete draft</button>
+        }
+        <button class="btn small" type="button" (click)="save({ status: 'sent' })">Mark as sent</button>
+      } @else if (inv.status === 'sent') {
+        <button class="btn small" type="button" (click)="save({ status: 'void' })" title="Releases the time so it can be invoiced again">Void</button>
+        <button class="btn small primary" type="button" (click)="save({ status: 'paid' })">Mark as paid</button>
+      }
+      <button class="btn small" type="button" (click)="downloadCsv()">CSV</button>
+      <button class="btn small" type="button" (click)="print()">Print / PDF</button>
+    </div>
+
+    @if (inv.status === 'draft') {
+      <section class="panel no-print">
+        <h2>Edit draft</h2>
+        <form class="edit" (ngSubmit)="save(edit)">
+          <label>Client <input name="client" [(ngModel)]="edit.client_name" /></label>
+          <label>Due date <input type="date" name="due" [(ngModel)]="edit.due_date" /></label>
+          <label class="wide">Client details <textarea name="client_details" rows="2" [(ngModel)]="edit.client_details"></textarea></label>
+          <label class="wide">Notes <textarea name="notes" rows="2" [(ngModel)]="edit.notes"></textarea></label>
+          <div class="wide right"><button class="btn primary small" type="submit">Save</button></div>
+        </form>
+      </section>
+    }
+
+    <article class="sheet">
+      <header class="sheet-head">
+        <div>
+          <h1>Invoice {{ inv.number }}</h1>
+          <span class="status" [attr.data-status]="inv.status">{{ inv.status }}</span>
+        </div>
+        <div class="issuer">
+          <strong>{{ inv.issuer_name }}</strong>
+          <div class="pre">{{ inv.issuer_details }}</div>
+        </div>
+      </header>
+      <div class="meta">
+        <div>
+          <div class="label">Bill to</div>
+          <strong>{{ inv.client_name || '—' }}</strong>
+          <div class="pre">{{ inv.client_details }}</div>
+        </div>
+        <div class="dates">
+          <div><span class="label">Issued</span> {{ inv.issue_date | date: 'mediumDate' }}</div>
+          <div><span class="label">Due</span> {{ inv.due_date | date: 'mediumDate' }}</div>
+          <div><span class="label">Period</span> {{ inv.period_start | date: 'mediumDate' }} – {{ inv.period_end | date: 'mediumDate' }}</div>
+        </div>
+      </div>
+      <table class="lines">
+        <thead><tr><th>Description</th><th class="num">Hours</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+          @for (l of inv.lines; track l.id) {
+            <tr><td>{{ l.description }}</td><td class="num">{{ l.hours }}</td><td class="num">{{ l.rate }}</td><td class="num">{{ l.amount }}</td></tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr><td colspan="3">Subtotal</td><td class="num">{{ inv.subtotal }}</td></tr>
+          <tr><td colspan="3">Tax {{ inv.tax_rate }}%</td><td class="num">{{ inv.tax_amount }}</td></tr>
+          <tr class="total"><td colspan="3">Total ({{ inv.currency }})</td><td class="num">{{ inv.total }}</td></tr>
+        </tfoot>
+      </table>
+      @if (inv.notes) {
+        <p class="pre notes">{{ inv.notes }}</p>
+      }
+    </article>
+  } @else {
+    <p class="center-note">Loading…</p>
+  }
+</div>

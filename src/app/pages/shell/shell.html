@@ -29,10 +29,25 @@
       <a [routerLink]="['/w', id, 'board']" routerLinkActive="active">Board</a>
       <a [routerLink]="['/w', id, 'projects']" routerLinkActive="active">Projects</a>
       <a [routerLink]="['/w', id, 'tags']" routerLinkActive="active">Tags</a>
+      <a [routerLink]="['/w', id, 'time']" routerLinkActive="active">Time</a>
+      @if (store.navCanManage()) {
+        <a [routerLink]="['/w', id, 'billing']" routerLinkActive="active">Billing</a>
+      }
       <a [routerLink]="['/w', id, 'integrations']" routerLinkActive="active">Integrations</a>
       <a [routerLink]="['/w', id, 'members']" routerLinkActive="active">Members</a>
     }
   </nav>
+
+  @if (timer.entry(); as t) {
+    <div class="timer-pill" role="status">
+      <span class="rec" aria-hidden="true"></span>
+      <button type="button" class="timer-what" (click)="openTimerTask()" [title]="t.task_title || t.description || 'Timer'">
+        <strong>{{ formatDuration(timer.elapsed()) }}</strong>
+        <span>{{ t.task_title || t.description || 'Untitled work' }}</span>
+      </button>
+      <button type="button" class="timer-stop" aria-label="Stop timer" (click)="timer.stop()">■</button>
+    </div>
+  }
 
   <div class="bell-wrap">
     <button class="btn ghost icon bell" type="button" (click)="bellOpen.set(!bellOpen()); menuOpen.set(false)"

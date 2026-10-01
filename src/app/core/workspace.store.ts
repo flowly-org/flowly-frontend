@@ -47,6 +47,12 @@ export class WorkspaceStore {
     return list;
   }
 
+  /** Whether the user manages the workspace the nav points at (also on My day, where none is open). */
+  readonly navCanManage = computed(() => {
+    const ws = this.workspaces().find((w) => w.id === this.navId());
+    return ws?.my_role === 'owner' || ws?.my_role === 'admin';
+  });
+
   /** Workspace the workspace-level nav should point at: current, else last used, else first. */
   readonly navId = computed(() => {
     const list = this.workspaces();

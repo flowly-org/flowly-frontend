@@ -1,0 +1,119 @@
+.page.wide {
+  max-width: 1000px;
+}
+
+.week {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--surface-2);
+
+  button {
+    font: inherit;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &.on {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+  }
+}
+
+.panel > h2 select {
+  width: auto;
+  padding: 4px 8px;
+  font-weight: 400;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.report {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  tfoot th {
+    color: var(--ink);
+    font-weight: 600;
+    border-bottom: 0;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.add {
+  input[type='date'],
+  input[type='time'],
+  select {
+    flex: 0 1 auto;
+    width: auto;
+  }
+}
+
+.entry {
+  .dur {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 48px;
+  }
+
+  .grow {
+    display: grid;
+    gap: 2px;
+  }
+
+  &.running .dur {
+    color: var(--danger);
+  }
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+button.billable {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  --chip: var(--ok);
+
+  &.off {
+    --chip: #64748b;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}

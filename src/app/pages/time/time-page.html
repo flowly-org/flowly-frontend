@@ -1,0 +1,117 @@
+<div class="page wide">
+  <header>
+    <div>
+      <h1>Time</h1>
+      <p class="muted">Time tracked in {{ store.current()?.name }}. Start a timer from any task card (▶) or log time here.</p>
+    </div>
+    <div class="week">
+      <button class="btn icon" type="button" aria-label="Previous week" (click)="shift(-1)">‹</button>
+      <span>{{ from() | date: 'MMM d' }} – {{ to() | date: 'MMM d, y' }}</span>
+      <button class="btn icon" type="button" aria-label="Next week" (click)="shift(1)">›</button>
+      @if (store.canManage()) {
+        <div class="segmented" role="group" aria-label="Whose time">
+          <button type="button" [class.on]="who() === 'me'" (click)="who.set('me')">Mine</button>
+          <button type="button" [class.on]="who() === 'all'" (click)="who.set('all')">Everyone</button>
+        </div>
+      }
+    </div>
+  </header>
+
+  @if (report(); as r) {
+    <section class="panel">
+      <h2>
+        Summary
+        <select [ngModel]="group()" (ngModelChange)="group.set($event)" aria-label="Group by">
+          <option value="project">By project</option>
+          <option value="task">By task</option>
+          <option value="day">By day</option>
+          @if (who() === 'all') {
+            <option value="user">By person</option>
+          }
+        </select>
+      </h2>
+      <div class="table-wrap">
+        <table class="report">
+          <thead>
+            <tr><th></th><th class="num">Tracked</th>
+              @if (r.billing_enabled) {<th class="num">Billable</th><th class="num">Amount ({{ r.currency }})</th>}
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of r.rows; track row.key) {
+              <tr>
+                <td>{{ row.label }}</td>
+                <td class="num">{{ formatDuration(row.seconds) }}</td>
+                @if (r.billing_enabled) {
+                  <td class="num">{{ formatDuration(row.billable_seconds) }}</td>
+                  <td class="num">{{ row.amount }}</td>
+                }
+              </tr>
+            } @empty {
+              <tr><td class="muted" colspan="4">No time this week.</td></tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total</th>
+              <th class="num">{{ formatDuration(r.totals.seconds) }}</th>
+              @if (r.billing_enabled) {
+                <th class="num">{{ formatDuration(r.totals.billable_seconds) }}</th>
+                <th class="num">{{ r.totals.amount }}</th>
+              }
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  }
+
+  <section class="panel">
+    <h2>Add time</h2>
+    <form class="inline-form add" (ngSubmit)="add()">
+      <input type="date" name="day" [(ngModel)]="draft.day" aria-label="Day" />
+      <input type="time" name="start" [(ngModel)]="draft.start" aria-label="Start" />
+      <span class="muted">–</span>
+      <input type="time" name="end" [(ngModel)]="draft.end" aria-label="End" />
+      <select name="project" [(ngModel)]="draft.project" aria-label="Project">
+        <option [ngValue]="null">No project</option>
+        @for (p of store.activeProjects(); track p.id) {
+          <option [ngValue]="p.id">{{ p.name }}</option>
+        }
+      </select>
+      <input name="description" [(ngModel)]="draft.description" placeholder="What did you work on?" aria-label="Description" />
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+  </section>
+
+  @for (d of byDay(); track d.day) {
+    <section class="panel">
+      <h2>{{ d.day | date: 'EEEE d MMMM' }} <span class="muted">{{ formatDuration(d.seconds) }}</span></h2>
+      @for (e of d.list; track e.id) {
+        <div class="row entry" [class.running]="e.running">
+          <span class="dur">{{ formatDuration(e.running ? timer.elapsed() : e.seconds) }}</span>
+          <span class="grow">
+            <strong>{{ e.task_title || e.description || 'Untitled work' }}</strong>
+            <span class="muted small">
+              {{ e.project_name || 'No project' }}
+              @if (e.task_title && e.description) { · {{ e.description }} }
+              · {{ e.started_at | date: 'HH:mm' }}–{{ e.running ? 'now' : (e.ended_at | date: 'HH:mm') }}
+              @if (who() === 'all') { · {{ e.user.full_name || e.user.email }} }
+            </span>
+          </span>
+          @if (e.invoiced) {
+            <span class="chip" title="Invoiced">{{ e.invoiced }}</span>
+          } @else {
+            <button type="button" class="chip billable" [class.off]="!e.billable" [disabled]="!canEdit(e)"
+              (click)="toggleBillable(e)" [title]="e.billable ? 'Billable: click to mark non-billable' : 'Non-billable'">
+              {{ e.billable ? '$ billable' : 'non-billable' }}
+            </button>
+          }
+          @if (canEdit(e)) {
+            <button class="btn ghost icon small" type="button" aria-label="Delete entry" (click)="remove(e)">✕</button>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TaskAttachments } from '../task-attachments/task-attachments';
 import { TaskDiscussion } from '../task-discussion/task-discussion';
 import { TaskShare } from '../task-share/task-share';
+import { TaskTime } from '../task-time/task-time';
 import { formatLong } from '../../core/dates';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { BoardData } from '../../core/board-data';
@@ -25,7 +26,7 @@ interface FormModel {
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare],
+  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   host: { '(document:keydown.escape)': 'close()' },
@@ -55,7 +56,7 @@ export class TaskDialog implements OnInit {
   protected busy = signal(false);
   protected error = signal<string | null>(null);
   protected confirmDelete = signal(false);
-  protected tab = signal<'details' | 'discussion' | 'files' | 'share'>('details');
+  protected tab = signal<'details' | 'discussion' | 'files' | 'time' | 'share'>('details');
   /** Existing tasks open read-only; Edit switches to the form. New tasks start in the form. */
   protected editing = signal(false);
   protected visibility = signal<Visibility>('team');
@@ -98,7 +99,7 @@ export class TaskDialog implements OnInit {
   private dirty = false;
 
   /** Open straight on a tab (e.g. from the card's comment badge). */
-  readonly initialTab = input<'details' | 'discussion' | 'files' | 'share'>('details');
+  readonly initialTab = input<'details' | 'discussion' | 'files' | 'time' | 'share'>('details');
 
   protected close() {
     const task = this.task();

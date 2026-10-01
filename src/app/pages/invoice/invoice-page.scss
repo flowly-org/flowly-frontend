@@ -1,0 +1,158 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.small {
+  font-size: 0.82rem;
+}
+
+.edit {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  padding: 14px 16px;
+
+  label {
+    display: grid;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+
+  .right {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.sheet {
+  background: #fff;
+  color: #111;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: var(--shadow);
+}
+
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 1.6rem;
+  }
+}
+
+.issuer {
+  text-align: right;
+}
+
+.pre {
+  white-space: pre-line;
+  font-size: 0.88rem;
+  color: #444;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 32px 0 24px;
+}
+
+.dates {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #777;
+  margin-right: 6px;
+}
+
+.lines {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #e5e5e5;
+    text-align: left;
+  }
+
+  th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #777;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  tfoot td {
+    border-bottom: 0;
+  }
+
+  .total td {
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-top: 2px solid #111;
+  }
+}
+
+.notes {
+  margin-top: 24px;
+}
+
+.status {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #eee;
+  color: #555;
+
+  &[data-status='paid'] { background: #dcfce7; color: #166534; }
+  &[data-status='sent'] { background: #e0e7ff; color: #3730a3; }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .sheet {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .status {
+    display: none;
+  }
+}

@@ -160,6 +160,7 @@ export interface Attachment {
 
 export interface PublicConfig {
   uploads: { enabled: boolean; max_mb: number };
+  mcp_url: string;
   google: { client_id: string; api_key: string; app_id: string } | null;
   microsoft: { client_id: string } | null;
 }
@@ -326,4 +327,109 @@ export interface AdminUser {
   last_login: string | null;
   workspaces: number;
   tokens_30d: number;
+}
+
+export interface TimeEntry {
+  id: number;
+  workspace: number;
+  user: User;
+  task: number | null;
+  task_title: string | null;
+  project: number | null;
+  project_name: string | null;
+  description: string;
+  started_at: string;
+  ended_at: string | null;
+  duration_seconds: number;
+  seconds: number;
+  billable: boolean;
+  running: boolean;
+  invoice: number | null;
+  invoiced: string | null;
+}
+
+export interface TimeReport {
+  currency: string;
+  billing_enabled: boolean;
+  rows: { key: string; label: string; seconds: number; billable_seconds: number; amount: string }[];
+  totals: { seconds: number; billable_seconds: number; amount: string };
+}
+
+export interface BillingSettings {
+  enabled: boolean;
+  currency: string;
+  default_rate: string;
+  rounding_minutes: number;
+  billable_by_default: boolean;
+  tax_rate: string;
+  invoice_prefix: string;
+  next_invoice_number: number;
+  payment_terms_days: number;
+  issuer_name: string;
+  issuer_details: string;
+  invoice_notes: string;
+}
+
+export interface ProjectBillingRow {
+  project: number;
+  name: string;
+  color: string;
+  archived: boolean;
+  mode: 'inherit' | 'hourly' | 'off';
+  hourly_rate: string | null;
+  client_name: string;
+  client_details: string;
+  budget_hours: string | null;
+  effective_rate: string | null;
+  unbilled_hours: number;
+  tracked_hours: number;
+}
+
+export interface InvoiceLine {
+  id: number;
+  description: string;
+  hours: string;
+  rate: string;
+  amount: string;
+}
+
+export interface Invoice {
+  id: number;
+  number: string;
+  status: 'draft' | 'sent' | 'paid' | 'void';
+  project: number | null;
+  project_name: string | null;
+  issue_date: string;
+  due_date: string;
+  period_start: string;
+  period_end: string;
+  currency: string;
+  subtotal: string;
+  tax_rate: string;
+  tax_amount: string;
+  total: string;
+  issuer_name: string;
+  issuer_details: string;
+  client_name: string;
+  client_details: string;
+  notes: string;
+  lines: InvoiceLine[];
+  entry_count: number;
+  created_at: string;
+}
+
+export interface ApiTokenRow {
+  id: number;
+  name: string;
+  hint: string;
+  created_at: string;
+  last_used_at: string | null;
+  token?: string;
+}
+
+export function formatDuration(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds / 60));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return `${h}:${String(m).padStart(2, '0')}`;
 }

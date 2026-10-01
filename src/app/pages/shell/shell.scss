@@ -107,6 +107,76 @@
   margin-left: auto;
 }
 
+.timer-pill ~ .bell-wrap {
+  margin-left: 0;
+}
+
+.timer-pill {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  max-width: 280px;
+  font-size: 0.85rem;
+}
+
+.timer-pill + .bell-wrap,
+.timer-pill ~ .bell-wrap {
+  margin-left: 0;
+}
+
+.rec {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: pulse 1.4s ease-in-out infinite;
+  flex: none;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.35; }
+}
+
+.timer-what {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+
+  strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+}
+
+.timer-stop {
+  border: 0;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  background: var(--danger);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.7rem;
+  flex: none;
+}
+
 .user {
   position: relative;
 }

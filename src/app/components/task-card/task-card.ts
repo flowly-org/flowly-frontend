@@ -1,6 +1,7 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 
 import { BoardData } from '../../core/board-data';
+import { TimerService } from '../../core/timer.service';
 import { formatShort } from '../../core/dates';
 import { Tag, Task, VISIBILITIES } from '../../core/models';
 
@@ -8,7 +9,7 @@ import { Tag, Task, VISIBILITIES } from '../../core/models';
   selector: 'app-task-card',
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
-  host: { '[class.done]': 'done()' },
+  host: { '[class.done]': 'done()', '[class.timing]': 'timing()' },
 })
 export class TaskCard {
   readonly task = input.required<Task>();
@@ -26,6 +27,13 @@ export class TaskCard {
   readonly toggleDone = output<Task>();
 
   private data = inject(BoardData);
+  protected timer = inject(TimerService);
+  protected timing = computed(() => this.timer.isRunningOn(this.task().id));
+
+  protected toggleTimer(event: Event) {
+    event.stopPropagation();
+    this.timer.toggle(this.task().workspace, this.task().id);
+  }
 
   protected visibilityIcon = computed(() => {
     const v = this.task().visibility;
