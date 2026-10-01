@@ -21,6 +21,8 @@ export const KINDS: KindInfo[] = [
   { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: '↗', blurb: 'POST signed JSON to your URL when tasks change.' },
   { kind: 'incoming_webhook', label: 'Incoming webhook', icon: '↘', blurb: 'A secret URL any system can call to create or update tasks.' },
   { kind: 'email', label: 'Email in', icon: '✉', blurb: 'Email an address to create a task.' },
+  { kind: 'openrouter', label: 'OpenRouter', icon: '✦', blurb: "Use the workspace's own OpenRouter key and model for AI features." },
+  { kind: 'openai_compatible', label: 'Custom AI endpoint', icon: '⚙', blurb: 'Any OpenAI-compatible API, e.g. a local model server.' },
 ];
 
 interface Form {
@@ -31,6 +33,7 @@ interface Form {
   enabled: boolean;
   config: Record<string, any>;
   events: Set<string>;
+  apiKey: string;
 }
 
 const DEFAULT_EVENTS: Partial<Record<IntegrationKind, string[]>> = {
@@ -128,7 +131,11 @@ export class IntegrationsPage implements OnInit {
           ? { allowed_senders: 'members', schedule: 'backlog' }
           : kind === 'incoming_webhook'
             ? { schedule: 'backlog', require_signature: false }
-            : {};
+            : kind === 'openrouter'
+              ? { model: '', exclusive: false }
+              : kind === 'openai_compatible'
+                ? { base_url: '', model: '', exclusive: true }
+                : {};
     this.form.set({
       id: null,
       kind,
@@ -137,6 +144,7 @@ export class IntegrationsPage implements OnInit {
       enabled: true,
       config,
       events: new Set(DEFAULT_EVENTS[kind] ?? []),
+      apiKey: '',
     });
     this.deliveries.set([]);
     this.repos.set(null);
@@ -152,6 +160,7 @@ export class IntegrationsPage implements OnInit {
       enabled: item.enabled,
       config: structuredClone(item.config),
       events: new Set(item.config['events']?.length ? item.config['events'] : (DEFAULT_EVENTS[item.kind] ?? [])),
+      apiKey: '',
     });
     this.confirmDelete.set(false);
     this.repos.set(null);
@@ -173,7 +182,14 @@ export class IntegrationsPage implements OnInit {
     if (!f) return;
     const config = { ...f.config };
     if (f.kind === 'outgoing_webhook' || f.kind === 'slack') config['events'] = [...f.events];
-    const payload: Partial<Integration> = { kind: f.kind, name: f.name.trim() || this.kindInfo(f.kind).label, project: f.project, enabled: f.enabled, config };
+    const payload: Partial<Integration> & { api_key?: string } = {
+      kind: f.kind,
+      name: f.name.trim() || this.kindInfo(f.kind).label,
+      project: f.project,
+      enabled: f.enabled,
+      config,
+    };
+    if (f.apiKey.trim()) payload.api_key = f.apiKey.trim();
     this.busy.set(true);
     try {
       const saved = f.id
@@ -329,6 +345,10 @@ export class IntegrationsPage implements OnInit {
       this.toast.error('Copy failed; select the text and copy it manually.');
     }
     area.remove();
+  }
+
+  protected isAi(kind: IntegrationKind): boolean {
+    return kind === 'openrouter' || kind === 'openai_compatible';
   }
 
   protected curlExample(item: Integration): string {

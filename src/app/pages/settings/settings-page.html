@@ -1,0 +1,169 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Settings</h1>
+      <p class="muted">Your profile, appearance and personal concierge.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>Profile</h2>
+    <form class="inline-form" (ngSubmit)="saveProfile()">
+      <input name="fullName" [(ngModel)]="fullName" placeholder="Your name" aria-label="Your name" />
+      <input name="githubLogin" [(ngModel)]="githubLogin" placeholder="GitHub username" aria-label="GitHub username"
+        title="Matches GitHub issue assignees to you" />
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Appearance</h2>
+    <div class="inline-form">
+      @for (t of themes; track t.value) {
+        <label class="radio">
+          <input type="radio" name="theme" [checked]="theme.theme() === t.value" (change)="theme.set(t.value)" />
+          {{ t.label }}
+        </label>
+      }
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Notifications</h2>
+    <div class="row">
+      <div class="grow">
+        In-app notifications are on: assignments, urgent tasks for today and comments on your tasks appear under the bell.
+        @if (systemNotifications() === 'granted') {
+          <div class="muted small">Desktop notifications are enabled for this browser.</div>
+        }
+      </div>
+      @if (systemNotifications() === 'default') {
+        <button class="btn small" type="button" (click)="enableSystem()">Enable desktop notifications</button>
+      }
+    </div>
+  </section>
+
+  @if (state(); as s) {
+    <section class="panel concierge">
+      <h2>
+        <span class="group-title">Concierge <span class="plan" [class.pro]="s.has_pro">{{ s.has_pro ? 'PRO' : 'FREE' }}</span></span>
+      </h2>
+      <p class="intro muted">
+        Your personal assistant across all workspaces. It sends a morning brief of your day, tells you when something urgent
+        lands on today's plan, and you can ask it to look up, add or move tasks, on Telegram or right here.
+      </p>
+
+      @if (!s.has_pro) {
+        <div class="callout">
+          <strong>Flowly Pro feature</strong>
+          <p class="muted">The concierge uses an AI model, so it's part of Flowly Pro. Ask an admin to upgrade your account.</p>
+        </div>
+      } @else {
+        @if (s.unavailable_reason) {
+          <div class="callout"><p>{{ s.unavailable_reason }}</p></div>
+        }
+
+        <div class="row">
+          <div class="grow">
+            <strong>Telegram</strong>
+            @if (!s.telegram.configured) {
+              <div class="muted small">The Telegram bot isn't configured on this server yet.</div>
+            } @else if (s.telegram.linked) {
+              <div class="muted small">Connected{{ s.telegram.username ? ' as @' + s.telegram.username : '' }} to &#64;{{ s.telegram.bot }}.</div>
+            } @else {
+              <div class="muted small">Connect to get your brief and alerts in Telegram.</div>
+            }
+          </div>
+          @if (s.telegram.configured) {
+            @if (s.telegram.linked) {
+              <button class="btn small ghost danger" type="button" (click)="disconnectTelegram()">Disconnect</button>
+            } @else {
+              <button class="btn small primary" type="button" (click)="connectTelegram()">Connect Telegram</button>
+            }
+          }
+        </div>
+        @if (linkUrl()) {
+          <div class="row">
+            <div class="grow small">
+              Telegram should have opened. If not, open <a [href]="linkUrl()" target="_blank" rel="noopener">this link</a> and tap <strong>Start</strong>.
+              The link is valid for 30 minutes.
+            </div>
+            <button class="btn small" type="button" (click)="checkLinked()">I've connected</button>
+          </div>
+        }
+
+        <div class="row settings-grid">
+          <label class="check-line">
+            <input type="checkbox" [checked]="s.settings.morning_brief" (change)="update({ morning_brief: $any($event.target).checked })" />
+            Morning brief at
+          </label>
+          <input type="time" class="time" [value]="s.settings.brief_time" (change)="update({ brief_time: $any($event.target).value })" aria-label="Brief time" />
+          <select class="tz" [value]="s.settings.timezone" (change)="update({ timezone: $any($event.target).value })" aria-label="Time zone">
+            @for (tz of timezones; track tz) {
+              <option [value]="tz" [selected]="tz === s.settings.timezone">{{ tz }}</option>
+            }
+          </select>
+        </div>
+        <div class="row">
+          <label class="check-line">
+            <input type="checkbox" [checked]="s.settings.alerts" (change)="update({ alerts: $any($event.target).checked })" />
+            Send urgent changes, assignments and comments to Telegram
+          </label>
+        </div>
+        <div class="row">
+          <label class="grow">
+            <span class="small muted">AI model</span>
+            <select [value]="s.settings.provider ?? ''" (change)="update({ provider: $any($event.target).value ? +$any($event.target).value : null })">
+              <option value="" [selected]="s.settings.provider === null">{{ s.platform_ai ? 'Flowly (included in Pro)' : 'Flowly (not configured)' }}</option>
+              @for (p of s.providers; track p.id) {
+                <option [value]="p.id" [selected]="p.id === s.settings.provider">{{ p.workspace }}: {{ p.name }} ({{ p.model }})</option>
+              }
+            </select>
+            <span class="small muted">Workspaces can add their own OpenRouter key or OpenAI-compatible endpoint under Integrations. Workspaces marked “exclusive” are only ever shown to their own model.</span>
+          </label>
+        </div>
+        @if (s.settings.provider === null && s.platform_ai) {
+          <div class="row">
+            <div class="grow small muted">Today's usage</div>
+            <div class="usage"><span [style.width.%]="usagePct(s)"></span></div>
+            <span class="small muted">{{ usagePct(s) }}%</span>
+          </div>
+        }
+
+        <div class="chat">
+          <div class="chat-log">
+            @for (m of chat(); track $index) {
+              <div class="bubble" [class.me]="m.role === 'user'">{{ m.text }}</div>
+            } @empty {
+              <p class="muted small">Try: “What's on my plate today?” or “Add ‘renew passport’ for Friday in Personal”.</p>
+            }
+            @if (busy()) {
+              <div class="bubble typing">…</div>
+            }
+          </div>
+          <form class="chat-form" (ngSubmit)="send()">
+            <textarea name="chat" rows="2" [(ngModel)]="chatDraft" placeholder="Ask your concierge…" (keydown)="chatKey($event)"
+              [disabled]="!s.available" aria-label="Message the concierge"></textarea>
+            <div class="chat-actions">
+              <button class="btn small ghost" type="button" [disabled]="busy() || !s.available" (click)="sendBrief()">Brief me now</button>
+              <button class="btn primary small" type="submit" [disabled]="busy() || !s.available || !chatDraft.trim()">Send</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="row">
+          <div class="grow">
+            <strong class="small">What it remembers</strong>
+            <div class="memory small muted">{{ s.memory || 'Nothing yet. Tell it things like “I prefer deep work in the morning”.' }}</div>
+          </div>
+          @if (confirmForget()) {
+            <button class="btn small danger" type="button" (click)="forget()">Forget everything</button>
+            <button class="btn small ghost" type="button" (click)="confirmForget.set(false)">Cancel</button>
+          } @else {
+            <button class="btn small ghost" type="button" (click)="confirmForget.set(true)">Clear memory</button>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

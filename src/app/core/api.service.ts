@@ -4,7 +4,9 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  AppNotification,
   Attachment,
+  ConciergeState,
   Comment,
   Delivery,
   PublicConfig,
@@ -138,10 +140,10 @@ export class ApiService {
     const params = project ? new HttpParams().set('project', project) : undefined;
     return this.run(this.http.get<Integration[]>(this.ws(wsId, 'integrations/'), { params }));
   }
-  createIntegration(wsId: number, data: Partial<Integration>) {
+  createIntegration(wsId: number, data: Partial<Integration> & { api_key?: string }) {
     return this.run(this.http.post<Integration>(this.ws(wsId, 'integrations/'), data));
   }
-  updateIntegration(wsId: number, id: number, data: Partial<Integration>) {
+  updateIntegration(wsId: number, id: number, data: Partial<Integration> & { api_key?: string }) {
     return this.run(this.http.patch<Integration>(this.ws(wsId, `integrations/${id}/`), data));
   }
   deleteIntegration(wsId: number, id: number) {
@@ -229,6 +231,36 @@ export class ApiService {
   attachmentUrl(wsId: number, taskId: number, id: number) {
     return this.run(this.http.get<{ url: string }>(this.ws(wsId, `tasks/${taskId}/attachments/${id}/download/`)));
   }
+  // Notifications & concierge
+  notifications(after?: number) {
+    const params = after ? new HttpParams().set('after', after) : undefined;
+    return this.run(this.http.get<{ unread: number; results: AppNotification[] }>(this.url('notifications/'), { params }));
+  }
+  markNotificationsRead(ids: number[] | 'all') {
+    return this.run(this.http.post<{ unread: number }>(this.url('notifications/'), ids === 'all' ? { all: true } : { ids }));
+  }
+  concierge() {
+    return this.run(this.http.get<ConciergeState>(this.url('concierge/')));
+  }
+  updateConcierge(data: Partial<ConciergeState['settings']>) {
+    return this.run(this.http.patch<ConciergeState>(this.url('concierge/'), data));
+  }
+  forgetConcierge() {
+    return this.run(this.http.delete<void>(this.url('concierge/')));
+  }
+  telegramLink() {
+    return this.run(this.http.post<{ url: string; expires_at: string }>(this.url('concierge/telegram/link/'), {}));
+  }
+  telegramUnlink() {
+    return this.run(this.http.delete<void>(this.url('concierge/telegram/link/')));
+  }
+  conciergeChat(message: string) {
+    return this.run(this.http.post<{ reply: string }>(this.url('concierge/chat/'), { message }));
+  }
+  conciergeBrief(send: boolean) {
+    return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
+  }
+
   private configPromise: Promise<PublicConfig> | null = null;
   publicConfig() {
     this.configPromise ??= this.run(this.http.get<PublicConfig>(this.url('config/')));

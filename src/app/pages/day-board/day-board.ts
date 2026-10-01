@@ -9,6 +9,7 @@ import { TaskDialog } from '../../components/task-dialog/task-dialog';
 import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
+import { NotificationService } from '../../core/notification.service';
 import { addDays, formatLong, isValidIsoDate, today } from '../../core/dates';
 import { Task, TaskInput } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
@@ -60,6 +61,7 @@ export class DayBoard {
   private toast = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private notifications = inject(NotificationService);
 
   protected readonly mode: Mode = this.route.snapshot.data['mode'] === 'workspace' ? 'workspace' : 'global';
   private readonly wsId = this.mode === 'workspace' ? this.store.currentId() : null;
@@ -137,6 +139,7 @@ export class DayBoard {
 
   constructor() {
     this.restorePrefs();
+    this.openFromLink();
 
     if (this.mode === 'workspace') {
       effect(() => {
@@ -160,6 +163,11 @@ export class DayBoard {
       untracked(() => this.load(query.date, query.scope, query.overdue));
     });
 
+    // Someone else changed something that concerns you: show it without a manual reload.
+    effect(() => {
+      if (this.notifications.version() > 0) untracked(() => this.reload());
+    });
+
     // Fall back if the grouping no longer exists (e.g. its tag group was deleted).
     effect(() => {
       const choices = this.groupChoices();
@@ -168,6 +176,19 @@ export class DayBoard {
         this.groupBy.set('project');
       }
     });
+  }
+
+  /** /w/<ws>/board?task=<id> (from notifications): jump to the task's day and open it. */
+  private async openFromLink() {
+    const id = Number(this.route.snapshot.queryParamMap.get('task'));
+    if (!id || this.wsId === null) return;
+    try {
+      const task = await this.api.task(this.wsId, id);
+      if (task.planned_date) this.date.set(task.planned_date);
+      this.editing.set({ task, defaults: {} });
+    } catch {
+      this.toast.error('That task no longer exists.');
+    }
   }
 
   // --- data ---------------------------------------------------------------

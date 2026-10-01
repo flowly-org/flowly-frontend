@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
@@ -10,7 +10,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-members-page',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './members-page.html',
 })
 export class MembersPage implements OnInit {
@@ -25,8 +25,6 @@ export class MembersPage implements OnInit {
   protected inviteRole: Role = 'member';
   protected wsName = this.store.current()?.name ?? '';
   protected wsColor = this.store.current()?.color ?? '#4f46e5';
-  protected profileName = this.auth.user()?.full_name ?? '';
-  protected githubLogin = this.auth.user()?.github_login ?? '';
   protected confirming = signal<string | null>(null);
 
   private get wsId() {
@@ -123,13 +121,4 @@ export class MembersPage implements OnInit {
     }
   }
 
-  async saveProfile() {
-    try {
-      await this.auth.updateProfile({ full_name: this.profileName.trim(), github_login: this.githubLogin.trim() });
-      await this.store.refreshMembers();
-      this.toast.show('Profile updated.');
-    } catch (err) {
-      this.toast.error(errorMessage(err));
-    }
-  }
 }

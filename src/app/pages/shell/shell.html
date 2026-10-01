@@ -33,14 +33,54 @@
     }
   </nav>
 
+  <div class="bell-wrap">
+    <button class="btn ghost icon bell" type="button" (click)="bellOpen.set(!bellOpen()); menuOpen.set(false)"
+      [attr.aria-expanded]="bellOpen()" [attr.aria-label]="notifications.unread() + ' unread notifications'">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.2L4.3 15a1 1 0 0 0 .9 1.5h13.6a1 1 0 0 0 .9-1.5L18 12.2V9a6 6 0 0 0-6-6Zm-2 15a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      @if (notifications.unread()) {
+        <span class="bell-count">{{ notifications.unread() > 9 ? '9+' : notifications.unread() }}</span>
+      }
+    </button>
+    @if (bellOpen()) {
+      <div class="menu notif-menu" role="dialog" aria-label="Notifications">
+        <div class="notif-head">
+          <strong>Notifications</strong>
+          @if (notifications.unread()) {
+            <button class="btn ghost small" type="button" (click)="notifications.markRead('all')">Mark all read</button>
+          }
+        </div>
+        @for (n of notifications.items(); track n.id) {
+          <button type="button" class="notif" [class.unread]="!n.read_at" (click)="openNotification(n)">
+            <span class="notif-icon" aria-hidden="true">{{ icons[n.kind] ?? '🔔' }}</span>
+            <span class="notif-text">
+              <span class="notif-title">{{ n.title }}</span>
+              @if (n.body) {
+                <span class="notif-body">{{ n.body }}</span>
+              }
+              <span class="notif-time">{{ n.created_at | date: 'MMM d, HH:mm' }}</span>
+            </span>
+          </button>
+        } @empty {
+          <p class="notif-empty">You're all caught up.</p>
+        }
+      </div>
+    }
+  </div>
+
   <div class="user">
-    <button class="btn ghost icon" type="button" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()">
+    <button class="btn ghost icon" type="button" (click)="menuOpen.set(!menuOpen()); bellOpen.set(false)" [attr.aria-expanded]="menuOpen()">
       <span class="avatar">{{ initials(auth.user()?.full_name || auth.user()?.email || '?') }}</span>
       <span class="user-name">{{ auth.user()?.full_name || auth.user()?.email }}</span>
     </button>
     @if (menuOpen()) {
       <div class="menu" role="menu">
-        <div class="menu-email muted">{{ auth.user()?.email }}</div>
+        <div class="menu-email muted">
+          {{ auth.user()?.email }}
+          @if (auth.user()?.has_pro) {
+            <span class="pro-badge">PRO</span>
+          }
+        </div>
+        <a class="btn ghost block menu-link" routerLink="/settings" (click)="menuOpen.set(false)">Settings & concierge</a>
         <div class="menu-label">Theme</div>
         <div class="theme-switch" role="group" aria-label="Theme">
           @for (opt of themes; track opt.value) {

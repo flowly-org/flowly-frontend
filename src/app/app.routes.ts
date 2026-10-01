@@ -26,6 +26,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard),
         data: { mode: 'global' },
       },
+      { path: 'settings', loadComponent: () => import('./pages/settings/settings-page').then((m) => m.SettingsPage) },
       {
         path: 'github/app-created',
         loadComponent: () => import('./pages/github-callback/github-callback').then((m) => m.GithubCallback),

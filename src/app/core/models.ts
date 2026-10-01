@@ -7,6 +7,8 @@ export interface User {
   full_name: string;
   github_login?: string;
   is_staff?: boolean;
+  plan?: 'free' | 'pro';
+  has_pro?: boolean;
 }
 
 export interface AuthResponse {
@@ -145,7 +147,14 @@ export const PALETTE = [
   '#f97316', '#ef4444', '#ec4899', '#a855f7', '#64748b',
 ];
 
-export type IntegrationKind = 'github' | 'slack' | 'outgoing_webhook' | 'incoming_webhook' | 'email';
+export type IntegrationKind =
+  | 'github'
+  | 'slack'
+  | 'outgoing_webhook'
+  | 'incoming_webhook'
+  | 'email'
+  | 'openrouter'
+  | 'openai_compatible';
 
 export interface Integration {
   id: number;
@@ -194,4 +203,30 @@ export const TASK_EVENTS = [
   { key: 'task.completed', label: 'Task completed' },
   { key: 'task.assigned', label: 'Task assigned' },
   { key: 'task.deleted', label: 'Task deleted' },
+  { key: 'comment.created', label: 'New comment' },
 ];
+
+export interface AppNotification {
+  id: number;
+  kind: 'assigned' | 'urgent' | 'comment' | 'brief';
+  title: string;
+  body: string;
+  workspace: number | null;
+  task: number | null;
+  created_at: string;
+  read_at: string | null;
+}
+
+export interface ConciergeState {
+  plan: 'free' | 'pro';
+  has_pro: boolean;
+  available: boolean;
+  unavailable_reason: string | null;
+  platform_ai: boolean;
+  telegram: { configured: boolean; bot: string; linked: boolean; username: string };
+  settings: { enabled: boolean; timezone: string; brief_time: string; morning_brief: boolean; alerts: boolean; provider: number | null };
+  providers: { id: number; name: string; workspace: string; kind: string; model: string }[];
+  memory: string;
+  usage_today: number;
+  daily_limit: number;
+}

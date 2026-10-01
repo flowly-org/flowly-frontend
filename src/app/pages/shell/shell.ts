@@ -5,13 +5,17 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { Logo, logoSvg } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { DatePipe } from '@angular/common';
+
+import { AppNotification } from '../../core/models';
+import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, DatePipe],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   host: { '[style.--brand]': 'brandColor()' },
@@ -32,6 +36,9 @@ export class Shell {
   protected creating = signal(false);
   protected newName = '';
   protected menuOpen = signal(false);
+  protected bellOpen = signal(false);
+  protected notifications = inject(NotificationService);
+  protected readonly icons: Record<string, string> = { urgent: '🔴', assigned: '📌', comment: '💬', brief: '☀' };
 
   /** Colour of the workspace being viewed (default accent on My day). */
   protected readonly brandColor = computed(() => {
@@ -43,7 +50,15 @@ export class Shell {
   constructor() {
     this.router.events.subscribe(() => this.url.set(this.router.url));
     effect(() => setFavicon(this.brandColor()));
+    this.notifications.start();
     this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, 'Could not load your workspaces.')));
+  }
+
+  protected openNotification(n: AppNotification) {
+    this.notifications.markRead([n.id]);
+    this.bellOpen.set(false);
+    if (n.workspace && n.task) this.router.navigate(['/w', n.workspace, 'board'], { queryParams: { task: n.task } });
+    else if (n.kind === 'brief') this.router.navigate(['/day']);
   }
 
   protected switchTo(value: string) {
