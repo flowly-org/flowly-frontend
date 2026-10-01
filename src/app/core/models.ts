@@ -7,6 +7,7 @@ export interface User {
   full_name: string;
   github_login?: string;
   language?: string;
+  home_location?: string;
   is_staff?: boolean;
   plan?: 'free' | 'pro';
   has_pro?: boolean;
@@ -170,6 +171,7 @@ export interface PublicConfig {
   mcp_url: string;
   google: { client_id: string; api_key: string; app_id: string } | null;
   microsoft: { client_id: string } | null;
+  calendar?: { google: boolean };
 }
 
 export const PALETTE = [
@@ -444,4 +446,62 @@ export function formatDuration(seconds: number): string {
 export interface WorkspaceMcp {
   url: string;
   tokens: { id: number; name: string; hint: string; bot: string; created_at: string; last_used_at: string | null; token?: string }[];
+}
+
+// --- Calendars (background events; some need preparation) -----------------------
+
+export interface CalendarRow {
+  id: number;
+  name: string;
+  color: string;
+  primary: boolean;
+  selected: boolean;
+}
+
+export interface CalendarAccount {
+  id: number;
+  provider: 'google';
+  email: string;
+  status: 'ok' | 'error';
+  last_error: string;
+  last_synced_at: string | null;
+  calendars: CalendarRow[];
+}
+
+export interface CalendarOverview {
+  available: boolean;
+  home_location: string;
+  accounts: CalendarAccount[];
+}
+
+export type PrepReason = '' | 'away' | 'travel' | 'tickets' | 'event' | 'manual';
+
+export interface CalendarTaskRef {
+  id: number;
+  ref: string;
+  title: string;
+  workspace: number;
+  workspace_name: string;
+  planned_date: string | null;
+  done: boolean;
+}
+
+export interface CalendarEvent {
+  id: number;
+  calendar: number;
+  color: string;
+  title: string;
+  location: string;
+  html_link: string;
+  all_day: boolean;
+  start: string;
+  end: string;
+  start_date: string;
+  end_date: string;
+  prep: 'auto' | 'needed' | 'background';
+  needs_prep: boolean;
+  reason: PrepReason;
+  confirmed: boolean;
+  tasks: CalendarTaskRef[];
+  suggested?: CalendarTaskRef[];
 }

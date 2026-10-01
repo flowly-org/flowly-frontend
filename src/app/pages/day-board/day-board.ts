@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { BulkAdd } from '../../components/bulk-add/bulk-add';
+import { CalendarStrip } from '../../components/calendar-strip/calendar-strip';
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskDialog } from '../../components/task-dialog/task-dialog';
 import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
@@ -12,7 +13,7 @@ import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
 import { NotificationService } from '../../core/notification.service';
 import { addDays, formatLong, isValidIsoDate, today } from '../../core/dates';
-import { Task, TaskInput } from '../../core/models';
+import { CalendarTaskRef, Task, TaskInput } from '../../core/models';
 import { I18nService } from '../../core/i18n.service';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { ToastService } from '../../core/toast.service';
@@ -51,7 +52,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, TranslatePipe],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -339,6 +340,19 @@ export class DayBoard {
       task: null,
       defaults: { workspace: ws, planned_date: this.date(), assignee: this.auth.user()?.id ?? null, ...defaults },
     });
+  }
+
+  /** A task linked to a calendar event (it may be in another workspace or on another day). */
+  protected async openLinked(ref: CalendarTaskRef) {
+    if (!this.contexts().some((c) => c.id === ref.workspace)) {
+      this.router.navigate(['/t', ref.ref]);
+      return;
+    }
+    try {
+      this.editing.set({ task: await this.api.task(ref.workspace, ref.id), defaults: {} });
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
   }
 
   protected openTask(task: Task, tab: 'details' | 'discussion' | 'files' = 'details') {

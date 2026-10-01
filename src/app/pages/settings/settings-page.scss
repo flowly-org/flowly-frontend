@@ -220,3 +220,39 @@ label.grow {
     width: auto;
   }
 }
+
+.grow-label {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.cal-account {
+  border-top: 1px solid var(--line);
+  padding: 8px 0;
+}
+
+.cal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 4px 0 0 2px;
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.danger-text {
+  color: var(--danger);
+}

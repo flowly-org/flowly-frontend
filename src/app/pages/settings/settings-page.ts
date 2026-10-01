@@ -1,11 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService, LANGUAGES } from '../../core/i18n.service';
-import { ApiTokenRow, ConciergeState } from '../../core/models';
+import { ApiTokenRow, CalendarOverview, ConciergeState } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
@@ -32,6 +33,10 @@ export class SettingsPage implements OnInit {
 
   protected fullName = this.auth.user()?.full_name ?? '';
   protected githubLogin = this.auth.user()?.github_login ?? '';
+  protected home = this.auth.user()?.home_location ?? '';
+  protected calendars = signal<CalendarOverview | null>(null);
+  protected calBusy = signal(false);
+  private route = inject(ActivatedRoute);
   protected state = signal<ConciergeState | null>(null);
   protected linkUrl = signal<string | null>(null);
   protected busy = signal(false);
@@ -52,11 +57,65 @@ export class SettingsPage implements OnInit {
   ];
 
   async ngOnInit() {
-    await Promise.all([this.load(), this.loadTokens()]);
+    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars()]);
+    const result = this.route.snapshot.queryParamMap.get('calendar');
+    if (result === 'connected') this.toast.show(this.i18n.t('Google Calendar connected.'));
+    if (result === 'error') this.toast.error(this.i18n.t('Could not connect Google Calendar. Please try again.'));
+    if (result) setTimeout(() => document.getElementById('calendars')?.scrollIntoView({ behavior: 'smooth' }), 100);
     try {
       const cfg = await this.api.publicConfig();
       this.mcpUrl.set(cfg.mcp_url.startsWith('http') ? cfg.mcp_url : `${window.location.origin}/api/mcp/`);
     } catch {}
+  }
+
+  private async loadCalendars() {
+    try {
+      this.calendars.set(await this.api.calendarOverview());
+    } catch {}
+  }
+
+  async saveHome() {
+    try {
+      await this.auth.updateProfile({ home_location: this.home.trim() });
+      this.toast.show(this.i18n.t('Home saved.'));
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async connectGoogle() {
+    try {
+      const { url } = await this.api.connectGoogleCalendar();
+      window.location.href = url;
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async syncAccount(id: number) {
+    this.calBusy.set(true);
+    try {
+      await this.api.syncCalendarAccount(id);
+      await this.loadCalendars();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.calBusy.set(false);
+    }
+  }
+
+  async disconnectAccount(id: number) {
+    await this.api.disconnectCalendarAccount(id);
+    await this.loadCalendars();
+  }
+
+  async selectCalendar(id: number, selected: boolean) {
+    try {
+      await this.api.selectCalendar(id, selected);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+    await this.loadCalendars();
   }
 
   private async loadTokens() {

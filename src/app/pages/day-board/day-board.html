@@ -60,6 +60,14 @@
   </div>
 </div>
 
+<app-calendar-strip
+  [date]="date()"
+  [workspaces]="contexts()"
+  [defaultWorkspace]="newTaskWs()"
+  (openTask)="openLinked($event)"
+  (changed)="reload()"
+/>
+
 <div class="layout" cdkDropListGroup>
   <div class="board-scroll" cdkScrollable [class.loading]="loading()">
     <div class="board" [style.min-width.px]="columns().length * 232 + 32">

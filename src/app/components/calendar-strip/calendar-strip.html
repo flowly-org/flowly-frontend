@@ -1,0 +1,139 @@
+@if (visible()) {
+  <section class="cal" [attr.aria-label]="'Calendar' | t">
+    <div class="row">
+      <span class="label" [title]="'Events from your calendars: background, not tasks' | t">📅 {{ 'Calendar' | t }}</span>
+      <div class="chips">
+        @for (e of events(); track e.id) {
+          <button type="button" class="chip" [class.prep]="e.needs_prep && !covered(e)" [class.on]="selected()?.id === e.id"
+            [style.--cal]="e.color || 'var(--muted)'" (click)="open(e)" [attr.aria-expanded]="selected()?.id === e.id">
+            <span class="time">
+              @if (e.all_day) { {{ dayOf(e) ?? ('All day' | t) }} } @else { {{ e.start | ldate: 'HH:mm' }} }
+            </span>
+            <span class="title">{{ e.title }}</span>
+            @if (e.location) {
+              <span class="where">· {{ e.location.split(',')[0] }}</span>
+            }
+            @if (icon(e)) {
+              <span class="flag" [title]="reasonLabel(e) | t">{{ icon(e) }}</span>
+            }
+            @if (e.tasks.length) {
+              <span class="linked" [title]="'Linked tasks' | t">✓{{ e.tasks.length }}</span>
+            }
+          </button>
+        } @empty {
+          <span class="muted small">{{ 'No events today' | t }}</span>
+        }
+      </div>
+      @if (prepList().length) {
+        <button type="button" class="btn small prep-toggle" [class.active]="showPrep()" (click)="showPrep.set(!showPrep())">
+          ⚑ {{ prepCount() === 1 ? ('1 to prepare' | t) : ('{n} to prepare' | t: { n: prepCount() }) }}
+        </button>
+      }
+    </div>
+
+    @if (showPrep()) {
+      <ul class="prep-list">
+        @for (e of prepList(); track e.id) {
+          <li>
+            <button type="button" class="link-btn" (click)="open(e)">
+              <span class="flag">{{ icon(e) }}</span>
+              <strong>{{ e.title }}</strong>
+              <span class="muted">{{ e.start_date | ldate: 'EEE d MMM' }}@if (e.location) { · {{ e.location.split(',')[0] }} }</span>
+            </button>
+            @if (covered(e)) {
+              <span class="ok small">{{ 'covered' | t }}</span>
+            } @else if (e.tasks.length) {
+              <span class="small muted">{{ '{n} linked' | t: { n: e.tasks.length } }}</span>
+            } @else {
+              <span class="warn small">{{ 'nothing planned' | t }}</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (selected(); as e) {
+      <div class="detail" [style.--cal]="e.color || 'var(--muted)'">
+        <div class="detail-head">
+          <div>
+            <h3>{{ e.title }}</h3>
+            <div class="muted small">
+              @if (e.all_day) {
+                {{ e.start_date | ldate: 'EEE d MMM' }}@if (e.end_date !== e.start_date) { – {{ e.end_date | ldate: 'EEE d MMM' }} }
+              } @else {
+                {{ e.start | ldate: 'EEE d MMM, HH:mm' }} – {{ e.end | ldate: 'HH:mm' }}
+              }
+              @if (e.location) { · {{ e.location }} }
+            </div>
+          </div>
+          <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="selected.set(null)">✕</button>
+        </div>
+
+        @if (e.needs_prep) {
+          <p class="reason">{{ icon(e) }} {{ 'May need preparation' | t }}: {{ reasonLabel(e) | t }}</p>
+        } @else {
+          <p class="reason muted">{{ 'Background only: nothing to prepare.' | t }}</p>
+        }
+
+        @if (e.tasks.length) {
+          <div class="tasks">
+            @for (t of e.tasks; track t.id) {
+              <div class="task">
+                <button type="button" class="link-btn" [class.done]="t.done" (click)="openTask.emit(t)">{{ t.ref }} {{ t.title }}</button>
+                <span class="muted small">{{ t.workspace_name }}</span>
+                <button type="button" class="btn ghost small" [attr.aria-label]="'Unlink' | t" [title]="'Unlink' | t" [disabled]="busy()" (click)="unlink(e, t)">✕</button>
+              </div>
+            }
+          </div>
+        }
+        @if (e.suggested?.length) {
+          <div class="tasks suggested">
+            <span class="small muted">{{ 'Related tasks' | t }}</span>
+            @for (t of e.suggested; track t.id) {
+              <div class="task">
+                <span>{{ t.title }}</span>
+                <span class="muted small">{{ t.workspace_name }}</span>
+                <button type="button" class="btn small" [disabled]="busy()" (click)="link(e, t)">{{ 'Link it' | t }}</button>
+              </div>
+            }
+          </div>
+        }
+
+        <form class="add" (ngSubmit)="addTask(e)">
+          <input name="title" [(ngModel)]="draftTitle" [attr.aria-label]="'Preparation task' | t" required />
+          @if (workspaces().length > 1) {
+            <select name="ws" [(ngModel)]="draftWs" [attr.aria-label]="'Workspace' | t">
+              @for (w of workspaces(); track w.id) {
+                <option [ngValue]="w.id">{{ w.name }}</option>
+              }
+            </select>
+          }
+          <input type="date" name="day" [(ngModel)]="draftDay" [attr.aria-label]="'Planned for' | t" />
+          <button class="btn primary small" type="submit" [disabled]="busy()">{{ 'Add task' | t }}</button>
+        </form>
+
+        <div class="actions">
+          @if (e.reason === 'away') {
+            @if (e.confirmed) {
+              <button type="button" class="btn small" [disabled]="busy()" (click)="confirm(e, false)">✓ {{ 'Confirmed' | t }}</button>
+            } @else {
+              <button type="button" class="btn small" [disabled]="busy()" (click)="confirm(e, true)">{{ "It's still on" | t }}</button>
+            }
+          }
+          @if (e.needs_prep) {
+            <button type="button" class="btn ghost small" [disabled]="busy()" (click)="setPrep(e, 'background')">{{ 'Just background' | t }}</button>
+          } @else {
+            <button type="button" class="btn ghost small" [disabled]="busy()" (click)="setPrep(e, 'needed')">{{ 'Needs preparation' | t }}</button>
+          }
+          @if (e.prep !== 'auto') {
+            <button type="button" class="btn ghost small" [disabled]="busy()" (click)="setPrep(e, 'auto')">{{ 'Decide automatically' | t }}</button>
+          }
+          <span class="spacer"></span>
+          @if (e.html_link) {
+            <a class="btn ghost small" [href]="e.html_link" target="_blank" rel="noopener">{{ 'Open in Google Calendar' | t }} ↗</a>
+          }
+        </div>
+      </div>
+    }
+  </section>
+}

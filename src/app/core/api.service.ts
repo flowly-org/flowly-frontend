@@ -17,6 +17,9 @@ import {
   TaskLinkView,
   TaskShareEntry,
   AdminUser,
+  CalendarEvent,
+  CalendarOverview,
+  CalendarAccount,
   AppNotification,
   InstanceSettingRow,
   Attachment,
@@ -304,6 +307,38 @@ export class ApiService {
   }
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
+  }
+
+  // Calendars
+  calendarOverview() {
+    return this.run(this.http.get<CalendarOverview>(this.url('calendar/')));
+  }
+  connectGoogleCalendar() {
+    return this.run(this.http.post<{ url: string }>(this.url('calendar/google/connect/'), {}));
+  }
+  syncCalendarAccount(id: number) {
+    return this.run(this.http.post<CalendarAccount>(this.url(`calendar/accounts/${id}/`), {}));
+  }
+  disconnectCalendarAccount(id: number) {
+    return this.run(this.http.delete<void>(this.url(`calendar/accounts/${id}/`)));
+  }
+  selectCalendar(id: number, selected: boolean) {
+    return this.run(this.http.patch<{ id: number; selected: boolean }>(this.url(`calendar/calendars/${id}/`), { selected }));
+  }
+  calendarEvents(from: string, to = from) {
+    return this.run(this.http.get<CalendarEvent[]>(this.url('calendar/events/'), { params: { from, to } }));
+  }
+  calendarPrep() {
+    return this.run(this.http.get<CalendarEvent[]>(this.url('calendar/events/'), { params: { prep: 1 } }));
+  }
+  updateCalendarEvent(id: number, data: { prep?: CalendarEvent['prep']; confirmed?: boolean }) {
+    return this.run(this.http.patch<CalendarEvent>(this.url(`calendar/events/${id}/`), data));
+  }
+  addEventTask(id: number, data: { task?: number; title?: string; workspace?: number; planned_date?: string | null }) {
+    return this.run(this.http.post<CalendarEvent>(this.url(`calendar/events/${id}/tasks/`), data));
+  }
+  unlinkEventTask(id: number, taskId: number) {
+    return this.run(this.http.delete<CalendarEvent>(this.url(`calendar/events/${id}/tasks/${taskId}/`)));
   }
 
   // Instance admin (staff only)
