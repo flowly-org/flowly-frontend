@@ -81,6 +81,9 @@
           }
         </div>
         <a class="btn ghost block menu-link" routerLink="/settings" (click)="menuOpen.set(false)">Settings & concierge</a>
+        @if (auth.user()?.is_staff) {
+          <a class="btn ghost block menu-link" routerLink="/manage" (click)="menuOpen.set(false)">Admin</a>
+        }
         <div class="menu-label">Theme</div>
         <div class="theme-switch" role="group" aria-label="Theme">
           @for (opt of themes; track opt.value) {

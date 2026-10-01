@@ -4,7 +4,9 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  AdminUser,
   AppNotification,
+  InstanceSettingRow,
   Attachment,
   ConciergeState,
   Comment,
@@ -259,6 +261,30 @@ export class ApiService {
   }
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
+  }
+
+  // Instance admin (staff only)
+  adminOverview() {
+    return this.run(this.http.get<Record<string, any>>(this.url('admin/overview/')));
+  }
+  adminSettings() {
+    return this.run(this.http.get<InstanceSettingRow[]>(this.url('admin/settings/')));
+  }
+  updateAdminSettings(values: Record<string, unknown>) {
+    return this.run(this.http.patch<InstanceSettingRow[]>(this.url('admin/settings/'), values));
+  }
+  adminCheck(service: string) {
+    return this.run(this.http.post<{ ok: boolean; message: string }>(this.url(`admin/check/${service}/`), {}));
+  }
+  adminTelegramWebhook(enable: boolean) {
+    return this.run(this.http.post<{ mode: string; webhook: string; pending: number }>(this.url('admin/telegram/webhook/'), { enable }));
+  }
+  adminUsers(q = '') {
+    const params = q ? new HttpParams().set('q', q) : undefined;
+    return this.run(this.http.get<AdminUser[]>(this.url('admin/users/'), { params }));
+  }
+  updateAdminUser(id: number, data: Partial<AdminUser>) {
+    return this.run(this.http.patch<AdminUser>(this.url(`admin/users/${id}/`), data));
   }
 
   private configPromise: Promise<PublicConfig> | null = null;

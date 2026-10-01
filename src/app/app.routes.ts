@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, guestGuard } from './core/auth.guard';
+import { authGuard, guestGuard, staffGuard } from './core/auth.guard';
 
 export const routes: Routes = [
   {
@@ -25,6 +25,11 @@ export const routes: Routes = [
         path: 'day',
         loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard),
         data: { mode: 'global' },
+      },
+      {
+        path: 'manage',
+        canActivate: [staffGuard],
+        loadComponent: () => import('./pages/manage/manage-page').then((m) => m.ManagePage),
       },
       { path: 'settings', loadComponent: () => import('./pages/settings/settings-page').then((m) => m.SettingsPage) },
       {

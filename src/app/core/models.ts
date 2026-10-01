@@ -230,3 +230,30 @@ export interface ConciergeState {
   usage_today: number;
   daily_limit: number;
 }
+
+export interface InstanceSettingRow {
+  key: string;
+  group: string;
+  label: string;
+  help: string;
+  type: 'str' | 'int' | 'bool' | 'url' | 'choice';
+  secret: boolean;
+  choices: string[];
+  value: string | number | boolean;
+  is_set: boolean;
+  source: 'admin' | 'environment' | 'unset';
+}
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  full_name: string;
+  plan: 'free' | 'pro';
+  plan_expires_at: string | null;
+  is_staff: boolean;
+  is_active: boolean;
+  date_joined: string;
+  last_login: string | null;
+  workspaces: number;
+  tokens_30d: number;
+}

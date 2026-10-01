@@ -17,3 +17,10 @@ export const guestGuard: CanActivateFn = async () => {
   if (auth.isLoggedIn() || (await auth.loadMe())) return router.parseUrl('/');
   return true;
 };
+
+export const staffGuard: CanActivateFn = async () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const user = auth.user() ?? (await auth.loadMe());
+  return user?.is_staff ? true : router.parseUrl('/day');
+};
