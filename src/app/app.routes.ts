@@ -24,6 +24,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/join/join-page').then((m) => m.JoinPage),
   },
   {
+    path: 'apps',
+    loadComponent: () => import('./pages/apps/apps-page').then((m) => m.AppsPage),
+  },
+  {
     path: 't/:ref',
     loadComponent: () => import('./pages/task-link/task-link-page').then((m) => m.TaskLinkPage),
   },

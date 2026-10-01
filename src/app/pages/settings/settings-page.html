@@ -105,7 +105,7 @@
     }
   </section>
 
-  <section class="panel">
+  <section class="panel" id="assistants">
     <h2>{{ 'Claude, ChatGPT & API' | t }}</h2>
     <p class="intro muted">
       {{ 'Flowly is an MCP server, so AI assistants can read your day, add and update tasks, comment and track time, with your permissions. Workspaces with an exclusive AI endpoint stay hidden.' | t }}
@@ -177,7 +177,7 @@
   </section>
 
   @if (state(); as s) {
-    <section class="panel concierge">
+    <section class="panel concierge" id="concierge">
       <h2>
         <span class="group-title">{{ 'Concierge' | t }} <span class="plan" [class.pro]="s.has_pro">{{ s.has_pro ? 'PRO' : 'FREE' }}</span></span>
       </h2>

@@ -61,7 +61,8 @@ export class SettingsPage implements OnInit {
     const result = this.route.snapshot.queryParamMap.get('calendar');
     if (result === 'connected') this.toast.show(this.i18n.t('Google Calendar connected.'));
     if (result === 'error') this.toast.error(this.i18n.t('Could not connect Google Calendar. Please try again.'));
-    if (result) setTimeout(() => document.getElementById('calendars')?.scrollIntoView({ behavior: 'smooth' }), 100);
+    const target = result ? 'calendars' : this.route.snapshot.fragment;
+    if (target) setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 100);
     try {
       const cfg = await this.api.publicConfig();
       this.mcpUrl.set(cfg.mcp_url.startsWith('http') ? cfg.mcp_url : `${window.location.origin}/api/mcp/`);

@@ -1,0 +1,94 @@
+<div class="wrap">
+  <header class="top">
+    <a routerLink="/" class="brand"><app-logo color="#4f46e5" [size]="26" /> Flowly</a>
+    <span class="spacer"></span>
+    @if (auth.isLoggedIn()) {
+      <a class="btn small" routerLink="/day">{{ 'Open Flowly' | t }}</a>
+    } @else {
+      <a class="btn small" routerLink="/login">{{ 'Sign in' | t }}</a>
+      <a class="btn small primary" routerLink="/register">{{ 'Create account' | t }}</a>
+    }
+  </header>
+
+  <main class="content">
+    <section class="intro">
+      <h1>{{ 'Flowly apps' | t }}</h1>
+      <p class="muted">
+        {{ 'Use Flowly in the browser, track time from your desktop tray, and keep your day on your phone.' | t }}
+        @if (release(); as r) {
+          <span class="version">{{ 'Version {v}' | t: { v: r.version } }} · {{ r.date | ldate: 'MMM d, y' }}</span>
+        }
+      </p>
+    </section>
+
+    @if (platform === 'ios') {
+      <section class="card highlight top-card">
+        <div class="card-head"><span class="icon" aria-hidden="true">📱</span><h2>iPhone &amp; iPad</h2></div>
+        <p>{{ 'The App Store version is coming. Meanwhile, add Flowly to your home screen:' | t }}</p>
+        <p class="muted small">{{ 'In Safari open {url}, tap Share, then Add to Home Screen.' | t: { url: webUrl } }}</p>
+      </section>
+    }
+
+    <div class="grid">
+      @for (c of cards(); track c.platform) {
+        <section class="card" [class.highlight]="c.platform === platform">
+          <div class="card-head">
+            <span class="icon" aria-hidden="true">{{ c.icon }}</span>
+            <h2>{{ c.name }}</h2>
+            @if (c.platform === platform) {
+              <span class="badge">{{ 'This device' | t }}</span>
+            }
+          </div>
+          <p class="muted">{{ c.what | t }}</p>
+          <div class="downloads">
+            @for (d of c.downloads; track d.file; let first = $first) {
+              <a class="btn" [class.primary]="first" [href]="href(d.file)" rel="noopener">
+                ↓ {{ d.label | t }}
+                @if (d.note) {
+                  <span class="size">{{ d.note | t }}</span>
+                }
+                @if (size(d.file)) {
+                  <span class="size">· {{ size(d.file) }}</span>
+                }
+              </a>
+            }
+          </div>
+          <p class="first-run small">{{ c.firstRun | t }}</p>
+        </section>
+      }
+
+      @if (platform !== 'ios') {
+        <section class="card">
+          <div class="card-head"><span class="icon" aria-hidden="true">📱</span><h2>iPhone &amp; iPad</h2><span class="badge soon">{{ 'Coming soon' | t }}</span></div>
+          <p class="muted">{{ 'The App Store version is coming. Meanwhile, add Flowly to your home screen:' | t }}</p>
+          <p class="first-run small">{{ 'In Safari open {url}, tap Share, then Add to Home Screen.' | t: { url: webUrl } }}</p>
+        </section>
+      }
+    </div>
+
+    <h2 class="section">{{ 'More ways to use Flowly' | t }}</h2>
+    <div class="grid">
+      <section class="card">
+        <div class="card-head"><span class="icon" aria-hidden="true">🌐</span><h2>{{ 'Web app' | t }}</h2></div>
+        <p class="muted">{{ 'Everything, in any browser. Chrome and Edge can install it as an app from the address bar.' | t }}</p>
+        <div class="downloads"><a class="btn" [href]="webUrl">{{ 'Open the web app' | t }}</a></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><span class="icon" aria-hidden="true">💬</span><h2>{{ 'Telegram concierge' | t }}</h2><span class="badge soon">PRO</span></div>
+        <p class="muted">{{ 'A personal assistant that briefs you each morning and adds or moves tasks by chat.' | t }}</p>
+        <div class="downloads"><a class="btn" routerLink="/settings" fragment="concierge">{{ 'Link Telegram' | t }}</a></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><span class="icon" aria-hidden="true">✦</span><h2>Claude &amp; ChatGPT</h2></div>
+        <p class="muted">{{ 'Add Flowly as a connector so your AI assistant can read your day and manage tasks.' | t }}</p>
+        <div class="downloads"><a class="btn" routerLink="/settings" fragment="assistants">{{ 'Connect an assistant' | t }}</a></div>
+      </section>
+    </div>
+
+    <p class="foot muted small">
+      {{ 'The desktop and Android builds are not code-signed yet, so your system may ask you to confirm the first time.' | t }}
+      <a [href]="releaseUrl" target="_blank" rel="noopener">{{ 'Release notes' | t }}</a> ·
+      <a [href]="checksumsUrl" target="_blank" rel="noopener">{{ 'Checksums' | t }}</a>
+    </p>
+  </main>
+</div>

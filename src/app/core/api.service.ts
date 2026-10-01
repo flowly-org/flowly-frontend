@@ -309,6 +309,11 @@ export class ApiService {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
   }
 
+  // Getting-started guide
+  guide() {
+    return this.run(this.http.get<{ steps: { key: string; done: boolean }[]; done: number; total: number; pro: boolean }>(this.url('my/guide/')));
+  }
+
   // Calendars
   calendarOverview() {
     return this.run(this.http.get<CalendarOverview>(this.url('calendar/')));

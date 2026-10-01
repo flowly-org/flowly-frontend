@@ -1,0 +1,154 @@
+.wrap {
+  min-height: 100dvh;
+  background: var(--bg);
+  padding: 0 16px 48px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 0 14px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.content {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.intro {
+  margin: 16px 0 20px;
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 1.7rem;
+  }
+  p {
+    margin: 0;
+  }
+}
+
+.version {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  p {
+    margin: 0;
+  }
+
+  &.highlight {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent), var(--shadow);
+  }
+}
+
+.top-card {
+  margin-bottom: 14px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  font-size: 1rem;
+}
+
+.badge {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+
+  &.soon {
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+}
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.size {
+  opacity: 0.7;
+  font-size: 0.8em;
+  margin-left: 4px;
+}
+
+.note {
+  margin-right: 4px;
+}
+
+.first-run {
+  color: var(--muted);
+  border-top: 1px dashed var(--line);
+  padding-top: 8px;
+}
+
+.section {
+  font-size: 1.1rem;
+  margin: 28px 0 12px;
+}
+
+.foot {
+  margin-top: 24px;
+}
+
+.small {
+  font-size: 0.8rem;
+}
