@@ -19,12 +19,16 @@ export function addDays(s: string, days: number): string {
   return toIsoDate(d);
 }
 
+function uiLang(): string {
+  return document.documentElement.lang || undefined!;
+}
+
 export function formatLong(s: string): string {
-  return parseIsoDate(s).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  return parseIsoDate(s).toLocaleDateString(uiLang(), { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 export function formatShort(s: string): string {
-  return parseIsoDate(s).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  return parseIsoDate(s).toLocaleDateString(uiLang(), { day: 'numeric', month: 'short' });
 }
 
 export function isValidIsoDate(s: string | null | undefined): s is string {
