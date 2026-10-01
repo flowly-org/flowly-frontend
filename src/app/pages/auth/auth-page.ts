@@ -17,6 +17,7 @@ import { AuthService } from '../../core/auth.service';
 export class AuthPage {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   protected mode = toSignal(inject(ActivatedRoute).data.pipe(map((d) => d['mode'] as 'login' | 'register')), {
     initialValue: 'login' as const,
@@ -35,7 +36,8 @@ export class AuthPage {
     try {
       if (this.isRegister()) await this.auth.register(this.email, this.password, this.fullName);
       else await this.auth.login(this.email, this.password);
-      this.router.navigateByUrl('/');
+      const next = this.route.snapshot.queryParamMap.get('next');
+      this.router.navigateByUrl(next && next.startsWith('/') && !next.startsWith('//') ? next : '/');
     } catch (err) {
       this.error.set(
         errorMessage(err, this.isRegister() ? 'Could not create your account.' : 'Wrong email or password.'),

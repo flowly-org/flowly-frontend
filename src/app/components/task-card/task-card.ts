@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 
 import { BoardData } from '../../core/board-data';
 import { formatShort } from '../../core/dates';
-import { Tag, Task } from '../../core/models';
+import { Tag, Task, VISIBILITIES } from '../../core/models';
 
 @Component({
   selector: 'app-task-card',
@@ -26,6 +26,12 @@ export class TaskCard {
   readonly toggleDone = output<Task>();
 
   private data = inject(BoardData);
+
+  protected visibilityIcon = computed(() => {
+    const v = this.task().visibility;
+    return v && v !== 'team' ? VISIBILITIES.find((x) => x.value === v)?.icon : null;
+  });
+  protected visibilityLabel = computed(() => VISIBILITIES.find((x) => x.value === this.task().visibility)?.label ?? '');
 
   protected done = computed(() => this.data.isDone(this.task()));
   protected canToggle = computed(() => this.data.toggledStatus(this.task()) !== null);

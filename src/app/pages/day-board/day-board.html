@@ -55,6 +55,7 @@
         </select>
       </label>
     }
+    <button class="btn" type="button" (click)="bulk.set('day')" title="Paste a list to add many tasks at once">Bulk add</button>
     <button class="btn primary" type="button" (click)="openNew()">+ New task</button>
   </div>
 </div>
@@ -156,6 +157,7 @@
         <button class="btn ghost icon" type="button" aria-label="Close backlog" (click)="showBacklog.set(false)">✕</button>
       </header>
       <p class="hint muted">Unscheduled tasks. Drag one onto the board to plan it for this day.</p>
+      <button class="btn ghost small bulk-backlog" type="button" (click)="bulk.set('backlog')">Paste a list…</button>
       <form class="inline" (ngSubmit)="addToBacklog()">
         <input name="backlogTitle" [(ngModel)]="backlogTitle" placeholder="Add to backlog…" aria-label="New backlog task" />
       </form>
@@ -201,5 +203,14 @@
     (saved)="onSaved($event)"
     (deleted)="onDeleted($event)"
     (closed)="editing.set(null)"
+  />
+}
+
+@if (bulk(); as b) {
+  <app-bulk-add
+    [day]="b === 'day' ? date() : null"
+    [workspace]="newTaskWs()"
+    (created)="onBulkCreated($event)"
+    (closed)="bulk.set(null)"
   />
 }

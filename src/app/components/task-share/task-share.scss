@@ -1,0 +1,97 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+
+.visibility {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+
+  legend {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+}
+
+.option {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+
+  input {
+    width: auto;
+    margin-top: 3px;
+  }
+
+  .icon {
+    width: 20px;
+    text-align: center;
+  }
+
+  .help {
+    display: block;
+    font-size: 0.8rem;
+  }
+
+  &.on {
+    border-color: var(--brand, var(--accent));
+    background: color-mix(in srgb, var(--brand, var(--accent)) 6%, transparent);
+  }
+}
+
+.link label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.copy-row {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0;
+
+  input {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+  }
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.link p {
+  margin: 0;
+}
+
+.people h3 {
+  font-size: 0.85rem;
+  margin: 0 0 8px;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+
+  .grow {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.invite {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}

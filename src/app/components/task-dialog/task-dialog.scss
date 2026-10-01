@@ -154,3 +154,78 @@ footer {
 [hidden] {
   display: none !important;
 }
+
+.ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-right: 6px;
+}
+
+.vis-icon {
+  font-size: 0.8rem;
+}
+
+.summary {
+  gap: 14px;
+}
+
+.summary-title {
+  margin: 0;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+
+  &.done {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+}
+
+.notes {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 0;
+  align-items: center;
+
+  dt {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.project {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.link-btn {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: underline dotted;
+}

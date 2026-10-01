@@ -50,7 +50,9 @@ export class MembersPage implements OnInit {
       const res = await this.api.addMember(this.wsId, email, this.inviteRole);
       this.inviteEmail = '';
       if (res.status === 202) {
-        this.toast.show(`${email} has no account yet. They'll join automatically when they sign up with that email.`);
+        const link = (res.body as Invitation).link;
+        if (link) this.copyLink(link, `${email} has no account yet. Join link copied: send it to them`);
+        else this.toast.show(`${email} has no account yet. They'll join automatically when they sign up with that email.`);
         await this.loadInvitations();
       } else {
         this.toast.show(`${email} added.`);
@@ -85,6 +87,25 @@ export class MembersPage implements OnInit {
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
+  }
+
+  protected copyLink(link: string, message = 'Join link copied.') {
+    const done = () => this.toast.show(message);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link).then(done, () => this.toast.show(link));
+      return;
+    }
+    const area = document.createElement('textarea');
+    area.value = link;
+    document.body.appendChild(area);
+    area.select();
+    try {
+      document.execCommand('copy');
+      done();
+    } catch {
+      this.toast.show(link);
+    }
+    area.remove();
   }
 
   async revoke(inv: Invitation) {

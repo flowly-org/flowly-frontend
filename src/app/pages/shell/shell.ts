@@ -38,7 +38,7 @@ export class Shell {
   protected menuOpen = signal(false);
   protected bellOpen = signal(false);
   protected notifications = inject(NotificationService);
-  protected readonly icons: Record<string, string> = { urgent: '🔴', assigned: '📌', comment: '💬', brief: '☀' };
+  protected readonly icons: Record<string, string> = { urgent: '🔴', assigned: '📌', comment: '💬', brief: '☀', shared: '🔗' };
 
   /** Colour of the workspace being viewed (default accent on My day). */
   protected readonly brandColor = computed(() => {
@@ -57,7 +57,8 @@ export class Shell {
   protected openNotification(n: AppNotification) {
     this.notifications.markRead([n.id]);
     this.bellOpen.set(false);
-    if (n.workspace && n.task) this.router.navigate(['/w', n.workspace, 'board'], { queryParams: { task: n.task } });
+    if (n.kind === 'shared' && n.data?.ref) this.router.navigate(['/t', n.data.ref]);
+    else if (n.workspace && n.task) this.router.navigate(['/w', n.workspace, 'board'], { queryParams: { task: n.task } });
     else if (n.kind === 'brief') this.router.navigate(['/day']);
   }
 

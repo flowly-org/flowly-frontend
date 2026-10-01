@@ -8,7 +8,12 @@
 }
 
 <div class="body" (click)="open.emit(task())" (keydown.enter)="open.emit(task())" tabindex="0" role="button">
-  <div class="title">{{ task().title }}</div>
+  <div class="title">
+    @if (visibilityIcon(); as icon) {
+      <span class="vis" [title]="visibilityLabel()">{{ icon }}</span>
+    }
+    {{ task().title }}
+  </div>
 
   <div class="meta">
     @if (workspace(); as ws) {

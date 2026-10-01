@@ -4,6 +4,10 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  InvitationPreview,
+  SharedTask,
+  TaskLinkView,
+  TaskShareEntry,
   AdminUser,
   AppNotification,
   InstanceSettingRow,
@@ -84,6 +88,12 @@ export class ApiService {
   }
   invitations(wsId: number) {
     return this.run(this.http.get<Invitation[]>(this.ws(wsId, 'invitations/')));
+  }
+  invitationPreview(token: string) {
+    return this.run(this.http.get<InvitationPreview>(this.url(`invitations/${token}/`)));
+  }
+  acceptInvitation(token: string) {
+    return this.run(this.http.post<{ workspace: number }>(this.url(`invitations/${token}/accept/`), {}));
   }
   revokeInvitation(wsId: number, id: number) {
     return this.run(this.http.delete<void>(this.ws(wsId, `invitations/${id}/`)));
@@ -198,6 +208,31 @@ export class ApiService {
   updateTask(wsId: number, id: number, data: TaskInput) {
     return this.run(this.http.patch<Task>(this.ws(wsId, `tasks/${id}/`), data));
   }
+  bulkCreateTasks(wsId: number, tasks: TaskInput[]) {
+    return this.run(this.http.post<Task[]>(this.ws(wsId, 'tasks/bulk/'), { tasks }));
+  }
+  shares(wsId: number, taskId: number) {
+    return this.run(this.http.get<TaskShareEntry[]>(this.ws(wsId, `tasks/${taskId}/shares/`)));
+  }
+  addShare(wsId: number, taskId: number, email: string) {
+    return this.run(this.http.post<TaskShareEntry>(this.ws(wsId, `tasks/${taskId}/shares/`), { email }));
+  }
+  removeShare(wsId: number, taskId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `tasks/${taskId}/shares/${id}/`)));
+  }
+  taskLink(ref: string) {
+    return this.run(this.http.get<TaskLinkView>(this.url(`t/${ref}/`)));
+  }
+  taskLinkComment(ref: string, body: string) {
+    return this.run(this.http.post<Comment>(this.url(`t/${ref}/comments/`), { body }));
+  }
+  taskLinkAttachment(ref: string, id: number) {
+    return this.run(this.http.get<{ url: string }>(this.url(`t/${ref}/attachments/${id}/download/`)));
+  }
+  sharedWithMe() {
+    return this.run(this.http.get<SharedTask[]>(this.url('my/shared/')));
+  }
+
   task(wsId: number, id: number) {
     return this.run(this.http.get<Task>(this.ws(wsId, `tasks/${id}/`)));
   }

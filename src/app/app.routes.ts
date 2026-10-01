@@ -16,6 +16,14 @@ export const routes: Routes = [
     data: { mode: 'register' },
   },
   {
+    path: 'join/:token',
+    loadComponent: () => import('./pages/join/join-page').then((m) => m.JoinPage),
+  },
+  {
+    path: 't/:ref',
+    loadComponent: () => import('./pages/task-link/task-link-page').then((m) => m.TaskLinkPage),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/shell/shell').then((m) => m.Shell),
@@ -31,6 +39,7 @@ export const routes: Routes = [
         canActivate: [staffGuard],
         loadComponent: () => import('./pages/manage/manage-page').then((m) => m.ManagePage),
       },
+      { path: 'shared', loadComponent: () => import('./pages/shared/shared-page').then((m) => m.SharedPage) },
       { path: 'settings', loadComponent: () => import('./pages/settings/settings-page').then((m) => m.SettingsPage) },
       {
         path: 'github/app-created',

@@ -3,9 +3,11 @@ import { FormsModule } from '@angular/forms';
 
 import { TaskAttachments } from '../task-attachments/task-attachments';
 import { TaskDiscussion } from '../task-discussion/task-discussion';
+import { TaskShare } from '../task-share/task-share';
+import { formatLong } from '../../core/dates';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { BoardData } from '../../core/board-data';
-import { Task, TaskInput } from '../../core/models';
+import { Task, TaskInput, VISIBILITIES, Visibility } from '../../core/models';
 
 interface FormModel {
   title: string;
@@ -23,7 +25,7 @@ interface FormModel {
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule, TaskDiscussion, TaskAttachments],
+  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   host: { '(document:keydown.escape)': 'close()' },
@@ -53,13 +55,50 @@ export class TaskDialog implements OnInit {
   protected busy = signal(false);
   protected error = signal<string | null>(null);
   protected confirmDelete = signal(false);
-  protected tab = signal<'details' | 'discussion' | 'files'>('details');
+  protected tab = signal<'details' | 'discussion' | 'files' | 'share'>('details');
+  /** Existing tasks open read-only; Edit switches to the form. New tasks start in the form. */
+  protected editing = signal(false);
+  protected visibility = signal<Visibility>('team');
+  protected readonly visibilities = VISIBILITIES;
+
+  /** Read-only summary of the task as it is now. */
+  protected readonly view = computed(() => {
+    const t = this.task();
+    if (!t) return null;
+    const tagById = this.data.tagById();
+    const tags = t.tags.map((id) => tagById.get(id)).filter((x) => !!x);
+    return {
+      status: tagById.get(t.status) ?? null,
+      priority: t.priority ? (tagById.get(t.priority) ?? null) : null,
+      project: t.project ? (this.data.projectById().get(t.project) ?? null) : null,
+      assignee: t.assignee ? (this.data.userById().get(t.assignee) ?? null) : null,
+      tags,
+      planned: t.planned_date ? formatLong(t.planned_date) : 'Backlog',
+      due: t.due_date ? formatLong(t.due_date) : null,
+      visibility: VISIBILITIES.find((v) => v.value === this.visibility())!,
+    };
+  });
+
+  protected onVisibility(v: Visibility) {
+    this.visibility.set(v);
+    this.dirty = true;
+  }
+
+  protected cancelEdit() {
+    if (this.task()) {
+      this.editing.set(false);
+      this.error.set(null);
+      this.ngOnInitForm();
+    } else {
+      this.close();
+    }
+  }
   protected commentCount = signal(0);
   protected attachmentCount = signal(0);
   private dirty = false;
 
   /** Open straight on a tab (e.g. from the card's comment badge). */
-  readonly initialTab = input<'details' | 'discussion' | 'files'>('details');
+  readonly initialTab = input<'details' | 'discussion' | 'files' | 'share'>('details');
 
   protected close() {
     const task = this.task();
@@ -74,8 +113,15 @@ export class TaskDialog implements OnInit {
 
   ngOnInit() {
     this.tab.set(this.task() ? this.initialTab() : 'details');
+    this.editing.set(!this.task());
+    this.visibility.set(this.task()?.visibility ?? 'team');
     this.commentCount.set(this.task()?.comment_count ?? 0);
     this.attachmentCount.set(this.task()?.attachment_count ?? 0);
+    this.ngOnInitForm();
+  }
+
+  /** (Re)fill the form from the task or the defaults. */
+  private ngOnInitForm() {
     const src: TaskInput = this.task() ?? this.defaults();
     this.wsId.set(src.workspace ?? this.data.contexts()[0]?.id ?? 0);
     this.model = {

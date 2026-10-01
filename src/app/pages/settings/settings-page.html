@@ -93,6 +93,21 @@
         }
 
         <div class="row settings-grid">
+          <label class="grow persona">
+            <span class="small muted">Name</span>
+            <input [value]="s.settings.name" maxlength="40" (change)="update({ name: $any($event.target).value.trim() || 'Flo' })" aria-label="Concierge name" />
+          </label>
+          <label class="grow persona">
+            <span class="small muted">Language</span>
+            <select (change)="update({ language: $any($event.target).value })" aria-label="Concierge language">
+              @for (l of s.languages; track l.code) {
+                <option [value]="l.code" [selected]="l.code === s.settings.language">{{ l.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="row settings-grid">
           <label class="check-line">
             <input type="checkbox" [checked]="s.settings.morning_brief" (change)="update({ morning_brief: $any($event.target).checked })" />
             Morning brief at

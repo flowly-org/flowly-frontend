@@ -1,0 +1,105 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="bulk-title">
+  <header>
+    <h2 id="bulk-title">Add several tasks</h2>
+    <button class="btn ghost icon" type="button" aria-label="Close" (click)="closed.emit()">✕</button>
+  </header>
+
+  <div class="content">
+    <div class="options">
+      @if (data.multi()) {
+        <label>
+          Workspace
+          <select [ngModel]="wsId()" (ngModelChange)="changeWorkspace($event)">
+            @for (c of data.contexts(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </label>
+      }
+      <label>
+        Project
+        <select [ngModel]="projectId()" (ngModelChange)="projectId.set($event)">
+          <option [ngValue]="null">No project</option>
+          @for (p of ctx()?.projects ?? []; track p.id) {
+            @if (!p.archived) {
+              <option [ngValue]="p.id">{{ p.name }}</option>
+            }
+          }
+        </select>
+      </label>
+      <label>
+        Plan for
+        <select [ngModel]="planned()" (ngModelChange)="planned.set($event)">
+          @if (day()) {
+            <option value="day">{{ formatShort(day()!) }}</option>
+          }
+          <option value="backlog">Backlog</option>
+        </select>
+      </label>
+      <label class="check">
+        <input type="checkbox" [ngModel]="assignToMe()" (ngModelChange)="assignToMe.set($event)" />
+        Assign to me
+      </label>
+    </div>
+
+    <div class="split">
+      <label class="editor">
+        <span class="muted">One task per line. Paste a bulleted list, or type:</span>
+        <textarea
+          [ngModel]="text()"
+          (ngModelChange)="text.set($event)"
+          rows="12"
+          autofocus
+          placeholder="- Call the accountant !high @tomorrow&#10;- Draft the newsletter +Website #writing&#10;  include the October numbers&#10;- [x] Book the venue"
+          aria-label="Tasks, one per line"
+        ></textarea>
+        <span class="syntax muted">
+          <code>!high</code> priority · <code>#tag</code> · <code>+Project</code> · <code>&#64;tomorrow</code> <code>&#64;fri</code> <code>&#64;2026-10-05</code> <code>&#64;backlog</code> ·
+          <code>[x]</code> done · indented lines become notes
+        </span>
+      </label>
+
+      <div class="preview" aria-live="polite">
+        <div class="preview-head muted">{{ drafts().length }} task{{ drafts().length === 1 ? '' : 's' }}</div>
+        @for (d of drafts(); track $index) {
+          <div class="draft">
+            <div class="draft-title" [class.done]="d.done">{{ d.title }}</div>
+            <div class="draft-meta">
+              <span class="date">{{ dateLabel(d.date) }}</span>
+              @if (d.priority) {
+                <span class="chip" [style.--chip]="d.priority.color">{{ d.priority.name }}</span>
+              }
+              @if (d.project) {
+                <span class="chip" [style.--chip]="d.project.color">{{ d.project.name }}</span>
+              }
+              @for (t of d.tags; track t.id) {
+                <span class="chip" [style.--chip]="t.color">{{ t.name }}</span>
+              }
+              @if (d.notes) {
+                <span class="muted" title="{{ d.notes }}">+ notes</span>
+              }
+            </div>
+            @for (w of d.warnings; track w) {
+              <div class="warn">{{ w }}: left in the title</div>
+            }
+          </div>
+        } @empty {
+          <p class="muted empty">The tasks will appear here as you type.</p>
+        }
+      </div>
+    </div>
+
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+  </div>
+
+  <footer>
+    <span class="spacer"></span>
+    <button class="btn" type="button" (click)="closed.emit()">Cancel</button>
+    <button class="btn primary" type="button" [disabled]="busy() || !drafts().length" (click)="create()">
+      {{ busy() ? 'Adding…' : 'Add ' + drafts().length + ' task' + (drafts().length === 1 ? '' : 's') }}
+    </button>
+  </footer>
+</div>

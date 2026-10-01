@@ -2,9 +2,14 @@
 <form class="dialog" role="dialog" aria-modal="true" aria-labelledby="task-dialog-title" (ngSubmit)="save()">
   <header>
     <h2 id="task-dialog-title">
-      {{ task() ? 'Edit task' : 'New task' }}
-      @if (data.multi() && task()) {
-        <span class="muted ws-name">in {{ ctx()?.name }}</span>
+      @if (!task()) {
+        New task
+      } @else {
+        <span class="ref" title="Task reference">{{ task()!.ref }}</span>
+        @if (editing()) {
+          Editing
+        }
+        <span class="muted ws-name">{{ ctx()?.name }}</span>
       }
     </h2>
     <button class="btn ghost icon" type="button" aria-label="Close" (click)="close()">✕</button>
@@ -19,7 +24,45 @@
       <button type="button" role="tab" [class.on]="tab() === 'files'" [attr.aria-selected]="tab() === 'files'" (click)="tab.set('files')">
         Documents @if (attachmentCount()) {<span class="count">{{ attachmentCount() }}</span>}
       </button>
+      <button type="button" role="tab" [class.on]="tab() === 'share'" [attr.aria-selected]="tab() === 'share'" (click)="tab.set('share')">
+        Share <span class="vis-icon" aria-hidden="true">{{ view()?.visibility?.icon }}</span>
+      </button>
     </nav>
+    @if (tab() === 'share') {
+      <div class="content">
+        <app-task-share [task]="t" (changed)="onVisibility($event)" />
+      </div>
+    }
+    @if (tab() === 'details' && !editing() && view(); as v) {
+      <div class="content summary">
+        <h3 class="summary-title" [class.done]="v.status?.is_done">{{ t.title }}</h3>
+        @if (t.description) {
+          <p class="notes">{{ t.description }}</p>
+        }
+        <dl class="facts">
+          <dt>Status</dt>
+          <dd>@if (v.status) {<span class="chip" [style.--chip]="v.status.color">{{ v.status.name }}</span>}</dd>
+          <dt>Priority</dt>
+          <dd>@if (v.priority) {<span class="chip" [style.--chip]="v.priority.color">{{ v.priority.name }}</span>} @else {<span class="muted">None</span>}</dd>
+          <dt>Project</dt>
+          <dd>@if (v.project) {<span class="project"><span class="dot" [style.background]="v.project.color"></span>{{ v.project.name }}</span>} @else {<span class="muted">None</span>}</dd>
+          <dt>Assignee</dt>
+          <dd>{{ v.assignee ? v.assignee.full_name || v.assignee.email : 'Unassigned' }}</dd>
+          <dt>Planned</dt>
+          <dd>{{ v.planned }}</dd>
+          @if (v.due) {
+            <dt>Due</dt>
+            <dd>{{ v.due }}</dd>
+          }
+          @if (v.tags.length) {
+            <dt>Tags</dt>
+            <dd class="tag-list">@for (tag of v.tags; track tag!.id) {<span class="chip" [style.--chip]="tag!.color">{{ tag!.name }}</span>}</dd>
+          }
+          <dt>Visibility</dt>
+          <dd><button type="button" class="link-btn" (click)="tab.set('share')">{{ v.visibility.icon }} {{ v.visibility.label }}</button></dd>
+        </dl>
+      </div>
+    }
     @if (tab() === 'discussion') {
       <div class="content">
         <app-task-discussion [wsId]="t.workspace" [taskId]="t.id" (changed)="onCount('comments', $event)" />
@@ -32,8 +75,10 @@
     }
   }
 
-  <div class="content" [hidden]="tab() !== 'details'">
-    <input class="title-input" name="title" [(ngModel)]="model.title" placeholder="What needs doing?" required autofocus />
+  <div class="content" [hidden]="tab() !== 'details' || !editing()">
+    @if (editing()) {
+      <input class="title-input" name="title" [(ngModel)]="model.title" placeholder="What needs doing?" required autofocus />
+    }
     <textarea name="description" [(ngModel)]="model.description" placeholder="Notes (optional)" rows="3"></textarea>
 
     <div class="grid">
@@ -128,8 +173,8 @@
     }
   </div>
 
-  <footer [hidden]="tab() !== 'details'">
-    @if (task()) {
+  @if (tab() === 'details' && !editing() && task()) {
+    <footer>
       @if (confirmDelete()) {
         <span class="confirm">Delete this task?</span>
         <button class="btn danger small" type="button" [disabled]="busy()" (click)="remove()">Delete</button>
@@ -137,9 +182,15 @@
       } @else {
         <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">Delete</button>
       }
-    }
+      <span class="spacer"></span>
+      <button class="btn" type="button" (click)="close()">Close</button>
+      <button class="btn primary" type="button" (click)="editing.set(true)">Edit</button>
+    </footer>
+  }
+
+  <footer [hidden]="tab() !== 'details' || !editing()">
     <span class="spacer"></span>
-    <button class="btn" type="button" (click)="close()">Cancel</button>
+    <button class="btn" type="button" (click)="cancelEdit()">Cancel</button>
     <button class="btn primary" type="submit" [disabled]="busy()">{{ task() ? 'Save' : 'Add task' }}</button>
   </footer>
 </form>

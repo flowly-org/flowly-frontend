@@ -4,6 +4,7 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { BulkAdd } from '../../components/bulk-add/bulk-add';
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskDialog } from '../../components/task-dialog/task-dialog';
 import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
@@ -48,7 +49,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -84,6 +85,8 @@ export class DayBoard {
 
   protected editing = signal<{ task: Task | null; defaults: TaskInput; tab?: 'details' | 'discussion' | 'files' } | null>(null);
   protected quickAddLane = signal<string | null>(null);
+  /** Bulk-add dialog: null = closed; 'day' plans for the viewed day, 'backlog' leaves them unscheduled. */
+  protected bulk = signal<'day' | 'backlog' | null>(null);
   protected quickAddTitle = '';
   protected backlogTitle = '';
 
@@ -342,6 +345,13 @@ export class DayBoard {
     this.editing.set(null);
     this.place(task);
     if (this.mode === 'global') this.targetWs.set(task.workspace);
+  }
+
+  protected onBulkCreated(tasks: Task[]) {
+    this.bulk.set(null);
+    for (const task of tasks) this.place(task);
+    if (this.mode === 'global' && tasks[0]) this.targetWs.set(tasks[0].workspace);
+    this.toast.show(`Added ${tasks.length} task${tasks.length === 1 ? '' : 's'}.`);
   }
 
   protected onDeleted(id: number) {

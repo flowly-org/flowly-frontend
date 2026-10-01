@@ -41,9 +41,9 @@
 
     <p class="switch">
       @if (isRegister()) {
-        Already have an account? <a routerLink="/login">Sign in</a>
+        Already have an account? <a routerLink="/login" queryParamsHandling="preserve">Sign in</a>
       } @else {
-        New here? <a routerLink="/register">Create an account</a>
+        New here? <a routerLink="/register" queryParamsHandling="preserve">Create an account</a>
       }
     </p>
   </section>

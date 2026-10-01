@@ -38,6 +38,17 @@ export interface Invitation {
   email: string;
   role: Role;
   created_at: string;
+  /** Join link; only returned to owners and admins. */
+  link: string | null;
+  link_expired: boolean;
+}
+
+export interface InvitationPreview {
+  workspace: { id: number | null; name: string; color: string };
+  invited_by: string | null;
+  email: string;
+  role: Role;
+  already_member: boolean;
 }
 
 export interface Project {
@@ -82,8 +93,19 @@ export interface WorkspaceContext {
   members: Membership[];
 }
 
+export type Visibility = 'private' | 'team' | 'shareable' | 'public';
+
+export const VISIBILITIES: { value: Visibility; label: string; icon: string; help: string }[] = [
+  { value: 'private', label: 'Private', icon: '🔒', help: 'Only you and the assignee.' },
+  { value: 'team', label: 'Team', icon: '👥', help: 'Everyone in the workspace.' },
+  { value: 'shareable', label: 'Shareable', icon: '🔗', help: 'The team, plus people you invite by email (they can view and comment).' },
+  { value: 'public', label: 'Public', icon: '🌐', help: 'Anyone with the link can view it, no account needed.' },
+];
+
 export interface Task {
   id: number;
+  ref: string;
+  visibility: Visibility;
   workspace: number;
   title: string;
   description: string;
@@ -106,7 +128,7 @@ export interface Task {
 }
 
 export type TaskInput = Partial<
-  Omit<Task, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count'>
+  Omit<Task, 'id' | 'ref' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count'>
 >;
 
 export interface Comment {
@@ -208,13 +230,60 @@ export const TASK_EVENTS = [
 
 export interface AppNotification {
   id: number;
-  kind: 'assigned' | 'urgent' | 'comment' | 'brief';
+  kind: 'assigned' | 'urgent' | 'comment' | 'brief' | 'shared';
   title: string;
   body: string;
   workspace: number | null;
   task: number | null;
+  data: { ref?: string };
   created_at: string;
   read_at: string | null;
+}
+
+export interface TaskShareEntry {
+  id: number;
+  email: string;
+  name: string;
+  registered: boolean;
+  created_at: string;
+}
+
+export interface TaskLinkView {
+  access: 'member' | 'shared' | 'public';
+  task: {
+    id: number;
+    ref: string;
+    title: string;
+    description: string;
+    visibility: Visibility;
+    workspace: { id: number; name: string };
+    project: { id: number; name: string } | null;
+    status: { id: number; name: string; is_done: boolean };
+    priority: { id: number; name: string } | null;
+    assignee: { name: string; email?: string } | null;
+    tags: { id: number; name: string; group: string | null }[];
+    planned_date: string | null;
+    due_date: string | null;
+    completed_at: string | null;
+    link: string;
+  };
+  workspace: { id?: number; name: string; color: string };
+  comments: Comment[];
+  attachments: { id: number; kind: AttachmentKind; name: string; url: string; size: number | null }[];
+  can_comment: boolean;
+  can_edit: boolean;
+}
+
+export interface SharedTask {
+  ref: string;
+  title: string;
+  workspace: string;
+  status: string;
+  status_done: boolean;
+  project: string | null;
+  planned_date: string | null;
+  due_date: string | null;
+  updated_at: string;
 }
 
 export interface ConciergeState {
@@ -224,7 +293,8 @@ export interface ConciergeState {
   unavailable_reason: string | null;
   platform_ai: boolean;
   telegram: { configured: boolean; bot: string; linked: boolean; username: string };
-  settings: { enabled: boolean; timezone: string; brief_time: string; morning_brief: boolean; alerts: boolean; provider: number | null };
+  languages: { code: string; label: string }[];
+  settings: { enabled: boolean; name: string; language: string; timezone: string; brief_time: string; morning_brief: boolean; alerts: boolean; provider: number | null };
   providers: { id: number; name: string; workspace: string; kind: string; model: string }[];
   memory: string;
   usage_today: number;

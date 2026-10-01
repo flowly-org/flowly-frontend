@@ -11,10 +11,11 @@ export const authGuard: CanActivateFn = async () => {
   return router.parseUrl('/login');
 };
 
-export const guestGuard: CanActivateFn = async () => {
+export const guestGuard: CanActivateFn = async (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  if (auth.isLoggedIn() || (await auth.loadMe())) return router.parseUrl('/');
+  const next = route.queryParamMap.get('next');
+  if (auth.isLoggedIn() || (await auth.loadMe())) return router.parseUrl(next?.startsWith('/') && !next.startsWith('//') ? next : '/');
   return true;
 };
 

@@ -61,9 +61,14 @@
       @for (inv of invitations(); track inv.id) {
         <div class="row">
           <div class="grow">
-            {{ inv.email }} <span class="muted">· {{ inv.role }} · waiting for sign-up</span>
+            {{ inv.email }} <span class="muted">· {{ inv.role }} · waiting to join</span>
           </div>
           @if (store.canManage()) {
+            @if (inv.link && !inv.link_expired) {
+              <button class="btn small" type="button" (click)="copyLink(inv.link)" title="Anyone with this link can join with this role">Copy join link</button>
+            } @else if (inv.link_expired) {
+              <span class="muted small">link expired</span>
+            }
             <button class="btn ghost danger small" type="button" (click)="revoke(inv)">Revoke</button>
           }
         </div>
