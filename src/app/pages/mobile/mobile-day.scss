@@ -1,0 +1,385 @@
+:host {
+  display: block;
+  background: var(--bg);
+  min-height: 100dvh;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav,
+.avatar {
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.25rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+
+  &:active {
+    background: var(--surface-2);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.day {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  padding: 0 4px;
+
+  &:disabled {
+    opacity: 1;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.menu {
+  position: absolute;
+  right: 10px;
+  top: calc(100% + 4px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  min-width: 180px;
+  overflow: hidden;
+
+  button {
+    border: 0;
+    background: none;
+    text-align: left;
+    font: inherit;
+    color: var(--ink);
+    padding: 12px 14px;
+
+    & + button {
+      border-top: 1px solid var(--line);
+    }
+  }
+}
+
+.timer {
+  position: sticky;
+  top: calc(57px + env(safe-area-inset-top, 0px));
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  border-bottom: 1px solid var(--line);
+
+  .what {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .clock {
+    font-variant-numeric: tabular-nums;
+  }
+  .stop {
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: var(--danger);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+  }
+}
+
+.rec {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--c);
+  border-radius: 12px;
+  min-height: 60px;
+
+  &.running {
+    border-color: color-mix(in srgb, var(--danger) 50%, var(--line));
+    border-left-color: var(--danger);
+  }
+
+  &.done .title {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+}
+
+.check {
+  justify-self: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: none;
+  color: #fff;
+  font-size: 0.85rem;
+
+  &.on {
+    background: var(--ok);
+    border-color: var(--ok);
+  }
+}
+
+.body {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  padding: 10px 4px;
+  min-width: 0;
+
+  .title {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+.carried {
+  color: var(--warn);
+}
+
+.play {
+  width: 52px;
+  height: 52px;
+  margin: 4px;
+  border-radius: 12px;
+  border: 0;
+  background: var(--surface-2);
+  color: var(--accent);
+  font-size: 1.1rem;
+
+  &.on {
+    background: var(--danger);
+    color: #fff;
+  }
+}
+
+.details {
+  grid-column: 1 / -1;
+  padding: 0 12px 12px 44px;
+  display: grid;
+  gap: 8px;
+
+  .notes {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip-btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.done-toggle {
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 4px 2px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 16px;
+
+  p {
+    margin: 4px 0;
+  }
+}
+
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
+.dock-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  &.busy {
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  &.wide {
+    width: 100%;
+  }
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 0.4);
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgb(10 12 16 / 0.45);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  max-height: 88dvh;
+  overflow-y: auto;
+  display: grid;
+  gap: 10px;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-radius: 18px 18px 0 0;
+  box-shadow: var(--shadow-lg);
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  textarea,
+  select {
+    width: 100%;
+    font-size: 16px; /* no zoom on iOS */
+  }
+  .hint {
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--warn) 10%, var(--surface));
+  }
+}
+
+.drafts {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: 0.92rem;
+
+  .done {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

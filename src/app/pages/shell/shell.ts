@@ -15,6 +15,7 @@ import { TimerService } from '../../core/timer.service';
 import { formatDuration } from '../../core/models';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
+import { setViewMode } from '../../core/view-mode';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
@@ -60,6 +61,11 @@ export class Shell {
     this.notifications.start();
     this.timer.start();
     this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, this.i18n.t('Could not load your workspaces.'))));
+  }
+
+  protected compactView() {
+    setViewMode('compact');
+    this.router.navigate(['/m']);
   }
 
   protected openTimerTask() {

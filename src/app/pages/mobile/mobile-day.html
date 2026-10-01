@@ -1,0 +1,131 @@
+<div class="screen">
+  <header class="bar">
+    <app-logo color="#4f46e5" [size]="22" />
+    <button type="button" class="nav" [attr.aria-label]="'Previous day' | t" (click)="shift(-1)">‹</button>
+    <button type="button" class="day" (click)="date.set(today())" [disabled]="isToday()">{{ title() }}</button>
+    <button type="button" class="nav" [attr.aria-label]="'Next day' | t" (click)="shift(1)">›</button>
+    <span class="spacer"></span>
+    <button type="button" class="nav" [attr.aria-label]="'Refresh' | t" (click)="refresh()" [class.spin]="loading()">↻</button>
+    <button type="button" class="avatar" [attr.aria-label]="'Menu' | t" (click)="menu.set(!menu())">☰</button>
+    @if (menu()) {
+      <div class="menu" role="menu">
+        <button type="button" role="menuitem" (click)="fullVersion()">{{ 'Full version' | t }}</button>
+        <button type="button" role="menuitem" (click)="openSettings()">{{ 'Settings' | t }}</button>
+        <button type="button" role="menuitem" (click)="auth.logout()">{{ 'Sign out' | t }}</button>
+      </div>
+    }
+  </header>
+
+  @if (timer.entry(); as e) {
+    <div class="timer" role="status">
+      <span class="rec" aria-hidden="true"></span>
+      <span class="what">{{ e.task_title || e.description || ('Untitled work' | t) }}</span>
+      <strong class="clock">{{ formatDuration(timer.elapsed()) }}</strong>
+      <button type="button" class="stop" (click)="timer.stop()">■ {{ 'Stop' | t }}</button>
+    </div>
+  }
+
+  <main class="list" (click)="menu.set(false)">
+    @for (task of todo(); track task.id) {
+      <div class="row" [class.open]="open() === task.id" [class.running]="timer.isRunningOn(task.id)" [style.--c]="color(task)">
+        <button type="button" class="check" [attr.aria-label]="'Mark done' | t" (click)="toggleDone(task)"></button>
+        <button type="button" class="body" (click)="open.set(open() === task.id ? null : task.id)">
+          <span class="title">{{ task.title }}</span>
+          <span class="meta">
+            @if (priority(task); as p) {
+              <span class="prio" [style.color]="p.color">● {{ p.name }}</span>
+            }
+            @if (carried(task)) {
+              <span class="carried">{{ 'carried over' | t }}</span>
+            }
+            {{ where(task) }}
+          </span>
+        </button>
+        @if (data.canTrack(task)) {
+          <button type="button" class="play" [class.on]="timer.isRunningOn(task.id)" (click)="timerOn(task)"
+            [attr.aria-label]="(timer.isRunningOn(task.id) ? 'Stop timer' : 'Start timer') | t">
+            {{ timer.isRunningOn(task.id) ? '■' : '▶' }}
+          </button>
+        }
+        @if (open() === task.id) {
+          <div class="details">
+            @if (task.description) {
+              <p class="notes">{{ task.description }}</p>
+            }
+            @if (task.due_date) {
+              <p class="muted small">{{ 'Due' | t }} {{ task.due_date }}</p>
+            }
+            <div class="actions">
+              <button type="button" class="chip-btn" (click)="moveTo(task, addDays(date(), 1))">{{ 'Tomorrow' | t }}</button>
+              <button type="button" class="chip-btn" (click)="moveTo(task, null)">{{ 'Backlog' | t }}</button>
+              <button type="button" class="chip-btn" (click)="openFull(task)">{{ 'Open' | t }} ↗</button>
+            </div>
+          </div>
+        }
+      </div>
+    } @empty {
+      @if (!loading()) {
+        <div class="empty">
+          <p>{{ 'Nothing planned.' | t }}</p>
+          <p class="muted small">{{ 'Snap a photo of your written list, or add tasks below.' | t }}</p>
+        </div>
+      }
+    }
+
+    @if (done().length) {
+      <button type="button" class="done-toggle" (click)="showDone.set(!showDone())">
+        {{ showDone() ? '▾' : '▸' }} {{ 'Done' | t }} ({{ done().length }})
+      </button>
+      @if (showDone()) {
+        @for (task of done(); track task.id) {
+          <div class="row done" [style.--c]="color(task)">
+            <button type="button" class="check on" [attr.aria-label]="'Mark not done' | t" (click)="toggleDone(task)">✓</button>
+            <span class="body"><span class="title">{{ task.title }}</span></span>
+          </div>
+        }
+      }
+    }
+  </main>
+
+  <nav class="dock">
+    <label class="dock-btn primary" [class.busy]="reading()">
+      @if (reading()) {
+        <span class="spinner" aria-hidden="true"></span> {{ 'Reading your list…' | t }}
+      } @else {
+        📷 {{ 'Photo of a list' | t }}
+      }
+      <input type="file" accept="image/*" (change)="onPhoto($event)" [disabled]="reading()" hidden />
+    </label>
+    <button type="button" class="dock-btn" (click)="sheet.set({ kind: 'add', text: '' })">＋ {{ 'Add' | t }}</button>
+  </nav>
+
+  @if (sheet(); as s) {
+    <div class="scrim" (click)="sheet.set(null)"></div>
+    <section class="sheet" role="dialog" aria-modal="true">
+      <header>
+        <strong>{{ (s.kind === 'photo' ? 'From your photo' : 'Add tasks') | t }}</strong>
+        <button type="button" class="nav" [attr.aria-label]="'Close' | t" (click)="sheet.set(null)">✕</button>
+      </header>
+      @if (s.kind === 'photo') {
+        <p class="small hint">{{ 'Check the list, fix anything misread, then add.' | t }}</p>
+      }
+      <textarea [ngModel]="s.text" (ngModelChange)="setText($event)" rows="7" [autofocus]="s.kind === 'add'"
+        [placeholder]="'One task per line' | t" [attr.aria-label]="'Tasks, one per line' | t"></textarea>
+      @if (data.multi()) {
+        <select [ngModel]="ws()" (ngModelChange)="targetWs.set(+$event)" [attr.aria-label]="'Workspace' | t">
+          @for (c of data.contexts(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      }
+      <ul class="drafts">
+        @for (d of drafts(); track $index) {
+          <li [class.done]="d.done">{{ d.title }} @if (d.date !== undefined) {<span class="muted small"> · {{ d.date ? formatShort(d.date) : ('Backlog' | t) }}</span>}</li>
+        }
+      </ul>
+      <button type="button" class="dock-btn primary wide" [disabled]="busy() || !drafts().length" (click)="addAll()">
+        {{ (drafts().length === 1 ? 'Add 1 task' : 'Add {n} tasks') | t: { n: drafts().length } }}
+      </button>
+    </section>
+  }
+</div>

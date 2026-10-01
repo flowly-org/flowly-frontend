@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard, guestGuard, staffGuard } from './core/auth.guard';
+import { prefersCompact } from './core/view-mode';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/join/join-page').then((m) => m.JoinPage),
   },
   {
+    path: 'm',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/mobile/mobile-day').then((m) => m.MobileDay),
+  },
+  {
     path: 'apps',
     loadComponent: () => import('./pages/apps/apps-page').then((m) => m.AppsPage),
   },
@@ -36,7 +42,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/shell/shell').then((m) => m.Shell),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'day' },
+      { path: '', pathMatch: 'full', redirectTo: () => (prefersCompact() ? '/m' : 'day') },
       {
         path: 'day',
         loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard),
