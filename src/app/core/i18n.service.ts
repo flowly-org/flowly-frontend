@@ -8,7 +8,7 @@ import localePt from '@angular/common/locales/pt';
 
 import { inject } from '@angular/core';
 
-import { DICTIONARIES } from '../i18n';
+import { DICTIONARIES, loadDictionaries } from '../i18n';
 import { AuthService } from './auth.service';
 
 export type Lang = 'en' | 'it' | 'es' | 'fr' | 'de' | 'pt';
@@ -52,20 +52,26 @@ export class I18nService {
       try {
         saved = localStorage.getItem(KEY);
       } catch {}
-      if (!saved && lang && LANGUAGES.some((l) => l.code === lang) && lang !== this.lang()) this.apply(lang as Lang);
+      if (!saved && lang && LANGUAGES.some((l) => l.code === lang) && lang !== this.lang()) void this.apply(lang as Lang);
     };
+  }
+
+  /** Called at startup: fetch the dictionaries unless the UI is in English. */
+  init(): Promise<void> {
+    return this.lang() === 'en' ? Promise.resolve() : loadDictionaries();
   }
 
   /** Change the language from the UI: remembered on this device and on the account. */
   set(lang: Lang) {
-    this.apply(lang);
+    void this.apply(lang);
     try {
       localStorage.setItem(KEY, lang);
     } catch {}
     if (this.auth.isLoggedIn()) this.auth.updateProfile({ language: lang }).catch(() => {});
   }
 
-  private apply(lang: Lang) {
+  private async apply(lang: Lang) {
+    if (lang !== 'en') await loadDictionaries();
     this.lang.set(lang);
     document.documentElement.lang = lang;
   }

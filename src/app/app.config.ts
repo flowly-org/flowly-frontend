@@ -20,8 +20,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAppInitializer(() => {
       inject(ThemeService).apply();
-      inject(I18nService); // registers language adoption before the first sign-in check
-      return inject(ConfigService).load();
+      // Also registers language adoption before the first sign-in check.
+      const i18n = inject(I18nService);
+      return Promise.all([inject(ConfigService).load(), i18n.init()]).then(() => undefined);
     }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes, withComponentInputBinding()),
