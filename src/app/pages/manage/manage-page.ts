@@ -24,7 +24,13 @@ export class ManagePage implements OnInit {
   private toast = inject(ToastService);
   protected auth = inject(AuthService);
 
-  protected tab = signal<'overview' | 'users' | 'settings'>('overview');
+  protected tab = signal<'overview' | 'users' | 'settings' | 'github'>('overview');
+  protected gh = signal<Record<string, any> | null>(null);
+  protected ghForm: Record<string, string> = {};
+  protected ghManual = signal(false);
+  protected ghConfirmRemove = signal(false);
+  protected ghAppName = 'Flowly';
+  protected ghOrg = '';
   protected overview = signal<Record<string, any> | null>(null);
   protected rows = signal<InstanceSettingRow[]>([]);
   protected users = signal<AdminUser[]>([]);
@@ -45,7 +51,65 @@ export class ManagePage implements OnInit {
   });
 
   async ngOnInit() {
-    await Promise.all([this.loadOverview(), this.loadSettings(), this.loadUsers()]);
+    await Promise.all([this.loadOverview(), this.loadSettings(), this.loadUsers(), this.loadGithub()]);
+  }
+
+  async loadGithub() {
+    try {
+      this.gh.set(await this.api.adminGithubApp());
+    } catch {}
+  }
+
+  async saveGithub() {
+    const data = Object.fromEntries(Object.entries(this.ghForm).filter(([, v]) => v && String(v).trim()));
+    try {
+      this.gh.set(await this.api.saveAdminGithubApp(data));
+      this.ghForm = {};
+      this.ghManual.set(false);
+      this.toast.show('GitHub App connected and verified.');
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async removeGithub() {
+    this.ghConfirmRemove.set(false);
+    try {
+      await this.api.deleteAdminGithubApp();
+      await this.loadGithub();
+      this.toast.show('GitHub App disconnected.');
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  /** Same manifest flow as on the Integrations page; GitHub sends us back here. */
+  async createGithubApp() {
+    try {
+      const { action, manifest } = await this.api.githubManifest(this.ghAppName, this.ghOrg);
+      try {
+        localStorage.setItem('flowly.githubReturn', '/manage');
+      } catch {}
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.action = action;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'manifest';
+      input.value = manifest;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected copy(text: string) {
+    navigator.clipboard?.writeText(text).then(
+      () => this.toast.show('Copied.'),
+      () => this.toast.show(text),
+    );
   }
 
   private async loadOverview() {

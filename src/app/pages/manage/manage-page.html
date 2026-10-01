@@ -10,6 +10,7 @@
     <button type="button" role="tab" [class.on]="tab() === 'overview'" (click)="tab.set('overview')">Overview</button>
     <button type="button" role="tab" [class.on]="tab() === 'users'" (click)="tab.set('users')">Users & plans</button>
     <button type="button" role="tab" [class.on]="tab() === 'settings'" (click)="tab.set('settings')">Settings</button>
+    <button type="button" role="tab" [class.on]="tab() === 'github'" (click)="tab.set('github')">GitHub App</button>
   </nav>
 
   @if (tab() === 'overview') {
@@ -78,6 +79,101 @@
         </table>
       </div>
     </section>
+  }
+
+  @if (tab() === 'github') {
+    @if (gh(); as g) {
+      <section class="panel">
+        <h2>
+          <span class="group-title">GitHub App <span class="source" [attr.data-source]="g['configured'] ? 'admin' : 'unset'">{{ g['configured'] ? 'connected' : 'not set up' }}</span></span>
+          @if (g['configured']) {
+            <span class="actions">
+              <button class="btn small ghost" type="button" (click)="check('github')">Test</button>
+              @if (ghConfirmRemove()) {
+                <button class="btn small danger" type="button" (click)="removeGithub()">Disconnect app</button>
+                <button class="btn small ghost" type="button" (click)="ghConfirmRemove.set(false)">Cancel</button>
+              } @else {
+                <button class="btn small ghost danger" type="button" (click)="ghConfirmRemove.set(true)">Disconnect…</button>
+              }
+            </span>
+          }
+        </h2>
+        @if (checks()['github']) {
+          <p class="check-line" [class.ok]="checkResult('github')?.ok" [class.fail]="checkResult('github') && !checkResult('github')?.ok">
+            {{ checks()['github'] === 'running' ? 'Checking…' : checkResult('github')?.message }}
+          </p>
+        }
+        @if (g['error']) {
+          <p class="check-line fail">{{ g['error'] }}</p>
+        }
+        @if (ghConfirmRemove()) {
+          <p class="check-line fail">Disconnecting stops every GitHub integration ({{ g['integrations'] }}) until an app is connected again. The app itself stays on GitHub.</p>
+        }
+
+        @if (g['app']; as a) {
+          <dl class="facts">
+            <dt>App</dt><dd><a [href]="a.html_url" target="_blank" rel="noopener">{{ a.name }}</a> <code>{{ a.slug }}</code></dd>
+            <dt>Owner</dt><dd>{{ a.owner || '—' }}</dd>
+            <dt>App ID</dt><dd>{{ a.app_id }}</dd>
+            <dt>Client ID</dt><dd><code>{{ a.client_id }}</code></dd>
+            <dt>Secrets</dt>
+            <dd class="muted small">
+              private key {{ a.has_private_key ? '✓' : '✗' }} · webhook secret {{ a.has_webhook_secret ? '✓' : '✗' }} · client secret {{ a.has_client_secret ? '✓' : '✗' }}
+            </dd>
+            <dt>Used by</dt><dd>{{ g['integrations'] }} GitHub integration{{ g['integrations'] === 1 ? '' : 's' }}</dd>
+          </dl>
+          <h3 class="sub">Installations</h3>
+          @for (i of g['installations']; track i.id) {
+            <div class="row">
+              <span class="grow"><strong>{{ i.account }}</strong> <span class="muted small">{{ i.type }} · {{ i.repositories === 'all' ? 'all repositories' : 'selected repositories' }}</span></span>
+              @if (i.url) {
+                <a class="btn small ghost" [href]="i.url" target="_blank" rel="noopener">Manage on GitHub</a>
+              }
+            </div>
+          } @empty {
+            <p class="empty">Not installed anywhere yet. Members install it from Integrations → GitHub.</p>
+          }
+        } @else {
+          <div class="callout-box">
+            <strong>Create a new app</strong>
+            <p class="muted small">GitHub opens with everything pre-filled (permissions, webhook, callbacks); you confirm and come back here.</p>
+            <div class="inline-form tight">
+              <input [(ngModel)]="ghAppName" placeholder="App name (unique on GitHub)" aria-label="App name" />
+              <input [(ngModel)]="ghOrg" placeholder="Organization (optional)" aria-label="Organization" />
+              <button class="btn primary" type="button" (click)="createGithubApp()">Create on GitHub</button>
+            </div>
+          </div>
+        }
+
+        <div class="row">
+          <span class="grow small muted">
+            {{ g['configured'] ? 'Replace the credentials, e.g. after rotating the private key or webhook secret.' : 'Or connect an app you already have.' }}
+          </span>
+          <button class="btn small" type="button" (click)="ghManual.set(!ghManual())">{{ ghManual() ? 'Cancel' : (g['configured'] ? 'Update credentials' : 'Connect existing app') }}</button>
+        </div>
+        @if (ghManual()) {
+          <form class="gh-form" (ngSubmit)="saveGithub()">
+            <label>App ID <input name="app_id" [(ngModel)]="ghForm['app_id']" [placeholder]="g['app']?.app_id ?? '123456'" /></label>
+            <label>App slug <input name="slug" [(ngModel)]="ghForm['slug']" [placeholder]="g['app']?.slug ?? 'flowly-acme'" /></label>
+            <label>Client ID <input name="client_id" [(ngModel)]="ghForm['client_id']" [placeholder]="g['app']?.client_id ?? 'Iv1.…'" /></label>
+            <label>Client secret <input name="client_secret" type="password" autocomplete="off" [(ngModel)]="ghForm['client_secret']" [placeholder]="g['app']?.has_client_secret ? 'Saved; type to replace' : ''" /></label>
+            <label>Webhook secret <input name="webhook_secret" type="password" autocomplete="off" [(ngModel)]="ghForm['webhook_secret']" [placeholder]="g['app']?.has_webhook_secret ? 'Saved; type to replace' : ''" /></label>
+            <label class="wide">Private key (.pem)
+              <textarea name="private_key" rows="5" autocomplete="off" [(ngModel)]="ghForm['private_key']" [placeholder]="g['app']?.has_private_key ? 'Saved; paste a new key to replace' : '-----BEGIN RSA PRIVATE KEY-----'"></textarea>
+            </label>
+            <div class="wide right"><button class="btn primary" type="submit">Verify & save</button></div>
+          </form>
+        }
+
+        <h3 class="sub">URLs for the GitHub App settings</h3>
+        <dl class="facts">
+          <dt>Webhook URL</dt><dd><code>{{ g['webhook_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['webhook_url'])">Copy</button></dd>
+          <dt>Setup URL</dt><dd><code>{{ g['setup_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['setup_url'])">Copy</button></dd>
+          <dt>Callback URL</dt><dd><code>{{ g['callback_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['callback_url'])">Copy</button></dd>
+          <dt>Permissions</dt><dd class="muted small">Issues: read &amp; write · Metadata: read · Events: Issues, Issue comment</dd>
+        </dl>
+      </section>
+    }
   }
 
   @if (tab() === 'settings') {

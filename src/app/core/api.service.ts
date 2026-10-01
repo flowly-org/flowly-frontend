@@ -321,6 +321,15 @@ export class ApiService {
   adminTelegramWebhook(enable: boolean) {
     return this.run(this.http.post<{ mode: string; webhook: string; pending: number }>(this.url('admin/telegram/webhook/'), { enable }));
   }
+  adminGithubApp() {
+    return this.run(this.http.get<Record<string, any>>(this.url('admin/github-app/')));
+  }
+  saveAdminGithubApp(data: Record<string, string>) {
+    return this.run(this.http.put<Record<string, any>>(this.url('admin/github-app/'), data));
+  }
+  deleteAdminGithubApp() {
+    return this.run(this.http.delete<void>(this.url('admin/github-app/')));
+  }
   adminUsers(q = '') {
     const params = q ? new HttpParams().set('q', q) : undefined;
     return this.run(this.http.get<AdminUser[]>(this.url('admin/users/'), { params }));
