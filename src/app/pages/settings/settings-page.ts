@@ -36,6 +36,7 @@ export class SettingsPage implements OnInit {
   protected chatDraft = '';
   protected confirmForget = signal(false);
   protected tokens = signal<ApiTokenRow[]>([]);
+  protected grants = signal<{ id: number; client: string; created_at: string; last_used_at: string | null }[]>([]);
   protected newToken = signal<ApiTokenRow | null>(null);
   protected tokenName = 'Claude';
   protected mcpUrl = signal('');
@@ -57,8 +58,15 @@ export class SettingsPage implements OnInit {
 
   private async loadTokens() {
     try {
-      this.tokens.set(await this.api.apiTokens());
+      const [tokens, grants] = await Promise.all([this.api.apiTokens(), this.api.oauthGrants()]);
+      this.tokens.set(tokens);
+      this.grants.set(grants);
     } catch {}
+  }
+
+  async disconnect(id: number) {
+    await this.api.revokeOauthGrant(id);
+    await this.loadTokens();
   }
 
   async createToken() {

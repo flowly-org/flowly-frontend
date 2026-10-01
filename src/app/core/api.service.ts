@@ -4,6 +4,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  WorkspaceMcp,
   ApiTokenRow,
   BillingSettings,
   Invoice,
@@ -389,6 +390,39 @@ export class ApiService {
   }
   invoiceCsv(wsId: number, id: number) {
     return this.run(this.http.get(this.ws(wsId, `invoices/${id}/csv/`), { responseType: 'text' }));
+  }
+
+  // OAuth for MCP clients
+  oauthAuthorizeInfo(params: Record<string, string>) {
+    return this.run(
+      this.http.get<{
+        client: { name: string; uri: string; logo_uri: string; redirect_host: string };
+        user: string;
+        workspace: { id: number; name: string } | null;
+      }>(
+        this.url('oauth/authorize/'),
+        { params: new HttpParams({ fromObject: params }) },
+      ),
+    );
+  }
+  oauthDecide(data: Record<string, string>) {
+    return this.run(this.http.post<{ redirect: string }>(this.url('oauth/authorize/'), data));
+  }
+  oauthGrants() {
+    return this.run(this.http.get<{ id: number; client: string; created_at: string; last_used_at: string | null }[]>(this.url('oauth/grants/')));
+  }
+  revokeOauthGrant(id: number) {
+    return this.run(this.http.delete<void>(this.url(`oauth/grants/${id}/`)));
+  }
+
+  workspaceMcp(wsId: number) {
+    return this.run(this.http.get<WorkspaceMcp>(this.ws(wsId, 'mcp-tokens/')));
+  }
+  createWorkspaceMcpToken(wsId: number, name: string) {
+    return this.run(this.http.post<WorkspaceMcp['tokens'][number]>(this.ws(wsId, 'mcp-tokens/'), { name }));
+  }
+  revokeWorkspaceMcpToken(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `mcp-tokens/${id}/`)));
   }
 
   // API tokens (MCP / API)

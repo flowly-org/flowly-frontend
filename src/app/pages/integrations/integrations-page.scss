@@ -338,3 +338,29 @@ code {
     grid-template-columns: 1fr;
   }
 }
+
+.mcp {
+  .intro {
+    margin: 0;
+    padding: 12px 16px 0;
+    font-size: 0.88rem;
+  }
+
+  .pad {
+    padding: 12px 16px 0;
+  }
+
+  .new-token {
+    margin: 0 16px 12px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--ok) 40%, var(--line));
+    background: color-mix(in srgb, var(--ok) 6%, transparent);
+    border-radius: 10px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .small {
+    font-size: 0.8rem;
+  }
+}

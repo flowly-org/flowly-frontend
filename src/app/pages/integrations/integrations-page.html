@@ -18,6 +18,44 @@
   @if (!store.canManage()) {
     <section class="panel"><p class="empty">Only workspace owners and admins can manage integrations.</p></section>
   } @else {
+    @if (mcp(); as m) {
+      <section class="panel mcp">
+        <h2>MCP server for this workspace</h2>
+        <p class="intro muted">
+          AI assistants and automation tools can work with {{ store.current()?.name }}'s tasks, discussions and time through this
+          endpoint. Everything is limited to this workspace. Members connect with OAuth (ChatGPT, Claude, Cursor…) using their own
+          permissions; automations (n8n, Zapier, internal agents) use a service token, which acts as a bot member of the workspace.
+        </p>
+        <div class="copy-row pad">
+          <input readonly [value]="m.url" (focus)="$any($event.target).select()" aria-label="Workspace MCP URL" />
+          <button class="btn small" type="button" (click)="copy(m.url, 'MCP URL copied')">Copy</button>
+        </div>
+        <form class="inline-form" (ngSubmit)="createMcpToken()">
+          <input name="mcpTokenName" [(ngModel)]="mcpTokenName" placeholder="Service token name, e.g. n8n" aria-label="Service token name" />
+          <button class="btn" type="submit">Create service token</button>
+        </form>
+        @if (mcpNew(); as t) {
+          <div class="new-token">
+            <strong>Copy the token now. It won't be shown again.</strong>
+            <div class="copy-row">
+              <input readonly [value]="t.token" (focus)="$any($event.target).select()" aria-label="Service token" />
+              <button class="btn small" type="button" (click)="copy(t.token!, 'Token copied')">Copy</button>
+            </div>
+            <span class="muted small">Send it as <code>Authorization: Bearer {{ t.hint }}…</code> to {{ m.url }}. Actions appear as “{{ t.bot }}”.</span>
+          </div>
+        }
+        @for (t of m.tokens; track t.id) {
+          <div class="row">
+            <span class="grow">
+              <strong>{{ t.name }}</strong> <code class="small">{{ t.hint }}…</code>
+              <span class="muted small"> · {{ t.bot }} · {{ t.last_used_at ? 'last used ' + (t.last_used_at | date: 'MMM d, HH:mm') : 'never used' }}</span>
+            </span>
+            <button class="btn ghost danger small" type="button" (click)="revokeMcpToken(t.id)">Revoke</button>
+          </div>
+        }
+      </section>
+    }
+
     <section class="kinds" aria-label="Add an integration">
       @for (k of kinds; track k.kind) {
         <button type="button" class="kind-card" [class.on]="form()?.kind === k.kind && !form()?.id" (click)="startNew(k.kind)">

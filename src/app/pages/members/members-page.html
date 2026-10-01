@@ -26,10 +26,15 @@
       <div class="row">
         <div class="grow">
           <strong>{{ m.user.full_name || m.user.email }}</strong>
+          @if (m.user.is_bot) {
+            <span class="chip" title="Service identity of a workspace MCP token (Integrations)">bot</span>
+          }
           @if (m.user.id === auth.user()?.id) {
             <span class="muted"> (you)</span>
           }
-          <div class="muted">{{ m.user.email }}</div>
+          @if (!m.user.is_bot) {
+            <div class="muted">{{ m.user.email }}</div>
+          }
         </div>
         @if (store.canManage() && m.role !== 'owner') {
           <select [ngModel]="m.role" (ngModelChange)="setRole(m, $event)" [attr.aria-label]="'Role of ' + m.user.email" style="width: auto">

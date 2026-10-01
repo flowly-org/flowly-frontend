@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
-import { Delivery, GitHubAppInfo, Integration, IntegrationKind, TASK_EVENTS } from '../../core/models';
+import { Delivery, GitHubAppInfo, Integration, IntegrationKind, TASK_EVENTS, WorkspaceMcp } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
@@ -66,6 +66,9 @@ export class IntegrationsPage implements OnInit {
   protected confirmDelete = signal(false);
   protected expanded = signal<number | null>(null);
   protected appName = 'Flowly';
+  protected mcp = signal<WorkspaceMcp | null>(null);
+  protected mcpNew = signal<WorkspaceMcp['tokens'][number] | null>(null);
+  protected mcpTokenName = 'Automation';
   protected appOrg = '';
 
   protected readonly current = computed(() => {
@@ -89,7 +92,7 @@ export class IntegrationsPage implements OnInit {
     const project = Number(qp.get('project'));
     if (project) this.projectFilter.set(project);
     if (!this.store.canManage()) return;
-    await Promise.all([this.load(), this.loadGithubApp()]);
+    await Promise.all([this.load(), this.loadGithubApp(), this.loadMcp()]);
     const open = Number(qp.get('open'));
     const item = this.items().find((i) => i.id === open);
     if (item) this.edit(item);
@@ -100,6 +103,31 @@ export class IntegrationsPage implements OnInit {
       this.items.set(await this.api.integrations(this.wsId));
     } catch (err) {
       this.toast.error(errorMessage(err, 'Could not load integrations.'));
+    }
+  }
+
+  private async loadMcp() {
+    try {
+      this.mcp.set(await this.api.workspaceMcp(this.wsId));
+    } catch {}
+  }
+
+  async createMcpToken() {
+    try {
+      this.mcpNew.set(await this.api.createWorkspaceMcpToken(this.wsId, this.mcpTokenName.trim() || 'Automation'));
+      await this.loadMcp();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async revokeMcpToken(id: number) {
+    try {
+      await this.api.revokeWorkspaceMcpToken(this.wsId, id);
+      if (this.mcpNew()?.id === id) this.mcpNew.set(null);
+      await this.loadMcp();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
     }
   }
 

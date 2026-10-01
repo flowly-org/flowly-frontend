@@ -9,6 +9,7 @@ export interface User {
   is_staff?: boolean;
   plan?: 'free' | 'pro';
   has_pro?: boolean;
+  is_bot?: boolean;
 }
 
 export interface AuthResponse {
@@ -432,4 +433,9 @@ export function formatDuration(seconds: number): string {
   const h = Math.floor(total / 60);
   const m = total % 60;
   return `${h}:${String(m).padStart(2, '0')}`;
+}
+
+export interface WorkspaceMcp {
+  url: string;
+  tokens: { id: number; name: string; hint: string; bot: string; created_at: string; last_used_at: string | null; token?: string }[];
 }

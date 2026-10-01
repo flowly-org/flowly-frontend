@@ -44,11 +44,40 @@
   </section>
 
   <section class="panel">
-    <h2>Claude & API tokens</h2>
+    <h2>Claude, ChatGPT & API</h2>
     <p class="intro muted">
-      Connect Claude to Flowly through MCP: it can read your day, add and update tasks, comment and track time, with your permissions.
-      Workspaces with an exclusive AI endpoint stay hidden. Tokens also work for the REST API.
+      Flowly is an MCP server, so AI assistants can read your day, add and update tasks, comment and track time, with your
+      permissions. Workspaces with an exclusive AI endpoint stay hidden.
     </p>
+    <div class="connect">
+      <div class="small muted">Server URL</div>
+      <div class="copy-line">
+        <code>{{ mcpUrl() }}</code>
+        <button class="btn small" type="button" (click)="copy(mcpUrl())">Copy</button>
+      </div>
+      <div class="how">
+        <div><strong>ChatGPT</strong>: Settings → Apps &amp; Connectors → Advanced → Developer mode on, then Create / Add custom connector, paste the URL and choose OAuth. Sign in to Flowly when asked.</div>
+        <div><strong>Claude (claude.ai, Desktop, mobile)</strong>: Settings → Connectors → Add custom connector, paste the URL, then Connect and allow access.</div>
+        <div><strong>Cursor, VS Code, Windsurf and other MCP clients</strong>: add a remote / HTTP server with the URL; they sign in with OAuth, or send a token below as <code>Authorization: Bearer …</code>.</div>
+        <div><strong>Claude Code / scripts</strong>: create a personal token below.</div>
+        <div class="muted">To give an assistant or an automation access to <em>one workspace only</em>, use that workspace's own MCP URL (Integrations → MCP server for this workspace).</div>
+      </div>
+    </div>
+
+    @if (grants().length) {
+      <h3 class="sub">Connected apps</h3>
+      @for (g of grants(); track g.id) {
+        <div class="row">
+          <span class="grow">
+            <strong>{{ g.client }}</strong>
+            <span class="muted small"> · connected {{ g.created_at | date: 'MMM d, y' }} · {{ g.last_used_at ? 'last used ' + (g.last_used_at | date: 'MMM d, HH:mm') : 'not used yet' }}</span>
+          </span>
+          <button class="btn ghost danger small" type="button" (click)="disconnect(g.id)">Disconnect</button>
+        </div>
+      }
+    }
+
+    <h3 class="sub">Personal tokens</h3>
     <form class="inline-form" (ngSubmit)="createToken()">
       <input name="tokenName" [(ngModel)]="tokenName" placeholder="Token name, e.g. Claude Code on laptop" aria-label="Token name" />
       <button class="btn primary" type="submit">Create token</button>

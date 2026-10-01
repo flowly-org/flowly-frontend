@@ -16,6 +16,10 @@ export const routes: Routes = [
     data: { mode: 'register' },
   },
   {
+    path: 'oauth/authorize',
+    loadComponent: () => import('./pages/oauth/oauth-consent').then((m) => m.OAuthConsent),
+  },
+  {
     path: 'join/:token',
     loadComponent: () => import('./pages/join/join-page').then((m) => m.JoinPage),
   },
