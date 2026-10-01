@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
+import { AuthService } from '../../core/auth.service';
 import { addDays, today } from '../../core/dates';
 import { I18nService } from '../../core/i18n.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
@@ -18,6 +19,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 })
 export class BillingPage implements OnInit {
   protected store = inject(WorkspaceStore);
+  protected auth = inject(AuthService);
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private router = inject(Router);
@@ -31,6 +33,8 @@ export class BillingPage implements OnInit {
   protected invoices = signal<Invoice[]>([]);
   protected newInvoice = { project: null as number | null, period_start: addDays(today(), -30), period_end: today(), group_by: 'task' };
   protected creating = signal(false);
+  protected clientOpen = signal<number | null>(null);
+  protected client: Partial<ProjectBillingRow> = {};
 
   private get wsId() {
     return this.store.currentId()!;
@@ -82,6 +86,28 @@ export class BillingPage implements OnInit {
       this.toast.error(errorMessage(err));
       await this.load();
     }
+  }
+
+  protected toggleClient(row: ProjectBillingRow) {
+    if (this.clientOpen() === row.project) {
+      this.clientOpen.set(null);
+      return;
+    }
+    const { client_details, client_vat, client_vat_country, client_tax_code, client_address, client_zip, client_city,
+      client_province, client_country, client_sdi_code, client_pec } = row;
+    this.client = { client_details, client_vat, client_vat_country, client_tax_code, client_address, client_zip, client_city,
+      client_province, client_country, client_sdi_code, client_pec };
+    this.clientOpen.set(row.project);
+  }
+
+  async saveClient(row: ProjectBillingRow) {
+    const data = { ...this.client };
+    if (data.client_sdi_code) data.client_sdi_code = data.client_sdi_code.toUpperCase();
+    if (data.client_province) data.client_province = data.client_province.toUpperCase();
+    if (data.client_country) data.client_country = data.client_country.toUpperCase();
+    await this.updateProject(row, data);
+    this.clientOpen.set(null);
+    this.toast.show(this.i18n.t('Client saved.'));
   }
 
   async createInvoice() {

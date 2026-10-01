@@ -444,6 +444,12 @@ export class ApiService {
   deleteInvoice(wsId: number, id: number) {
     return this.run(this.http.delete<void>(this.ws(wsId, `invoices/${id}/`)));
   }
+  einvoiceCheck(wsId: number, id: number) {
+    return this.run(this.http.get<{ ok: boolean; missing: string[]; filename: string }>(this.ws(wsId, `invoices/${id}/fatturapa/`), { params: { check: 1 } }));
+  }
+  einvoiceXml(wsId: number, id: number) {
+    return this.run(this.http.get(this.ws(wsId, `invoices/${id}/fatturapa/`), { responseType: 'blob' }));
+  }
   invoiceCsv(wsId: number, id: number) {
     return this.run(this.http.get(this.ws(wsId, `invoices/${id}/csv/`), { responseType: 'text' }));
   }

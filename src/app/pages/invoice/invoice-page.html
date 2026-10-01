@@ -17,8 +17,24 @@
         <button class="btn small primary" type="button" (click)="save({ status: 'paid' })">{{ 'Mark as paid' | t }}</button>
       }
       <button class="btn small" type="button" (click)="downloadCsv()">CSV</button>
+      <button class="btn small" type="button" (click)="downloadXml()" [disabled]="xmlBusy()" [title]="'Italian e-invoice (FatturaPA) to upload to the SDI or your intermediary' | t">{{ 'E-invoice XML' | t }}</button>
       <button class="btn small" type="button" (click)="print()">{{ 'Print / PDF' | t }}</button>
     </div>
+
+    @if (missing().length) {
+      <section class="panel no-print warn-panel" role="alert">
+        <h2>{{ 'The e-invoice needs a few more details' | t }}</h2>
+        <ul>
+          @for (m of missing(); track m) {
+            <li>{{ m | t }}</li>
+          }
+        </ul>
+        <p class="small muted">
+          {{ 'Your details are in Billing settings; the client’s are under the project, in the Projects table (…).' | t }}
+          <a routerLink="../..">{{ 'Open billing' | t }}</a>
+        </p>
+      </section>
+    }
 
     @if (inv.status === 'draft') {
       <section class="panel no-print">

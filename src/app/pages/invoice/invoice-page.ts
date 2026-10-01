@@ -29,6 +29,8 @@ export class InvoicePage implements OnInit {
   protected invoice = signal<Invoice | null>(null);
   protected confirmDelete = signal(false);
   protected edit: Partial<Invoice> = {};
+  protected missing = signal<string[]>([]);
+  protected xmlBusy = signal(false);
 
   private get wsId() {
     return this.store.currentId()!;
@@ -76,6 +78,28 @@ export class InvoicePage implements OnInit {
     a.download = `${inv.number}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async downloadXml() {
+    const inv = this.invoice();
+    if (!inv) return;
+    this.xmlBusy.set(true);
+    try {
+      const check = await this.api.einvoiceCheck(this.wsId, inv.id);
+      this.missing.set(check.missing);
+      if (!check.ok) return;
+      const blob = await this.api.einvoiceXml(this.wsId, inv.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = check.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      this.toast.error(errorMessage(err, this.i18n.t('Could not create the e-invoice.')));
+    } finally {
+      this.xmlBusy.set(false);
+    }
   }
 
   protected print() {

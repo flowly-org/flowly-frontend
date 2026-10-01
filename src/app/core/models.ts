@@ -377,6 +377,19 @@ export interface BillingSettings {
   issuer_name: string;
   issuer_details: string;
   invoice_notes: string;
+  // Italian e-invoicing (FatturaPA)
+  issuer_vat: string;
+  issuer_vat_country: string;
+  issuer_tax_code: string;
+  issuer_regime: string;
+  issuer_address: string;
+  issuer_zip: string;
+  issuer_city: string;
+  issuer_province: string;
+  issuer_country: string;
+  issuer_iban: string;
+  vat_nature: string;
+  stamp_duty: boolean;
 }
 
 export interface ProjectBillingRow {
@@ -388,6 +401,16 @@ export interface ProjectBillingRow {
   hourly_rate: string | null;
   client_name: string;
   client_details: string;
+  client_vat: string;
+  client_vat_country: string;
+  client_tax_code: string;
+  client_address: string;
+  client_zip: string;
+  client_city: string;
+  client_province: string;
+  client_country: string;
+  client_sdi_code: string;
+  client_pec: string;
   budget_hours: string | null;
   effective_rate: string | null;
   unbilled_hours: number;

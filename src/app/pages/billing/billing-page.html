@@ -40,6 +40,38 @@
         <label class="wide">{{ 'Your business name' | t }} <input name="issuer" [(ngModel)]="form.issuer_name" /></label>
         <label class="wide">{{ 'Your details on invoices' | t }} <textarea name="issuer_details" rows="3" [(ngModel)]="form.issuer_details" [placeholder]="'Address, VAT number, IBAN…' | t"></textarea></label>
         <label class="wide">{{ 'Default invoice notes' | t }} <textarea name="notes" rows="2" [(ngModel)]="form.invoice_notes"></textarea></label>
+        <details class="wide einvoice" [open]="!!form.issuer_vat">
+          <summary>{{ 'Italian e-invoicing (FatturaPA)' | t }} <span class="muted small">— {{ 'needed to download invoices as XML for the SDI' | t }}</span></summary>
+          <div class="grid inner">
+            <label>{{ 'Partita IVA' | t }} <input name="issuer_vat" [(ngModel)]="form.issuer_vat" maxlength="28" placeholder="01234567890" /></label>
+            <label>{{ 'Codice fiscale' | t }} <input name="issuer_tax_code" [(ngModel)]="form.issuer_tax_code" maxlength="16" /></label>
+            <label>
+              {{ 'Tax regime' | t }}
+              <select name="issuer_regime" [(ngModel)]="form.issuer_regime">
+                <option value="RF01">RF01 · {{ 'Ordinary' | t }}</option>
+                <option value="RF19">RF19 · {{ 'Flat-rate (forfettario)' | t }}</option>
+                <option value="RF02">RF02 · {{ 'Minimum taxpayers' | t }}</option>
+                <option value="RF18">RF18 · {{ 'Other' | t }}</option>
+              </select>
+            </label>
+            <label>{{ 'IBAN' | t }} <input name="issuer_iban" [(ngModel)]="form.issuer_iban" maxlength="34" /></label>
+            <label class="wide">{{ 'Address' | t }} <input name="issuer_address" [(ngModel)]="form.issuer_address" maxlength="60" [placeholder]="'Street and number' | t" /></label>
+            <label>{{ 'CAP' | t }} <input name="issuer_zip" [(ngModel)]="form.issuer_zip" maxlength="5" inputmode="numeric" /></label>
+            <label>{{ 'City' | t }} <input name="issuer_city" [(ngModel)]="form.issuer_city" maxlength="60" /></label>
+            <label>{{ 'Province' | t }} <input name="issuer_province" [(ngModel)]="form.issuer_province" maxlength="2" placeholder="BO" /></label>
+            <label>
+              {{ 'VAT-free nature' | t }}
+              <select name="vat_nature" [(ngModel)]="form.vat_nature" [title]="'Used when the tax rate is 0%' | t">
+                <option value="N2.2">N2.2 · {{ 'not subject (e.g. forfettario)' | t }}</option>
+                <option value="N2.1">N2.1 · {{ 'not subject (art. 7)' | t }}</option>
+                <option value="N4">N4 · {{ 'exempt' | t }}</option>
+                <option value="N3.2">N3.2 · {{ 'not taxable (EU)' | t }}</option>
+                <option value="N1">N1 · {{ 'excluded (art. 15)' | t }}</option>
+              </select>
+            </label>
+            <label class="check-line wide"><input type="checkbox" name="stamp_duty" [(ngModel)]="form.stamp_duty" /> {{ 'Add the €2 virtual stamp duty to VAT-free invoices over €77.47' | t }}</label>
+          </div>
+        </details>
         <div class="wide actions"><button class="btn primary" type="submit">{{ 'Save settings' | t }}</button></div>
       </form>
     </section>
@@ -70,13 +102,34 @@
                     <span class="muted">{{ p.effective_rate ?? '—' }}</span>
                   }
                 </td>
-                <td>
+                <td class="client-cell">
                   <input class="client" [value]="p.client_name" [placeholder]="'Client name' | t" (change)="updateProject(p, { client_name: $any($event.target).value })"
                     [attr.aria-label]="'Client for {name}' | t: { name: p.name }" />
+                  <button type="button" class="btn ghost small" (click)="toggleClient(p)" [attr.aria-expanded]="clientOpen() === p.project"
+                    [title]="'Client details for invoices and e-invoices' | t">{{ clientOpen() === p.project ? '▾' : '…' }}</button>
                 </td>
                 <td class="num">{{ p.tracked_hours }} h</td>
                 <td class="num">{{ p.mode === 'off' ? '—' : p.unbilled_hours + ' h' }}</td>
               </tr>
+              @if (clientOpen() === p.project) {
+                <tr class="client-row">
+                  <td colspan="6">
+                    <form class="grid client-form" (ngSubmit)="saveClient(p)">
+                      <label class="wide">{{ 'Client details on invoices' | t }} <textarea name="client_details" rows="2" [(ngModel)]="client.client_details"></textarea></label>
+                      <label>{{ 'Partita IVA' | t }} <input name="client_vat" [(ngModel)]="client.client_vat" maxlength="28" /></label>
+                      <label>{{ 'Codice fiscale' | t }} <input name="client_tax_code" [(ngModel)]="client.client_tax_code" maxlength="16" /></label>
+                      <label>{{ 'Codice destinatario (SDI)' | t }} <input name="client_sdi_code" [(ngModel)]="client.client_sdi_code" maxlength="7" placeholder="0000000" /></label>
+                      <label>{{ 'PEC' | t }} <input name="client_pec" type="email" [(ngModel)]="client.client_pec" /></label>
+                      <label class="wide">{{ 'Address' | t }} <input name="client_address" [(ngModel)]="client.client_address" maxlength="60" /></label>
+                      <label>{{ 'CAP' | t }} <input name="client_zip" [(ngModel)]="client.client_zip" maxlength="5" /></label>
+                      <label>{{ 'City' | t }} <input name="client_city" [(ngModel)]="client.client_city" maxlength="60" /></label>
+                      <label>{{ 'Province' | t }} <input name="client_province" [(ngModel)]="client.client_province" maxlength="2" /></label>
+                      <label>{{ 'Country' | t }} <input name="client_country" [(ngModel)]="client.client_country" maxlength="2" placeholder="IT" /></label>
+                      <div class="wide actions"><button class="btn primary small" type="submit">{{ 'Save client' | t }}</button></div>
+                    </form>
+                  </td>
+                </tr>
+              }
             } @empty {
               <tr><td colspan="6" class="muted">{{ 'No projects yet.' | t }}</td></tr>
             }
@@ -87,7 +140,9 @@
 
     <section class="panel">
       <h2>{{ 'Invoices' | t }}</h2>
-      @if (s.enabled) {
+      @if (s.enabled && !auth.user()?.has_pro) {
+        <p class="empty">{{ 'Creating invoices (PDF, CSV and Italian e-invoice XML) is part of Flowly Pro. Time tracking and reports stay free.' | t }}</p>
+      } @else if (s.enabled) {
         <form class="inline-form" (ngSubmit)="createInvoice()">
           <select name="project" [(ngModel)]="newInvoice.project" [attr.aria-label]="'Project to invoice' | t">
             <option [ngValue]="null">{{ 'All projects' | t }}</option>

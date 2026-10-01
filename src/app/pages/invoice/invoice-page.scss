@@ -156,3 +156,13 @@
     display: none;
   }
 }
+
+.warn-panel {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+  background: color-mix(in srgb, var(--warn) 7%, var(--surface));
+
+  ul {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+}
