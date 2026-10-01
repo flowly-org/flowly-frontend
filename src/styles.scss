@@ -16,20 +16,29 @@
   color-scheme: light;
 }
 
+@mixin dark-theme {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1e222b;
+  --line: #2a2f3a;
+  --ink: #e8eaf0;
+  --muted: #9aa3b2;
+  --accent: #818cf8;
+  --accent-ink: #0f1115;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+// Theme: data-theme="light" | "dark" on <html> forces it; no attribute (auto) follows the OS.
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1115;
-    --surface: #171a21;
-    --surface-2: #1e222b;
-    --line: #2a2f3a;
-    --ink: #e8eaf0;
-    --muted: #9aa3b2;
-    --accent: #818cf8;
-    --accent-ink: #0f1115;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.5);
-    color-scheme: dark;
+  :root:not([data-theme='light']) {
+    @include dark-theme;
   }
+}
+
+:root[data-theme='dark'] {
+  @include dark-theme;
 }
 
 * {

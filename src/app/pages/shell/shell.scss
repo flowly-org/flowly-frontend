@@ -100,7 +100,7 @@
   position: absolute;
   right: 0;
   top: calc(100% + 6px);
-  min-width: 220px;
+  min-width: 250px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -124,5 +124,43 @@
   .nav {
     order: 5;
     flex-basis: 100%;
+  }
+}
+
+.menu-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 0 8px 6px;
+}
+
+.theme-switch {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  margin: 0 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+
+  button {
+    font: inherit;
+    font-size: 0.82rem;
+    border: 0;
+    border-radius: 6px;
+    padding: 5px 4px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+
+    &.on {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
   }
 }

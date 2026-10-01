@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
@@ -16,6 +17,12 @@ import { WorkspaceStore } from '../../core/workspace.store';
 export class Shell {
   protected store = inject(WorkspaceStore);
   protected auth = inject(AuthService);
+  protected theme = inject(ThemeService);
+  protected readonly themes: { value: Theme; label: string; icon: string }[] = [
+    { value: 'light', label: 'Light', icon: '☀' },
+    { value: 'dark', label: 'Dark', icon: '☾' },
+    { value: 'auto', label: 'Auto', icon: '◐' },
+  ];
   private api = inject(ApiService);
   private router = inject(Router);
   private toast = inject(ToastService);

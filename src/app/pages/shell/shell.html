@@ -39,6 +39,19 @@
     @if (menuOpen()) {
       <div class="menu" role="menu">
         <div class="menu-email muted">{{ auth.user()?.email }}</div>
+        <div class="menu-label">Theme</div>
+        <div class="theme-switch" role="group" aria-label="Theme">
+          @for (opt of themes; track opt.value) {
+            <button
+              type="button"
+              [class.on]="theme.theme() === opt.value"
+              [attr.aria-pressed]="theme.theme() === opt.value"
+              (click)="theme.set(opt.value)"
+            >
+              <span aria-hidden="true">{{ opt.icon }}</span> {{ opt.label }}
+            </button>
+          }
+        </div>
         <button class="btn ghost block" type="button" role="menuitem" (click)="auth.logout()">Sign out</button>
       </div>
     }
