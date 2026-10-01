@@ -1,0 +1,50 @@
+<main class="auth">
+  <section class="card">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i></span>
+      Multikanban
+    </div>
+    <h1>{{ isRegister() ? 'Create your account' : 'Welcome back' }}</h1>
+    <p class="muted">
+      {{ isRegister() ? 'Plan each day across all your projects.' : 'Sign in to see your day.' }}
+    </p>
+
+    <form (ngSubmit)="submit()" #f="ngForm">
+      @if (isRegister()) {
+        <label>
+          Name
+          <input name="fullName" [(ngModel)]="fullName" autocomplete="name" />
+        </label>
+      }
+      <label>
+        Email
+        <input name="email" type="email" [(ngModel)]="email" required autocomplete="email" />
+      </label>
+      <label>
+        Password
+        <input
+          name="password"
+          type="password"
+          [(ngModel)]="password"
+          required
+          [attr.minlength]="isRegister() ? 8 : null"
+          [autocomplete]="isRegister() ? 'new-password' : 'current-password'"
+        />
+      </label>
+      @if (error()) {
+        <p class="form-error" role="alert">{{ error() }}</p>
+      }
+      <button class="btn primary block" type="submit" [disabled]="busy() || f.invalid">
+        {{ busy() ? 'Please wait…' : isRegister() ? 'Create account' : 'Sign in' }}
+      </button>
+    </form>
+
+    <p class="switch">
+      @if (isRegister()) {
+        Already have an account? <a routerLink="/login">Sign in</a>
+      } @else {
+        New here? <a routerLink="/register">Create an account</a>
+      }
+    </p>
+  </section>
+</main>

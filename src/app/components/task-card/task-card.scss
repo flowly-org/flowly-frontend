@@ -1,0 +1,111 @@
+:host {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 10px;
+  box-shadow: var(--shadow);
+  cursor: grab;
+}
+
+:host(.done) .title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+
+  &:hover {
+    border-color: var(--ok);
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+  }
+}
+
+:host(.done) .check {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+.title {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.prio {
+  color: var(--warn);
+  font-weight: 700;
+  margin-right: 2px;
+
+  &.high {
+    color: var(--danger);
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 6px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.project {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--muted);
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+.badge {
+  font-size: 0.72rem;
+  color: var(--muted);
+
+  &.late {
+    color: var(--danger);
+  }
+
+  &.today {
+    color: var(--warn);
+  }
+}
+
+.assignee {
+  margin-left: auto;
+}

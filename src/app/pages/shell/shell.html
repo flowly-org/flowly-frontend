@@ -1,0 +1,54 @@
+<header class="topbar">
+  <a class="brand" routerLink="/" aria-label="Multikanban home">
+    <span class="logo" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="brand-name">Multikanban</span>
+  </a>
+
+  @if (creating()) {
+    <form class="ws-create" (ngSubmit)="createWorkspace()">
+      <input name="ws" [(ngModel)]="newName" placeholder="Workspace name" aria-label="New workspace name" autofocus />
+      <button class="btn primary small" type="submit">Create</button>
+      <button class="btn ghost small" type="button" (click)="creating.set(false)">Cancel</button>
+    </form>
+  } @else {
+    <select
+      class="ws-select"
+      aria-label="Workspace"
+      [value]="wsId()"
+      (change)="switchTo($any($event.target).value)"
+    >
+      @for (ws of store.workspaces(); track ws.id) {
+        <option [value]="ws.id" [selected]="ws.id === +wsId()">{{ ws.name }}</option>
+      }
+      <option value="new">+ New workspace…</option>
+    </select>
+  }
+
+  <nav class="nav">
+    <a routerLink="day" routerLinkActive="active">My day</a>
+    <a routerLink="projects" routerLinkActive="active">Projects</a>
+    <a routerLink="tags" routerLinkActive="active">Tags</a>
+    <a routerLink="members" routerLinkActive="active">Members</a>
+  </nav>
+
+  <div class="user">
+    <button class="btn ghost icon" type="button" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()">
+      <span class="avatar">{{ initials(auth.user()?.full_name || auth.user()?.email || '?') }}</span>
+      <span class="user-name">{{ auth.user()?.full_name || auth.user()?.email }}</span>
+    </button>
+    @if (menuOpen()) {
+      <div class="menu" role="menu">
+        <div class="menu-email muted">{{ auth.user()?.email }}</div>
+        <button class="btn ghost block" type="button" role="menuitem" (click)="auth.logout()">Sign out</button>
+      </div>
+    }
+  </div>
+</header>
+
+<main class="main">
+  @if (ready()) {
+    <router-outlet />
+  } @else {
+    <p class="center-note">Loading…</p>
+  }
+</main>

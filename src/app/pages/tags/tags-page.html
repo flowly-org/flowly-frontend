@@ -1,0 +1,88 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Tags</h1>
+      <p class="muted">
+        A <strong>tag group</strong> is a dimension you want to plan by, like <em>Context</em> (&#64;office, &#64;home,
+        &#64;errands) or <em>Energy</em> (deep, light). Each group can be used as swimlanes on
+        <a routerLink="../day">My day</a>, and a task gets at most one tag per group. Free tags are plain labels.
+      </p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <form class="inline-form" (ngSubmit)="createGroup()">
+      <input name="group" [(ngModel)]="newGroupName" placeholder="New tag group, e.g. Context" aria-label="New tag group name" />
+      <button class="btn primary" type="submit" [disabled]="!newGroupName.trim()">Add group</button>
+    </form>
+  </section>
+
+  @for (group of store.tagGroups(); track group.id) {
+    <section class="panel">
+      <h2>
+        @if (editing() === 'g' + group.id) {
+          <form (ngSubmit)="saveGroupName(group)" class="grow-form">
+            <input name="gname" [(ngModel)]="editName" (blur)="saveGroupName(group)" (keydown.escape)="editing.set(null)" autofocus />
+          </form>
+        } @else {
+          <button class="btn ghost name-btn" type="button" title="Rename" (click)="startEdit('g' + group.id, group.name)">
+            {{ group.name }}
+          </button>
+        }
+        <span>
+          @if (confirming() === 'g' + group.id) {
+            <button class="btn danger small" type="button" (click)="deleteGroup(group)">Delete group and its tags</button>
+            <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+          } @else {
+            <button class="btn ghost danger small" type="button" (click)="confirming.set('g' + group.id)">Delete</button>
+          }
+        </span>
+      </h2>
+      @for (tag of group.tags; track tag.id) {
+        <ng-container *ngTemplateOutlet="tagRow; context: { $implicit: tag }" />
+      } @empty {
+        <p class="empty">No tags in this group yet.</p>
+      }
+      <form class="inline-form" (ngSubmit)="createTag(group)">
+        <input [name]="'t' + group.id" [(ngModel)]="drafts[group.id]" [placeholder]="'Add a ' + group.name.toLowerCase() + ' tag'" />
+        <button class="btn" type="submit">Add</button>
+      </form>
+    </section>
+  }
+
+  <section class="panel">
+    <h2>Free tags</h2>
+    @for (tag of store.freeTags(); track tag.id) {
+      <ng-container *ngTemplateOutlet="tagRow; context: { $implicit: tag }" />
+    } @empty {
+      <p class="empty">No free tags yet.</p>
+    }
+    <form class="inline-form" (ngSubmit)="createTag(null)">
+      <input name="free" [(ngModel)]="drafts['free']" placeholder="Add a tag, e.g. urgent" />
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </section>
+</div>
+
+<ng-template #tagRow let-tag>
+  <div class="row">
+    <input type="color" [value]="tag.color" (change)="setTagColor(tag, $any($event.target).value)" [attr.aria-label]="'Color of ' + tag.name" />
+    <div class="grow">
+      @if (editing() === 't' + tag.id) {
+        <form (ngSubmit)="saveTagName(tag)">
+          <input name="tname" [(ngModel)]="editName" (blur)="saveTagName(tag)" (keydown.escape)="editing.set(null)" autofocus />
+        </form>
+      } @else {
+        <button class="btn ghost name-btn" type="button" title="Rename" (click)="startEdit('t' + tag.id, tag.name)">
+          <span class="chip" [style.--chip]="tag.color">{{ tag.name }}</span>
+        </button>
+      }
+    </div>
+    @if (confirming() === 't' + tag.id) {
+      <button class="btn danger small" type="button" (click)="deleteTag(tag)">Confirm delete</button>
+      <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+    } @else {
+      <button class="btn ghost danger small" type="button" (click)="confirming.set('t' + tag.id)">Delete</button>
+    }
+  </div>
+</ng-template>

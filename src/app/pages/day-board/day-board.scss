@@ -1,0 +1,379 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.day-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+.btn-group {
+  display: flex;
+
+  .btn {
+    border-radius: 0;
+    margin-left: -1px;
+  }
+
+  .btn:first-child {
+    border-radius: 8px 0 0 8px;
+  }
+
+  .btn:last-child {
+    border-radius: 0 8px 8px 0;
+  }
+}
+
+.date-input {
+  width: 36px;
+  padding: 6px 4px;
+  color: transparent;
+  cursor: pointer;
+
+  &::-webkit-datetime-edit {
+    display: none;
+  }
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+
+  .bar {
+    width: 96px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      background: var(--ok);
+      transition: width 0.3s ease;
+    }
+  }
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-left: auto;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+
+  select {
+    width: auto;
+    padding: 6px 8px;
+    color: var(--ink);
+  }
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--surface-2);
+
+  button {
+    font: inherit;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &.on {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+  }
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn.active {
+  background: var(--surface-2);
+}
+
+.count {
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 0 6px;
+}
+
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+
+.board-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  transition: opacity 0.15s;
+
+  &.loading {
+    opacity: 0.6;
+  }
+}
+
+.board {
+  min-width: 760px;
+  padding: 0 16px 32px;
+}
+
+.col-heads,
+.cells {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.col-heads {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  padding: 12px 0 8px;
+}
+
+.col-head {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  &[data-status='in_progress']::before {
+    background: var(--warn);
+  }
+
+  &[data-status='done']::before {
+    background: var(--ok);
+  }
+}
+
+.lane {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.lane-head {
+  position: sticky;
+  left: 16px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.lane-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  padding: 4px 6px 4px 0;
+  cursor: pointer;
+}
+
+.chevron {
+  color: var(--muted);
+  font-size: 0.8rem;
+  transition: transform 0.15s;
+}
+
+.lane.collapsed .chevron {
+  transform: rotate(-90deg);
+}
+
+.lane-count {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  transition: background 0.15s;
+
+  &.cdk-drop-list-receiving,
+  &.cdk-drop-list-dragging {
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+    outline: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+}
+
+.add-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 2px 4px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+.quick-add input {
+  padding: 7px 9px;
+}
+
+.drop-placeholder {
+  min-height: 40px;
+  border-radius: 9px;
+  border: 2px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.backlog {
+  width: 300px;
+  flex: none;
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 0 16px;
+
+    h2 {
+      font-size: 0.95rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    margin: 4px 16px 10px;
+  }
+
+  .inline,
+  .search {
+    margin: 0 16px 8px;
+    width: auto;
+  }
+}
+
+.backlog-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 16px 24px;
+  min-height: 80px;
+}
+
+.empty {
+  font-size: 0.85rem;
+}
+
+// CDK drag visuals (preview is appended to <body>, so these are effectively global via ::ng-deep).
+:host ::ng-deep .cdk-drag-preview {
+  box-shadow: var(--shadow-lg);
+  transform-origin: center;
+  rotate: 1.5deg;
+}
+
+:host ::ng-deep .cdk-drag-animating,
+.cell.cdk-drop-list-dragging app-task-card:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (max-width: 900px) {
+  .backlog {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    width: min(320px, 85vw);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+@media (max-width: 720px) {
+  .controls {
+    margin-left: 0;
+  }
+
+  .day-nav h1 {
+    font-size: 1rem;
+  }
+}

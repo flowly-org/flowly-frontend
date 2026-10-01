@@ -1,0 +1,176 @@
+<div class="toolbar">
+  <div class="day-nav">
+    <div class="btn-group">
+      <button class="btn icon" type="button" aria-label="Previous day" (click)="shiftDay(-1)">‹</button>
+      <button class="btn" type="button" [disabled]="isToday()" (click)="goToday()">Today</button>
+      <button class="btn icon" type="button" aria-label="Next day" (click)="shiftDay(1)">›</button>
+    </div>
+    <h1>{{ dateLabel() }}</h1>
+    <label class="sr-only" for="board-date">Pick a date</label>
+    <input id="board-date" class="date-input" type="date" [value]="date()" (change)="setDate($any($event.target).value)" />
+  </div>
+
+  <div class="progress" [attr.aria-label]="progress().done + ' of ' + progress().total + ' tasks done'">
+    <div class="bar"><span [style.width.%]="progress().pct"></span></div>
+    <span class="muted">{{ progress().done }}/{{ progress().total }} done</span>
+  </div>
+
+  <div class="controls">
+    <label class="field">
+      <span>Swimlanes</span>
+      <select [ngModel]="groupBy()" (ngModelChange)="groupBy.set($event)">
+        @for (opt of groupOptions(); track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="segmented" role="group" aria-label="Whose tasks">
+      <button type="button" [class.on]="scope() === 'me'" [attr.aria-pressed]="scope() === 'me'" (click)="scope.set('me')">Mine</button>
+      <button type="button" [class.on]="scope() === 'all'" [attr.aria-pressed]="scope() === 'all'" (click)="scope.set('all')">Everyone</button>
+    </div>
+
+    <label class="toggle" title="Show unfinished tasks planned for earlier days">
+      <input type="checkbox" [ngModel]="includeOverdue()" (ngModelChange)="includeOverdue.set($event)" />
+      Carry over
+    </label>
+    <label class="toggle">
+      <input type="checkbox" [ngModel]="hideEmpty()" (ngModelChange)="hideEmpty.set($event)" />
+      Hide empty lanes
+    </label>
+
+    <button class="btn" type="button" [class.active]="showBacklog()" (click)="showBacklog.set(!showBacklog())">
+      Backlog <span class="count">{{ backlog().length }}</span>
+    </button>
+    <button class="btn primary" type="button" (click)="openNew()">+ New task</button>
+  </div>
+</div>
+
+<div class="layout" cdkDropListGroup>
+  <div class="board-scroll" cdkScrollable [class.loading]="loading()">
+    <div class="board">
+      <div class="col-heads">
+        @for (s of statuses; track s.key) {
+          <div class="col-head" [attr.data-status]="s.key">{{ s.label }}</div>
+        }
+      </div>
+
+      @for (lane of visibleLanes(); track lane.key) {
+        <section class="lane" [class.collapsed]="collapsed().has(lane.key)">
+          <header class="lane-head">
+            <button type="button" class="lane-toggle" (click)="toggleLane(lane.key)" [attr.aria-expanded]="!collapsed().has(lane.key)">
+              <span class="chevron" aria-hidden="true">▾</span>
+              @if (lane.color) {
+                <span class="dot" [style.background]="lane.color"></span>
+              }
+              <span class="lane-name">{{ lane.label }}</span>
+              <span class="lane-count">{{ laneDone(lane.key) }}/{{ laneCount(lane.key) }}</span>
+            </button>
+          </header>
+
+          @if (!collapsed().has(lane.key)) {
+            <div class="cells">
+              @for (s of statuses; track s.key) {
+                <div
+                  class="cell"
+                  cdkDropList
+                  [cdkDropListData]="cellTarget(lane, s.key)"
+                  (cdkDropListDropped)="drop($event)"
+                >
+                  @for (task of cells().get(lane.key)![s.key]; track task.id) {
+                    <app-task-card
+                      cdkDrag
+                      [cdkDragData]="task"
+                      [cdkDragStartDelay]="{ touch: 250, mouse: 0 }"
+                      [task]="task"
+                      [day]="date()"
+                      [showProject]="groupBy() !== 'project'"
+                      [showAssignee]="scope() === 'all' && groupBy() !== 'assignee'"
+                      [hideTagGroup]="hiddenTagGroup()"
+                      (open)="openTask($event)"
+                      (toggleDone)="toggleDone($event)"
+                    >
+                      <div class="drop-placeholder" *cdkDragPlaceholder></div>
+                    </app-task-card>
+                  }
+                  @if (s.key === 'todo') {
+                    @if (quickAddLane() === lane.key) {
+                      <form class="quick-add" (ngSubmit)="quickAdd(lane)">
+                        <input
+                          name="quick"
+                          [(ngModel)]="quickAddTitle"
+                          placeholder="Task title, Enter to add"
+                          aria-label="New task title"
+                          autofocus
+                          (keydown.escape)="quickAddLane.set(null)"
+                          (blur)="quickAdd(lane)"
+                        />
+                      </form>
+                    } @else {
+                      <button type="button" class="add-btn" (click)="startQuickAdd(lane)">+ Add</button>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </section>
+      } @empty {
+        <p class="center-note">
+          No swimlanes here yet. Add tags to this group on the <a routerLink="../tags">Tags</a> page,
+          or pick a different grouping.
+        </p>
+      }
+    </div>
+  </div>
+
+  @if (showBacklog()) {
+    <aside class="backlog" aria-label="Backlog">
+      <header>
+        <h2>Backlog <span class="count">{{ backlog().length }}</span></h2>
+        <button class="btn ghost icon" type="button" aria-label="Close backlog" (click)="showBacklog.set(false)">✕</button>
+      </header>
+      <p class="hint muted">Unscheduled tasks. Drag one onto the board to plan it for this day.</p>
+      <form class="inline" (ngSubmit)="addToBacklog()">
+        <input name="backlogTitle" [(ngModel)]="backlogTitle" placeholder="Add to backlog…" aria-label="New backlog task" />
+      </form>
+      @if (backlog().length > 5) {
+        <input
+          class="search"
+          type="search"
+          placeholder="Filter backlog"
+          aria-label="Filter backlog"
+          [ngModel]="backlogQuery()"
+          (ngModelChange)="backlogQuery.set($event)"
+        />
+      }
+      <div class="backlog-list" cdkDropList [cdkDropListData]="backlogTarget" (cdkDropListDropped)="drop($event)">
+        @for (task of filteredBacklog(); track task.id) {
+          <app-task-card
+            cdkDrag
+            [cdkDragData]="task"
+            [cdkDragStartDelay]="{ touch: 250, mouse: 0 }"
+            [task]="task"
+            [showAssignee]="scope() === 'all'"
+            (open)="openTask($event)"
+            (toggleDone)="toggleDone($event)"
+          >
+            <div class="drop-placeholder" *cdkDragPlaceholder></div>
+          </app-task-card>
+        } @empty {
+          <p class="empty">Nothing in the backlog.</p>
+        }
+      </div>
+    </aside>
+  }
+</div>
+
+@if (editing(); as e) {
+  <app-task-dialog
+    [task]="e.task"
+    [defaults]="e.defaults"
+    (saved)="onSaved($event)"
+    (deleted)="onDeleted($event)"
+    (closed)="editing.set(null)"
+  />
+}

@@ -1,0 +1,77 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Projects</h1>
+      <p class="muted">Projects become swimlanes on your day board. Shared with everyone in {{ store.current()?.name }}.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <form class="inline-form" (ngSubmit)="create()">
+      <input type="color" name="color" [(ngModel)]="newColor" aria-label="Project color" />
+      <input name="name" [(ngModel)]="newName" placeholder="New project name" aria-label="New project name" />
+      <button class="btn primary" type="submit" [disabled]="!newName.trim()">Add project</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Active <span class="muted">{{ active().length }}</span></h2>
+    @for (p of active(); track p.id; let first = $first, last = $last) {
+      <ng-container *ngTemplateOutlet="row; context: { $implicit: p, first, last }" />
+    } @empty {
+      <p class="empty">No projects yet. Add your first one above.</p>
+    }
+  </section>
+
+  @if (archived().length) {
+    <section class="panel">
+      <h2>
+        Archived <span class="muted">{{ archived().length }}</span>
+        <button class="btn ghost small" type="button" (click)="showArchived.set(!showArchived())">
+          {{ showArchived() ? 'Hide' : 'Show' }}
+        </button>
+      </h2>
+      @if (showArchived()) {
+        @for (p of archived(); track p.id) {
+          <ng-container *ngTemplateOutlet="row; context: { $implicit: p, first: true, last: true }" />
+        }
+      }
+    </section>
+  }
+</div>
+
+<ng-template #row let-p let-first="first" let-last="last">
+  <div class="row">
+    <input
+      type="color"
+      [value]="p.color"
+      (change)="update(p, { color: $any($event.target).value })"
+      [attr.aria-label]="'Color of ' + p.name"
+    />
+    <div class="grow">
+      @if (editingId() === p.id) {
+        <form (ngSubmit)="saveName(p)">
+          <input name="edit" [(ngModel)]="editName" (blur)="saveName(p)" (keydown.escape)="editingId.set(null)" autofocus />
+        </form>
+      } @else {
+        <button class="btn ghost name-btn" type="button" (click)="startEdit(p)" title="Rename">
+          <strong>{{ p.name }}</strong>
+        </button>
+        <span class="muted"> · {{ p.open_task_count }} open</span>
+      }
+    </div>
+    @if (!p.archived) {
+      <button class="btn ghost icon" type="button" [disabled]="first" (click)="move(p, -1)" aria-label="Move up">↑</button>
+      <button class="btn ghost icon" type="button" [disabled]="last" (click)="move(p, 1)" aria-label="Move down">↓</button>
+    }
+    <button class="btn small" type="button" (click)="update(p, { archived: !p.archived })">
+      {{ p.archived ? 'Restore' : 'Archive' }}
+    </button>
+    @if (confirmingDelete() === p.id) {
+      <button class="btn danger small" type="button" (click)="remove(p)">Confirm delete</button>
+      <button class="btn ghost small" type="button" (click)="confirmingDelete.set(null)">Cancel</button>
+    } @else {
+      <button class="btn ghost danger small" type="button" (click)="confirmingDelete.set(p.id)">Delete</button>
+    }
+  </div>
+</ng-template>

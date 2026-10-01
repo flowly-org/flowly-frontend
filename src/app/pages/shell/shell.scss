@@ -1,0 +1,114 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.ws-select {
+  width: auto;
+  max-width: 220px;
+  font-weight: 600;
+  padding: 6px 8px;
+}
+
+.ws-create {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+
+  input {
+    width: 180px;
+    padding: 6px 8px;
+  }
+}
+
+.nav {
+  display: flex;
+  gap: 2px;
+  flex: 1 1 auto;
+  overflow-x: auto;
+
+  a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--ink);
+      background: var(--surface-2);
+    }
+
+    &.active {
+      color: var(--ink);
+      background: var(--surface-2);
+    }
+  }
+}
+
+.user {
+  position: relative;
+  margin-left: auto;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: var(--shadow-lg);
+}
+
+.menu-email {
+  padding: 6px 8px 10px;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 720px) {
+  .brand-name,
+  .user-name {
+    display: none;
+  }
+
+  .nav {
+    order: 5;
+    flex-basis: 100%;
+  }
+}

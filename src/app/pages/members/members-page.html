@@ -1,0 +1,102 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Members</h1>
+      <p class="muted">Everyone here can see and edit this workspace's projects, tags and tasks.</p>
+    </div>
+  </header>
+
+  @if (store.canManage()) {
+    <section class="panel">
+      <h2>Invite someone</h2>
+      <form class="inline-form" (ngSubmit)="invite()">
+        <input name="email" type="email" [(ngModel)]="inviteEmail" placeholder="colleague@example.com" aria-label="Email to invite" />
+        <select name="role" [(ngModel)]="inviteRole" aria-label="Role" style="flex: 0 1 140px">
+          <option value="member">Member</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button class="btn primary" type="submit" [disabled]="!inviteEmail.trim()">Invite</button>
+      </form>
+    </section>
+  }
+
+  <section class="panel">
+    <h2>People <span class="muted">{{ store.members().length }}</span></h2>
+    @for (m of store.members(); track m.id) {
+      <div class="row">
+        <div class="grow">
+          <strong>{{ m.user.full_name || m.user.email }}</strong>
+          @if (m.user.id === auth.user()?.id) {
+            <span class="muted"> (you)</span>
+          }
+          <div class="muted">{{ m.user.email }}</div>
+        </div>
+        @if (store.canManage() && m.role !== 'owner') {
+          <select [ngModel]="m.role" (ngModelChange)="setRole(m, $event)" [attr.aria-label]="'Role of ' + m.user.email" style="width: auto">
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        } @else {
+          <span class="chip">{{ m.role }}</span>
+        }
+        @if (m.role !== 'owner' && (store.canManage() || m.user.id === auth.user()?.id)) {
+          @if (confirming() === 'm' + m.id) {
+            <button class="btn danger small" type="button" (click)="remove(m)">
+              {{ m.user.id === auth.user()?.id ? 'Leave workspace' : 'Remove' }}
+            </button>
+            <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+          } @else {
+            <button class="btn ghost danger small" type="button" (click)="confirming.set('m' + m.id)">
+              {{ m.user.id === auth.user()?.id ? 'Leave' : 'Remove' }}
+            </button>
+          }
+        }
+      </div>
+    }
+  </section>
+
+  @if (invitations().length) {
+    <section class="panel">
+      <h2>Pending invitations</h2>
+      @for (inv of invitations(); track inv.id) {
+        <div class="row">
+          <div class="grow">
+            {{ inv.email }} <span class="muted">· {{ inv.role }} · waiting for sign-up</span>
+          </div>
+          @if (store.canManage()) {
+            <button class="btn ghost danger small" type="button" (click)="revoke(inv)">Revoke</button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <section class="panel">
+    <h2>Your profile</h2>
+    <form class="inline-form" (ngSubmit)="saveProfile()">
+      <input name="profileName" [(ngModel)]="profileName" placeholder="Your name" aria-label="Your name" />
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </section>
+
+  @if (store.canManage()) {
+    <section class="panel">
+      <h2>Workspace</h2>
+      <form class="inline-form" (ngSubmit)="rename()">
+        <input name="wsName" [(ngModel)]="wsName" aria-label="Workspace name" />
+        <button class="btn" type="submit">Rename</button>
+      </form>
+      @if (store.current()?.my_role === 'owner') {
+        <div class="row">
+          <div class="grow muted">Deleting the workspace removes all of its projects, tags and tasks for everyone.</div>
+          @if (confirming() === 'ws') {
+            <button class="btn danger small" type="button" (click)="deleteWorkspace()">Delete forever</button>
+            <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+          } @else {
+            <button class="btn danger small" type="button" (click)="confirming.set('ws')">Delete workspace</button>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

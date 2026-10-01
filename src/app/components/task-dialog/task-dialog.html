@@ -1,0 +1,107 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<form class="dialog" role="dialog" aria-modal="true" aria-labelledby="task-dialog-title" (ngSubmit)="save()">
+  <header>
+    <h2 id="task-dialog-title">{{ task() ? 'Edit task' : 'New task' }}</h2>
+    <button class="btn ghost icon" type="button" aria-label="Close" (click)="closed.emit()">✕</button>
+  </header>
+
+  <div class="content">
+    <input class="title-input" name="title" [(ngModel)]="model.title" placeholder="What needs doing?" required autofocus />
+    <textarea name="description" [(ngModel)]="model.description" placeholder="Notes (optional)" rows="3"></textarea>
+
+    <div class="grid">
+      <label>
+        Project
+        <select name="project" [(ngModel)]="model.project">
+          <option [ngValue]="null">No project</option>
+          @for (p of store.projects(); track p.id) {
+            @if (!p.archived || p.id === model.project) {
+              <option [ngValue]="p.id">{{ p.name }}{{ p.archived ? ' (archived)' : '' }}</option>
+            }
+          }
+        </select>
+      </label>
+      <label>
+        Assignee
+        <select name="assignee" [(ngModel)]="model.assignee">
+          <option [ngValue]="null">Unassigned</option>
+          @for (m of store.members(); track m.id) {
+            <option [ngValue]="m.user.id">{{ m.user.full_name || m.user.email }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Status
+        <select name="status" [(ngModel)]="model.status">
+          @for (s of statuses; track s.key) {
+            <option [ngValue]="s.key">{{ s.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Priority
+        <select name="priority" [(ngModel)]="model.priority">
+          @for (p of priorities; track p.value) {
+            <option [ngValue]="p.value">{{ p.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Planned for
+        <input type="date" name="planned" [(ngModel)]="model.planned_date" />
+      </label>
+      <label>
+        Due
+        <input type="date" name="due" [(ngModel)]="model.due_date" />
+      </label>
+      @for (group of store.tagGroups(); track group.id) {
+        <label>
+          {{ group.name }}
+          <select [name]="'group-' + group.id" [(ngModel)]="model.grouped[group.id]">
+            <option [ngValue]="null">—</option>
+            @for (tag of group.tags; track tag.id) {
+              <option [ngValue]="tag.id">{{ tag.name }}</option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+
+    @if (store.freeTags().length) {
+      <fieldset class="free-tags">
+        <legend>Tags</legend>
+        @for (tag of store.freeTags(); track tag.id) {
+          <button
+            type="button"
+            class="chip toggle"
+            [class.on]="model.free.has(tag.id)"
+            [style.--chip]="tag.color"
+            [attr.aria-pressed]="model.free.has(tag.id)"
+            (click)="toggleFree(tag.id)"
+          >
+            {{ tag.name }}
+          </button>
+        }
+      </fieldset>
+    }
+
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+  </div>
+
+  <footer>
+    @if (task()) {
+      @if (confirmDelete()) {
+        <span class="confirm">Delete this task?</span>
+        <button class="btn danger small" type="button" [disabled]="busy()" (click)="remove()">Delete</button>
+        <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">Keep</button>
+      } @else {
+        <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">Delete</button>
+      }
+    }
+    <span class="spacer"></span>
+    <button class="btn" type="button" (click)="closed.emit()">Cancel</button>
+    <button class="btn primary" type="submit" [disabled]="busy()">{{ task() ? 'Save' : 'Add task' }}</button>
+  </footer>
+</form>
