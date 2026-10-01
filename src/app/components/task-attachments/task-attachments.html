@@ -2,7 +2,7 @@
   @if (config()?.uploads?.enabled) {
     <label class="btn">
       <input type="file" multiple hidden (change)="onFiles($any($event.target).files); $any($event.target).value = ''" />
-      ⤒ Upload
+      ⤒ {{ 'Upload' | t }}
     </label>
   }
   @if (config()?.google) {
@@ -11,14 +11,14 @@
   @if (config()?.microsoft) {
     <button class="btn" type="button" (click)="fromOneDrive()"><span class="src ms">☁</span> OneDrive / SharePoint</button>
   }
-  <button class="btn" type="button" (click)="showLinkForm.set(!showLinkForm())">🔗 Add link</button>
+  <button class="btn" type="button" (click)="showLinkForm.set(!showLinkForm())">🔗 {{ 'Add link' | t }}</button>
 </div>
 
 @if (showLinkForm()) {
   <form class="link-form" (ngSubmit)="addLink()">
-    <input name="url" type="url" [(ngModel)]="linkUrl" placeholder="https://…" required aria-label="Link URL" autofocus />
-    <input name="name" [(ngModel)]="linkName" placeholder="Title (optional)" aria-label="Link title" />
-    <button class="btn primary" type="submit">Attach</button>
+    <input name="url" type="url" [(ngModel)]="linkUrl" placeholder="https://…" required [attr.aria-label]="'Link URL' | t" autofocus />
+    <input name="name" [(ngModel)]="linkName" [placeholder]="'Title (optional)' | t" [attr.aria-label]="'Link title' | t" />
+    <button class="btn primary" type="submit">{{ 'Attach' | t }}</button>
   </form>
 }
 
@@ -39,34 +39,34 @@
           {{ icon(a) }}
         }
       </span>
-      <button type="button" class="name" (click)="open(a)" [title]="a.kind === 'file' ? 'Open file' : a.url">{{ a.name }}</button>
+      <button type="button" class="name" (click)="open(a)" [title]="a.kind === 'file' ? ('Open file' | t) : a.url">{{ a.name }}</button>
       <span class="meta muted">
         {{ size(a.size) }}
-        {{ a.added_by?.full_name || a.added_by?.email }} · {{ a.created_at | date: 'MMM d' }}
+        {{ a.added_by?.full_name || a.added_by?.email }} · {{ a.created_at | ldate: 'MMM d' }}
       </span>
       @if (canRemove(a)) {
         @if (confirming() === a.id) {
-          <button class="btn danger small" type="button" (click)="remove(a)">Remove</button>
-          <button class="btn ghost small" type="button" (click)="confirming.set(null)">Keep</button>
+          <button class="btn danger small" type="button" (click)="remove(a)">{{ 'Remove' | t }}</button>
+          <button class="btn ghost small" type="button" (click)="confirming.set(null)">{{ 'Keep' | t }}</button>
         } @else {
-          <button class="btn ghost icon small" type="button" aria-label="Remove attachment" (click)="confirming.set(a.id)">✕</button>
+          <button class="btn ghost icon small" type="button" [attr.aria-label]="'Remove attachment' | t" (click)="confirming.set(a.id)">✕</button>
         }
       }
     </div>
   } @empty {
     <p class="empty">
       @if (config()?.uploads?.enabled) {
-        Drop files here, or attach documents and links with the buttons above.
+        {{ 'Drop files here, or attach documents and links with the buttons above.' | t }}
       } @else {
-        No documents yet. Attach a link or a cloud document above.
+        {{ 'No documents yet. Attach a link or a cloud document above.' | t }}
       }
     </p>
   }
   @if (uploading()) {
-    <p class="muted uploading">Uploading {{ uploading() }} file{{ uploading() > 1 ? 's' : '' }}…</p>
+    <p class="muted uploading">{{ (uploading() > 1 ? 'Uploading {n} files…' : 'Uploading 1 file…') | t: { n: uploading() } }}</p>
   }
 </div>
 
 @if (config() && !config()!.uploads.enabled && !config()!.google && !config()!.microsoft) {
-  <p class="hint muted">File uploads, Google Drive and OneDrive aren't configured on this server yet; links work.</p>
+  <p class="hint muted">{{ "File uploads, Google Drive and OneDrive aren't configured on this server yet; links work." | t }}</p>
 }

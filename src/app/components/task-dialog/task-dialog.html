@@ -3,32 +3,32 @@
   <header>
     <h2 id="task-dialog-title">
       @if (!task()) {
-        New task
+        {{ 'New task' | t }}
       } @else {
-        <span class="ref" title="Task reference">{{ task()!.ref }}</span>
+        <span class="ref" [title]="'Task reference' | t">{{ task()!.ref }}</span>
         @if (editing()) {
-          Editing
+          {{ 'Editing' | t }}
         }
         <span class="muted ws-name">{{ ctx()?.name }}</span>
       }
     </h2>
-    <button class="btn ghost icon" type="button" aria-label="Close" (click)="close()">✕</button>
+    <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="close()">✕</button>
   </header>
 
   @if (task(); as t) {
     <nav class="tabs" role="tablist">
-      <button type="button" role="tab" [class.on]="tab() === 'details'" [attr.aria-selected]="tab() === 'details'" (click)="tab.set('details')">Details</button>
+      <button type="button" role="tab" [class.on]="tab() === 'details'" [attr.aria-selected]="tab() === 'details'" (click)="tab.set('details')">{{ 'Details' | t }}</button>
       <button type="button" role="tab" [class.on]="tab() === 'discussion'" [attr.aria-selected]="tab() === 'discussion'" (click)="tab.set('discussion')">
-        Discussion @if (commentCount()) {<span class="count">{{ commentCount() }}</span>}
+        {{ 'Discussion' | t }} @if (commentCount()) {<span class="count">{{ commentCount() }}</span>}
       </button>
       <button type="button" role="tab" [class.on]="tab() === 'files'" [attr.aria-selected]="tab() === 'files'" (click)="tab.set('files')">
-        Documents @if (attachmentCount()) {<span class="count">{{ attachmentCount() }}</span>}
+        {{ 'Documents' | t }} @if (attachmentCount()) {<span class="count">{{ attachmentCount() }}</span>}
       </button>
       @if (data.canTrack(t)) {
-        <button type="button" role="tab" [class.on]="tab() === 'time'" [attr.aria-selected]="tab() === 'time'" (click)="tab.set('time')">Time</button>
+        <button type="button" role="tab" [class.on]="tab() === 'time'" [attr.aria-selected]="tab() === 'time'" (click)="tab.set('time')">{{ 'Time' | t }}</button>
       }
       <button type="button" role="tab" [class.on]="tab() === 'share'" [attr.aria-selected]="tab() === 'share'" (click)="tab.set('share')">
-        Share <span class="vis-icon" aria-hidden="true">{{ view()?.visibility?.icon }}</span>
+        {{ 'Share' | t }} <span class="vis-icon" aria-hidden="true">{{ view()?.visibility?.icon }}</span>
       </button>
     </nav>
     @if (tab() === 'time') {
@@ -48,26 +48,26 @@
           <p class="notes">{{ t.description }}</p>
         }
         <dl class="facts">
-          <dt>Status</dt>
+          <dt>{{ 'Status' | t }}</dt>
           <dd>@if (v.status) {<span class="chip" [style.--chip]="v.status.color">{{ v.status.name }}</span>}</dd>
-          <dt>Priority</dt>
-          <dd>@if (v.priority) {<span class="chip" [style.--chip]="v.priority.color">{{ v.priority.name }}</span>} @else {<span class="muted">None</span>}</dd>
-          <dt>Project</dt>
-          <dd>@if (v.project) {<span class="project"><span class="dot" [style.background]="v.project.color"></span>{{ v.project.name }}</span>} @else {<span class="muted">None</span>}</dd>
-          <dt>Assignee</dt>
-          <dd>{{ v.assignee ? v.assignee.full_name || v.assignee.email : 'Unassigned' }}</dd>
-          <dt>Planned</dt>
+          <dt>{{ 'Priority' | t }}</dt>
+          <dd>@if (v.priority) {<span class="chip" [style.--chip]="v.priority.color">{{ v.priority.name }}</span>} @else {<span class="muted">{{ 'None' | t }}</span>}</dd>
+          <dt>{{ 'Project' | t }}</dt>
+          <dd>@if (v.project) {<span class="project"><span class="dot" [style.background]="v.project.color"></span>{{ v.project.name }}</span>} @else {<span class="muted">{{ 'None' | t }}</span>}</dd>
+          <dt>{{ 'Assignee' | t }}</dt>
+          <dd>{{ v.assignee ? v.assignee.full_name || v.assignee.email : ('Unassigned' | t) }}</dd>
+          <dt>{{ 'Planned' | t }}</dt>
           <dd>{{ v.planned }}</dd>
           @if (v.due) {
-            <dt>Due</dt>
+            <dt>{{ 'Due' | t }}</dt>
             <dd>{{ v.due }}</dd>
           }
           @if (v.tags.length) {
-            <dt>Tags</dt>
+            <dt>{{ 'Tags' | t }}</dt>
             <dd class="tag-list">@for (tag of v.tags; track tag!.id) {<span class="chip" [style.--chip]="tag!.color">{{ tag!.name }}</span>}</dd>
           }
-          <dt>Visibility</dt>
-          <dd><button type="button" class="link-btn" (click)="tab.set('share')">{{ v.visibility.icon }} {{ v.visibility.label }}</button></dd>
+          <dt>{{ 'Visibility' | t }}</dt>
+          <dd><button type="button" class="link-btn" (click)="tab.set('share')">{{ v.visibility.icon }} {{ v.visibility.label | t }}</button></dd>
         </dl>
       </div>
     }
@@ -85,14 +85,14 @@
 
   <div class="content" [hidden]="tab() !== 'details' || !editing()">
     @if (editing()) {
-      <input class="title-input" name="title" [(ngModel)]="model.title" placeholder="What needs doing?" required autofocus />
+      <input class="title-input" name="title" [(ngModel)]="model.title" [placeholder]="'What needs doing?' | t" required autofocus />
     }
-    <textarea name="description" [(ngModel)]="model.description" placeholder="Notes (optional)" rows="3"></textarea>
+    <textarea name="description" [(ngModel)]="model.description" [placeholder]="'Notes (optional)' | t" rows="3"></textarea>
 
     <div class="grid">
       @if (data.multi() && !task()) {
         <label>
-          Workspace
+          {{ 'Workspace' | t }}
           <select name="workspace" [ngModel]="wsId()" (ngModelChange)="changeWorkspace($event)">
             @for (c of data.contexts(); track c.id) {
               <option [ngValue]="c.id">{{ c.name }}</option>
@@ -101,27 +101,27 @@
         </label>
       }
       <label>
-        Project
+        {{ 'Project' | t }}
         <select name="project" [(ngModel)]="model.project">
-          <option [ngValue]="null">No project</option>
+          <option [ngValue]="null">{{ 'No project' | t }}</option>
           @for (p of ctx()?.projects ?? []; track p.id) {
             @if (!p.archived || p.id === model.project) {
-              <option [ngValue]="p.id">{{ p.name }}{{ p.archived ? ' (archived)' : '' }}</option>
+              <option [ngValue]="p.id">{{ p.name }}{{ p.archived ? ' ' + ('(archived)' | t) : '' }}</option>
             }
           }
         </select>
       </label>
       <label>
-        Assignee
+        {{ 'Assignee' | t }}
         <select name="assignee" [(ngModel)]="model.assignee">
-          <option [ngValue]="null">Unassigned</option>
+          <option [ngValue]="null">{{ 'Unassigned' | t }}</option>
           @for (m of ctx()?.members ?? []; track m.id) {
             <option [ngValue]="m.user.id">{{ m.user.full_name || m.user.email }}</option>
           }
         </select>
       </label>
       <label>
-        Status
+        {{ 'Status' | t }}
         <select name="status" [(ngModel)]="model.status">
           @for (s of statuses(); track s.id) {
             <option [ngValue]="s.id">{{ s.name }}</option>
@@ -129,20 +129,20 @@
         </select>
       </label>
       <label>
-        Priority
+        {{ 'Priority' | t }}
         <select name="priority" [(ngModel)]="model.priority">
-          <option [ngValue]="null">None</option>
+          <option [ngValue]="null">{{ 'None' | t }}</option>
           @for (p of priorities(); track p.id) {
             <option [ngValue]="p.id">{{ p.name }}</option>
           }
         </select>
       </label>
       <label>
-        Planned for
+        {{ 'Planned for' | t }}
         <input type="date" name="planned" [(ngModel)]="model.planned_date" />
       </label>
       <label>
-        Due
+        {{ 'Due' | t }}
         <input type="date" name="due" [(ngModel)]="model.due_date" />
       </label>
       @for (group of customGroups(); track group.id) {
@@ -160,7 +160,7 @@
 
     @if (freeTags().length) {
       <fieldset class="free-tags">
-        <legend>Tags</legend>
+        <legend>{{ 'Tags' | t }}</legend>
         @for (tag of freeTags(); track tag.id) {
           <button
             type="button"
@@ -184,21 +184,21 @@
   @if (tab() === 'details' && !editing() && task()) {
     <footer>
       @if (confirmDelete()) {
-        <span class="confirm">Delete this task?</span>
-        <button class="btn danger small" type="button" [disabled]="busy()" (click)="remove()">Delete</button>
-        <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">Keep</button>
+        <span class="confirm">{{ 'Delete this task?' | t }}</span>
+        <button class="btn danger small" type="button" [disabled]="busy()" (click)="remove()">{{ 'Delete' | t }}</button>
+        <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">{{ 'Keep' | t }}</button>
       } @else {
-        <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">Delete</button>
+        <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">{{ 'Delete' | t }}</button>
       }
       <span class="spacer"></span>
-      <button class="btn" type="button" (click)="close()">Close</button>
-      <button class="btn primary" type="button" (click)="editing.set(true)">Edit</button>
+      <button class="btn" type="button" (click)="close()">{{ 'Close' | t }}</button>
+      <button class="btn primary" type="button" (click)="editing.set(true)">{{ 'Edit' | t }}</button>
     </footer>
   }
 
   <footer [hidden]="tab() !== 'details' || !editing()">
     <span class="spacer"></span>
-    <button class="btn" type="button" (click)="cancelEdit()">Cancel</button>
-    <button class="btn primary" type="submit" [disabled]="busy()">{{ task() ? 'Save' : 'Add task' }}</button>
+    <button class="btn" type="button" (click)="cancelEdit()">{{ 'Cancel' | t }}</button>
+    <button class="btn primary" type="submit" [disabled]="busy()">{{ (task() ? 'Save' : 'Add task') | t }}</button>
   </footer>
 </form>

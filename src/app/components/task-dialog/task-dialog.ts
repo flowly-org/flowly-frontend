@@ -6,6 +6,8 @@ import { TaskDiscussion } from '../task-discussion/task-discussion';
 import { TaskShare } from '../task-share/task-share';
 import { TaskTime } from '../task-time/task-time';
 import { formatLong } from '../../core/dates';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { BoardData } from '../../core/board-data';
 import { Task, TaskInput, VISIBILITIES, Visibility } from '../../core/models';
@@ -26,7 +28,7 @@ interface FormModel {
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime],
+  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TranslatePipe],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   host: { '(document:keydown.escape)': 'close()' },
@@ -43,6 +45,7 @@ export class TaskDialog implements OnInit {
   readonly touched = output<number>();
 
   protected data = inject(BoardData);
+  protected i18n = inject(I18nService);
   private api = inject(ApiService);
 
   protected wsId = signal<number>(0);
@@ -66,6 +69,7 @@ export class TaskDialog implements OnInit {
   protected readonly view = computed(() => {
     const t = this.task();
     if (!t) return null;
+    this.i18n.lang(); // dates follow the language
     const tagById = this.data.tagById();
     const tags = t.tags.map((id) => tagById.get(id)).filter((x) => !!x);
     return {
@@ -74,7 +78,7 @@ export class TaskDialog implements OnInit {
       project: t.project ? (this.data.projectById().get(t.project) ?? null) : null,
       assignee: t.assignee ? (this.data.userById().get(t.assignee) ?? null) : null,
       tags,
-      planned: t.planned_date ? formatLong(t.planned_date) : 'Backlog',
+      planned: t.planned_date ? formatLong(t.planned_date) : this.i18n.t('Backlog'),
       due: t.due_date ? formatLong(t.due_date) : null,
       visibility: VISIBILITIES.find((v) => v.value === this.visibility())!,
     };
@@ -174,7 +178,7 @@ export class TaskDialog implements OnInit {
   async save() {
     const m = this.model;
     if (!m.title.trim()) {
-      this.error.set('Give the task a title.');
+      this.error.set(this.i18n.t('Give the task a title.'));
       return;
     }
     const tags = [...Object.values(m.grouped).filter((id): id is number => id !== null), ...m.free];
@@ -198,7 +202,7 @@ export class TaskDialog implements OnInit {
         : await this.api.createTask(this.wsId(), payload);
       this.saved.emit(result);
     } catch (err) {
-      this.error.set(errorMessage(err, 'Could not save the task.'));
+      this.error.set(errorMessage(err, this.i18n.t('Could not save the task.')));
     } finally {
       this.busy.set(false);
     }
@@ -212,7 +216,7 @@ export class TaskDialog implements OnInit {
       await this.api.deleteTask(existing.workspace, existing.id);
       this.deleted.emit(existing.id);
     } catch (err) {
-      this.error.set(errorMessage(err, 'Could not delete the task.'));
+      this.error.set(errorMessage(err, this.i18n.t('Could not delete the task.')));
       this.busy.set(false);
     }
   }

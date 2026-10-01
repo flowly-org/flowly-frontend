@@ -1,6 +1,6 @@
 @if (canToggle()) {
   <button class="check" type="button" (click)="onToggle($event)" (mousedown)="$event.stopPropagation()"
-    [attr.aria-label]="done() ? 'Mark as not done' : 'Mark as done'">
+    [attr.aria-label]="(done() ? 'Mark as not done' : 'Mark as done') | t">
     @if (done()) {
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8.5l2.5 2.5L12 5.5" /></svg>
     }
@@ -20,7 +20,7 @@
       <span class="workspace">{{ ws }}</span>
     }
     @if (priority(); as p) {
-      <span class="chip priority" [style.--chip]="p.color" title="Priority">{{ p.name }}</span>
+      <span class="chip priority" [style.--chip]="p.color" [title]="'Priority' | t">{{ p.name }}</span>
     }
     @if (showProject() && project(); as p) {
       <span class="project"><span class="dot" [style.background]="p.color"></span>{{ p.name }}</span>
@@ -29,16 +29,16 @@
       <span class="chip" [style.--chip]="tag.color">{{ tag.name }}</span>
     }
     @if (carriedFrom(); as from) {
-      <span class="badge late" title="Planned for an earlier day and not done yet">↻ {{ from }}</span>
+      <span class="badge late" [title]="'Planned for an earlier day and not done yet' | t">↻ {{ from }}</span>
     }
     @if (due(); as d) {
-      <span class="badge" [class.late]="d.late" [class.today]="d.today" title="Due date">⚑ {{ d.label }}</span>
+      <span class="badge" [class.late]="d.late" [class.today]="d.today" [title]="'Due date' | t">⚑ {{ d.label }}</span>
     }
     @if (task().comment_count) {
-      <button type="button" class="badge count-badge" title="Discussion" (click)="openTab($event, 'discussion')" (mousedown)="$event.stopPropagation()">💬 {{ task().comment_count }}</button>
+      <button type="button" class="badge count-badge" [title]="'Discussion' | t" (click)="openTab($event, 'discussion')" (mousedown)="$event.stopPropagation()">💬 {{ task().comment_count }}</button>
     }
     @if (task().attachment_count) {
-      <button type="button" class="badge count-badge" title="Documents" (click)="openTab($event, 'files')" (mousedown)="$event.stopPropagation()">📎 {{ task().attachment_count }}</button>
+      <button type="button" class="badge count-badge" [title]="'Documents' | t" (click)="openTab($event, 'files')" (mousedown)="$event.stopPropagation()">📎 {{ task().attachment_count }}</button>
     }
     @if (showAssignee() && assignee(); as u) {
       <span class="avatar assignee" [title]="u.full_name || u.email">{{ initials(u.full_name || u.email) }}</span>
@@ -48,7 +48,7 @@
 
 @if (trackable() || timing()) {
 <button type="button" class="play" (click)="toggleTimer($event)" (mousedown)="$event.stopPropagation()"
-  [attr.aria-label]="timing() ? 'Stop timer' : 'Start timer'" [title]="timing() ? 'Stop timer' : 'Track time'">
+  [attr.aria-label]="(timing() ? 'Stop timer' : 'Start timer') | t" [title]="(timing() ? 'Stop timer' : 'Track time') | t">
   {{ timing() ? '■' : '▶' }}
 </button>
 }

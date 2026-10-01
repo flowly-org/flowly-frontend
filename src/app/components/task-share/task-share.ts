@@ -3,35 +3,37 @@ import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { Task, TaskShareEntry, VISIBILITIES, Visibility } from '../../core/models';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-task-share',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <fieldset class="visibility">
-      <legend>Who can see this task</legend>
+      <legend>{{ 'Who can see this task' | t }}</legend>
       @for (v of visibilities; track v.value) {
         <label class="option" [class.on]="visibility() === v.value">
           <input type="radio" name="visibility" [checked]="visibility() === v.value" (change)="setVisibility(v.value)" />
           <span class="icon" aria-hidden="true">{{ v.icon }}</span>
-          <span><strong>{{ v.label }}</strong><span class="muted help">{{ v.help }}</span></span>
+          <span><strong>{{ v.label | t }}</strong><span class="muted help">{{ v.help | t }}</span></span>
         </label>
       }
     </fieldset>
 
     <div class="link">
-      <label for="task-link">Link</label>
+      <label for="task-link">{{ 'Link' | t }}</label>
       <div class="copy-row">
         <input id="task-link" readonly [value]="link()" (focus)="$any($event.target).select()" />
-        <button class="btn small" type="button" (click)="copy()">Copy</button>
+        <button class="btn small" type="button" (click)="copy()">{{ 'Copy' | t }}</button>
       </div>
-      <p class="muted small">{{ linkHelp() }}</p>
+      <p class="muted small">{{ linkHelp() | t }}</p>
     </div>
 
     @if (visibility() === 'shareable' || visibility() === 'public' || shares().length) {
       <div class="people">
-        <h3>Shared with</h3>
+        <h3>{{ 'Shared with' | t }}</h3>
         @for (s of shares(); track s.id) {
           <div class="person">
             <span class="avatar">{{ (s.name || s.email)[0].toUpperCase() }}</span>
@@ -41,17 +43,17 @@ import { ToastService } from '../../core/toast.service';
                 <span class="muted small">{{ s.email }}</span>
               }
               @if (!s.registered) {
-                <span class="muted small">· gets access when they sign up</span>
+                <span class="muted small">· {{ 'gets access when they sign up' | t }}</span>
               }
             </span>
-            <button class="btn ghost small danger" type="button" (click)="remove(s)">Remove</button>
+            <button class="btn ghost small danger" type="button" (click)="remove(s)">{{ 'Remove' | t }}</button>
           </div>
         } @empty {
-          <p class="muted small">Nobody yet.</p>
+          <p class="muted small">{{ 'Nobody yet.' | t }}</p>
         }
         <form class="invite" (ngSubmit)="invite()">
-          <input name="email" type="email" [(ngModel)]="email" placeholder="name@example.com" aria-label="Share with email" />
-          <button class="btn primary small" type="submit" [disabled]="!email.trim()">Share</button>
+          <input name="email" type="email" [(ngModel)]="email" placeholder="name@example.com" [attr.aria-label]="'Share with email' | t" />
+          <button class="btn primary small" type="submit" [disabled]="!email.trim()">{{ 'Share' | t }}</button>
         </form>
       </div>
     }
@@ -64,6 +66,7 @@ export class TaskShare implements OnInit {
 
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   protected readonly visibilities = VISIBILITIES;
   protected visibility = signal<Visibility>('team');
@@ -114,7 +117,9 @@ export class TaskShare implements OnInit {
         this.visibility.set('shareable');
         this.changed.emit('shareable');
       }
-      this.toast.show(share.registered ? `Shared with ${email}.` : `${email} will get access when they sign up.`);
+      this.toast.show(
+        this.i18n.t(share.registered ? 'Shared with {email}.' : '{email} will get access when they sign up.', { email }),
+      );
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -131,7 +136,7 @@ export class TaskShare implements OnInit {
 
   protected copy() {
     const text = this.link();
-    const done = () => this.toast.show('Link copied.');
+    const done = () => this.toast.show(this.i18n.t('Link copied.'));
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(done);
       return;

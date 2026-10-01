@@ -1,15 +1,15 @@
 <div class="backdrop" (click)="closed.emit()"></div>
 <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="bulk-title">
   <header>
-    <h2 id="bulk-title">Add several tasks</h2>
-    <button class="btn ghost icon" type="button" aria-label="Close" (click)="closed.emit()">✕</button>
+    <h2 id="bulk-title">{{ 'Add several tasks' | t }}</h2>
+    <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="closed.emit()">✕</button>
   </header>
 
   <div class="content">
     <div class="options">
       @if (data.multi()) {
         <label>
-          Workspace
+          {{ 'Workspace' | t }}
           <select [ngModel]="wsId()" (ngModelChange)="changeWorkspace($event)">
             @for (c of data.contexts(); track c.id) {
               <option [ngValue]="c.id">{{ c.name }}</option>
@@ -18,9 +18,9 @@
         </label>
       }
       <label>
-        Project
+        {{ 'Project' | t }}
         <select [ngModel]="projectId()" (ngModelChange)="projectId.set($event)">
-          <option [ngValue]="null">No project</option>
+          <option [ngValue]="null">{{ 'No project' | t }}</option>
           @for (p of ctx()?.projects ?? []; track p.id) {
             @if (!p.archived) {
               <option [ngValue]="p.id">{{ p.name }}</option>
@@ -29,39 +29,39 @@
         </select>
       </label>
       <label>
-        Plan for
+        {{ 'Plan for' | t }}
         <select [ngModel]="planned()" (ngModelChange)="planned.set($event)">
           @if (day()) {
             <option value="day">{{ formatShort(day()!) }}</option>
           }
-          <option value="backlog">Backlog</option>
+          <option value="backlog">{{ 'Backlog' | t }}</option>
         </select>
       </label>
       <label class="check">
         <input type="checkbox" [ngModel]="assignToMe()" (ngModelChange)="assignToMe.set($event)" />
-        Assign to me
+        {{ 'Assign to me' | t }}
       </label>
     </div>
 
     <div class="split">
       <label class="editor">
-        <span class="muted">One task per line. Paste a bulleted list, or type:</span>
+        <span class="muted">{{ 'One task per line. Paste a bulleted list, or type:' | t }}</span>
         <textarea
           [ngModel]="text()"
           (ngModelChange)="text.set($event)"
           rows="12"
           autofocus
-          placeholder="- Call the accountant !high @tomorrow&#10;- Draft the newsletter +Website #writing&#10;  include the October numbers&#10;- [x] Book the venue"
-          aria-label="Tasks, one per line"
+          [placeholder]="'- Call the accountant !high @tomorrow\n- Draft the newsletter +Website #writing\n  include the October numbers\n- [x] Book the venue' | t"
+          [attr.aria-label]="'Tasks, one per line' | t"
         ></textarea>
         <span class="syntax muted">
-          <code>!high</code> priority · <code>#tag</code> · <code>+Project</code> · <code>&#64;tomorrow</code> <code>&#64;fri</code> <code>&#64;2026-10-05</code> <code>&#64;backlog</code> ·
-          <code>[x]</code> done · indented lines become notes
+          <code>!high</code> {{ 'priority' | t }} · <code>#tag</code> · <code>+Project</code> · <code>&#64;tomorrow</code> <code>&#64;fri</code> <code>&#64;2026-10-05</code> <code>&#64;backlog</code> ·
+          <code>[x]</code> {{ 'done' | t }} · {{ 'indented lines become notes' | t }}
         </span>
       </label>
 
       <div class="preview" aria-live="polite">
-        <div class="preview-head muted">{{ drafts().length }} task{{ drafts().length === 1 ? '' : 's' }}</div>
+        <div class="preview-head muted">{{ (drafts().length === 1 ? '1 task' : '{n} tasks') | t: { n: drafts().length } }}</div>
         @for (d of drafts(); track $index) {
           <div class="draft">
             <div class="draft-title" [class.done]="d.done">{{ d.title }}</div>
@@ -77,15 +77,15 @@
                 <span class="chip" [style.--chip]="t.color">{{ t.name }}</span>
               }
               @if (d.notes) {
-                <span class="muted" title="{{ d.notes }}">+ notes</span>
+                <span class="muted" [title]="d.notes">{{ '+ notes' | t }}</span>
               }
             </div>
-            @for (w of d.warnings; track w) {
-              <div class="warn">{{ w }}: left in the title</div>
+            @for (w of d.warnings; track $index) {
+              <div class="warn">{{ w.key | t: { value: w.value } }}</div>
             }
           </div>
         } @empty {
-          <p class="muted empty">The tasks will appear here as you type.</p>
+          <p class="muted empty">{{ 'The tasks will appear here as you type.' | t }}</p>
         }
       </div>
     </div>
@@ -97,9 +97,9 @@
 
   <footer>
     <span class="spacer"></span>
-    <button class="btn" type="button" (click)="closed.emit()">Cancel</button>
+    <button class="btn" type="button" (click)="closed.emit()">{{ 'Cancel' | t }}</button>
     <button class="btn primary" type="button" [disabled]="busy() || !drafts().length" (click)="create()">
-      {{ busy() ? 'Adding…' : 'Add ' + drafts().length + ' task' + (drafts().length === 1 ? '' : 's') }}
+      {{ (busy() ? 'Adding…' : drafts().length === 1 ? 'Add 1 task' : 'Add {n} tasks') | t: { n: drafts().length } }}
     </button>
   </footer>
 </div>

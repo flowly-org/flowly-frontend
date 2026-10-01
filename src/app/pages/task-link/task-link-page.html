@@ -3,29 +3,29 @@
     <a routerLink="/" class="brand"><app-logo [color]="view()?.workspace?.color ?? '#4f46e5'" [size]="26" /> Flowly</a>
     @if (!auth.isLoggedIn()) {
       <span class="spacer"></span>
-      <a class="btn small" routerLink="/login" [queryParams]="{ next: '/t/' + ref() }">Sign in</a>
-      <a class="btn small primary" routerLink="/register" [queryParams]="{ next: '/t/' + ref() }">Create account</a>
+      <a class="btn small" routerLink="/login" [queryParams]="{ next: '/t/' + ref() }">{{ 'Sign in' | t }}</a>
+      <a class="btn small primary" routerLink="/register" [queryParams]="{ next: '/t/' + ref() }">{{ 'Create account' | t }}</a>
     } @else {
       <span class="spacer"></span>
-      <a class="btn small" routerLink="/day">Open Flowly</a>
+      <a class="btn small" routerLink="/day">{{ 'Open Flowly' | t }}</a>
     }
   </header>
 
   @switch (state()) {
     @case ('loading') {
-      <p class="center-note">Loading…</p>
+      <p class="center-note">{{ 'Loading…' | t }}</p>
     }
     @case ('signin') {
       <section class="card center">
-        <h1>Sign in to open this task</h1>
-        <p class="muted">It's shared with specific people or with its team.</p>
-        <a class="btn primary" routerLink="/login" [queryParams]="{ next: '/t/' + ref() }">Sign in</a>
+        <h1>{{ 'Sign in to open this task' | t }}</h1>
+        <p class="muted">{{ "It's shared with specific people or with its team." | t }}</p>
+        <a class="btn primary" routerLink="/login" [queryParams]="{ next: '/t/' + ref() }">{{ 'Sign in' | t }}</a>
       </section>
     }
     @case ('missing') {
       <section class="card center">
-        <h1>Task not available</h1>
-        <p class="muted">It doesn't exist, or it isn't shared with {{ auth.isLoggedIn() ? 'your account' : 'you' }}.</p>
+        <h1>{{ 'Task not available' | t }}</h1>
+        <p class="muted">{{ (auth.isLoggedIn() ? "It doesn't exist, or it isn't shared with your account." : "It doesn't exist, or it isn't shared with you.") | t }}</p>
       </section>
     }
     @case ('ok') {
@@ -37,7 +37,7 @@
               <span class="muted">/ {{ v.task.project.name }}</span>
             }
             <span class="spacer"></span>
-            <span class="vis" [title]="visibility(v).help">{{ visibility(v).icon }} {{ visibility(v).label }}</span>
+            <span class="vis" [title]="visibility(v).help | t">{{ visibility(v).icon }} {{ visibility(v).label | t }}</span>
           </div>
           <h1 [class.done]="v.task.status.is_done">{{ v.task.title }}</h1>
           <div class="chips">
@@ -54,19 +54,19 @@
           }
           <dl class="facts">
             @if (v.task.assignee) {
-              <dt>Assignee</dt>
+              <dt>{{ 'Assignee' | t }}</dt>
               <dd>{{ v.task.assignee.name || v.task.assignee.email }}</dd>
             }
-            <dt>Planned</dt>
-            <dd>{{ v.task.planned_date ? formatLong(v.task.planned_date) : 'Not scheduled' }}</dd>
+            <dt>{{ 'Planned' | t }}</dt>
+            <dd>{{ v.task.planned_date ? formatLong(v.task.planned_date) : ('Not scheduled' | t) }}</dd>
             @if (v.task.due_date) {
-              <dt>Due</dt>
+              <dt>{{ 'Due' | t }}</dt>
               <dd>{{ formatLong(v.task.due_date) }}</dd>
             }
           </dl>
 
           @if (v.attachments.length) {
-            <h2>Documents</h2>
+            <h2>{{ 'Documents' | t }}</h2>
             <ul class="docs">
               @for (a of v.attachments; track a.id) {
                 <li><button type="button" class="link" (click)="open(a)">{{ a.name }}</button></li>
@@ -74,23 +74,23 @@
             </ul>
           }
 
-          <h2>Discussion</h2>
+          <h2>{{ 'Discussion' | t }}</h2>
           @for (c of v.comments; track c.id) {
             <div class="comment">
-              <strong>{{ c.author?.full_name || c.author?.email || (c.external_author ? '@' + c.external_author : 'Someone') }}</strong>
-              <span class="muted small">{{ c.created_at | date: 'MMM d, HH:mm' }}</span>
+              <strong>{{ c.author?.full_name || c.author?.email || (c.external_author ? '@' + c.external_author : ('Someone' | t)) }}</strong>
+              <span class="muted small">{{ c.created_at | ldate: 'MMM d, HH:mm' }}</span>
               <p>{{ c.body }}</p>
             </div>
           } @empty {
-            <p class="muted small">No comments yet.</p>
+            <p class="muted small">{{ 'No comments yet.' | t }}</p>
           }
           @if (v.can_comment) {
             <form class="composer" (ngSubmit)="comment()">
-              <textarea name="body" [(ngModel)]="draft" rows="3" placeholder="Add a comment…" aria-label="Comment"></textarea>
-              <button class="btn primary small" type="submit" [disabled]="!draft.trim()">Comment</button>
+              <textarea name="body" [(ngModel)]="draft" rows="3" [placeholder]="'Add a comment…' | t" [attr.aria-label]="'Comment' | t"></textarea>
+              <button class="btn primary small" type="submit" [disabled]="!draft.trim()">{{ 'Comment' | t }}</button>
             </form>
           } @else if (!auth.isLoggedIn()) {
-            <p class="muted small">Read-only. <a routerLink="/login" [queryParams]="{ next: '/t/' + ref() }">Sign in</a> if this task was shared with you.</p>
+            <p class="muted small">{{ 'Read-only.' | t }} <a routerLink="/login" [queryParams]="{ next: '/t/' + ref() }">{{ 'Sign in if this task was shared with you.' | t }}</a></p>
           }
         </article>
       }

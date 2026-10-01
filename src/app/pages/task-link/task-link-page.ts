@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,13 +7,15 @@ import { Logo } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { formatLong } from '../../core/dates';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { TaskLinkView, VISIBILITIES } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
 /** /t/<ref>: members jump to the task on its board; shared and public viewers get a read-only page. */
 @Component({
   selector: 'app-task-link-page',
-  imports: [RouterLink, FormsModule, DatePipe, Logo],
+  imports: [RouterLink, FormsModule, Logo, TranslatePipe, LocalDatePipe],
   templateUrl: './task-link-page.html',
   styleUrl: './task-link-page.scss',
 })
@@ -25,6 +26,7 @@ export class TaskLinkPage implements OnInit {
   private router = inject(Router);
   private toast = inject(ToastService);
   protected auth = inject(AuthService);
+  private i18n = inject(I18nService);
 
   protected view = signal<TaskLinkView | null>(null);
   protected state = signal<'loading' | 'ok' | 'signin' | 'missing'>('loading');
@@ -58,7 +60,7 @@ export class TaskLinkPage implements OnInit {
       this.view.update((v) => (v ? { ...v, comments: [...v.comments, c] } : v));
       this.draft = '';
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not post the comment.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not post the comment.')));
     }
   }
 

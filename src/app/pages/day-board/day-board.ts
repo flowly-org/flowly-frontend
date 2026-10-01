@@ -13,6 +13,8 @@ import { BoardData } from '../../core/board-data';
 import { NotificationService } from '../../core/notification.service';
 import { addDays, formatLong, isValidIsoDate, today } from '../../core/dates';
 import { Task, TaskInput } from '../../core/models';
+import { I18nService } from '../../core/i18n.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 import {
@@ -49,7 +51,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -63,6 +65,8 @@ export class DayBoard {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private notifications = inject(NotificationService);
+  protected i18n = inject(I18nService);
+  private readonly tr = (text: string, params?: Record<string, string>) => this.i18n.t(text, params);
 
   protected readonly mode: Mode = this.route.snapshot.data['mode'] === 'workspace' ? 'workspace' : 'global';
   private readonly wsId = this.mode === 'workspace' ? this.store.currentId() : null;
@@ -91,17 +95,26 @@ export class DayBoard {
   protected backlogTitle = '';
 
   protected readonly title = computed(() =>
-    this.mode === 'global' ? 'My day' : (this.store.current()?.name ?? 'Board'),
+    this.mode === 'global' ? this.i18n.t('My day') : (this.store.current()?.name ?? this.i18n.t('Board')),
   );
   protected readonly isToday = computed(() => this.date() === today());
-  protected readonly dateLabel = computed(() => formatLong(this.date()));
+  protected readonly dateLabel = computed(() => {
+    this.i18n.lang(); // re-format when the language changes
+    return formatLong(this.date());
+  });
   protected readonly hiddenGroup = computed(() => groupNameOf(this.groupBy()));
   protected readonly contexts = this.data.contexts;
   protected readonly newTaskWs = computed(() => this.wsId ?? this.targetWs() ?? this.contexts()[0]?.id ?? null);
 
   protected readonly columns = computed(() => buildColumns(this.contexts()));
-  protected readonly lanes = computed(() => buildLanes(this.groupBy(), this.contexts(), this.tasks()));
-  protected readonly groupChoices = computed(() => groupOptions(this.contexts()));
+  protected readonly lanes = computed(() => {
+    this.i18n.lang();
+    return buildLanes(this.groupBy(), this.contexts(), this.tasks(), this.tr);
+  });
+  protected readonly groupChoices = computed(() => {
+    this.i18n.lang();
+    return groupOptions(this.contexts(), this.tr);
+  });
   protected readonly gridColumns = computed(() => `repeat(${this.columns().length || 1}, minmax(220px, 1fr))`);
 
   /** laneKey → columnKey → tasks sorted by position. */
@@ -190,7 +203,7 @@ export class DayBoard {
       if (task.planned_date) this.date.set(task.planned_date);
       this.editing.set({ task, defaults: {} });
     } catch {
-      this.toast.error('That task no longer exists.');
+      this.toast.error(this.i18n.t('That task no longer exists.'));
     }
   }
 
@@ -200,7 +213,7 @@ export class DayBoard {
     try {
       this.data.contexts.set(await this.api.myContext());
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not load your workspaces.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not load your workspaces.')));
     }
   }
 
@@ -223,7 +236,7 @@ export class DayBoard {
       this.tasks.set(tasks);
       this.backlog.set(backlog);
     } catch (err) {
-      if (seq === this.loadSeq) this.toast.error(errorMessage(err, 'Could not load tasks.'));
+      if (seq === this.loadSeq) this.toast.error(errorMessage(err, this.i18n.t('Could not load tasks.')));
     } finally {
       if (seq === this.loadSeq) this.loading.set(false);
     }
@@ -261,7 +274,7 @@ export class DayBoard {
     try {
       this.place(await this.api.updateTask(task.workspace, task.id, changes));
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not update the task.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not update the task.')));
       this.reload();
     }
   }
@@ -311,7 +324,7 @@ export class DayBoard {
   protected toggleDone(task: Task) {
     const status = this.data.toggledStatus(task);
     if (status === null) {
-      this.toast.error('This workspace has no "done" status. Mark one on the Tags page.');
+      this.toast.error(this.i18n.t('This workspace has no "done" status. Mark one on the Tags page.'));
       return;
     }
     this.patch(task, { status });
@@ -351,13 +364,13 @@ export class DayBoard {
     this.bulk.set(null);
     for (const task of tasks) this.place(task);
     if (this.mode === 'global' && tasks[0]) this.targetWs.set(tasks[0].workspace);
-    this.toast.show(`Added ${tasks.length} task${tasks.length === 1 ? '' : 's'}.`);
+    this.toast.show(tasks.length === 1 ? this.i18n.t('Added 1 task.') : this.i18n.t('Added {n} tasks.', { n: String(tasks.length) }));
   }
 
   protected onDeleted(id: number) {
     this.editing.set(null);
     this.unplace(id);
-    this.toast.show('Task deleted.');
+    this.toast.show(this.i18n.t('Task deleted.'));
   }
 
   /** Workspace a quick-added task in `lane` goes to: the preferred one if the lane allows it. */
@@ -396,7 +409,7 @@ export class DayBoard {
       });
       this.place(task);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not add the task.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not add the task.')));
     }
   }
 
@@ -408,7 +421,7 @@ export class DayBoard {
     try {
       this.place(await this.api.createTask(ws, { title, planned_date: null, assignee: this.auth.user()?.id ?? null }));
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not add the task.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not add the task.')));
     }
   }
 

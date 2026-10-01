@@ -4,39 +4,45 @@ import { Router, RouterLink } from '@angular/router';
 import { Logo } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { InvitationPreview } from '../../core/models';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 /** /join/<token>: shareable workspace invitation. */
 @Component({
   selector: 'app-join-page',
-  imports: [RouterLink, Logo],
+  imports: [RouterLink, Logo, TranslatePipe],
   template: `
     <main class="join">
       <section class="card">
         <app-logo [size]="34" [color]="preview()?.workspace?.color ?? '#4f46e5'" />
         @if (error()) {
-          <h1>Invitation not valid</h1>
+          <h1>{{ 'Invitation not valid' | t }}</h1>
           <p class="muted">{{ error() }}</p>
-          <a class="btn" routerLink="/">Go to Flowly</a>
+          <a class="btn" routerLink="/">{{ 'Go to Flowly' | t }}</a>
         } @else if (preview(); as p) {
-          <h1>Join <span [style.color]="p.workspace.color">{{ p.workspace.name }}</span></h1>
+          <h1>{{ 'Join' | t }} <span [style.color]="p.workspace.color">{{ p.workspace.name }}</span></h1>
           <p class="muted">
-            {{ p.invited_by ? p.invited_by + ' invited you' : "You've been invited" }} to collaborate on Flowly as {{ p.role === 'admin' ? 'an admin' : 'a member' }}.
+            @if (p.invited_by) {
+              {{ (p.role === 'admin' ? '{name} invited you to collaborate on Flowly as an admin.' : '{name} invited you to collaborate on Flowly as a member.') | t: { name: p.invited_by } }}
+            } @else {
+              {{ (p.role === 'admin' ? "You've been invited to collaborate on Flowly as an admin." : "You've been invited to collaborate on Flowly as a member.") | t }}
+            }
           </p>
           @if (p.already_member) {
-            <a class="btn primary" [routerLink]="['/w', p.workspace.id, 'board']">Open the workspace</a>
+            <a class="btn primary" [routerLink]="['/w', p.workspace.id, 'board']">{{ 'Open the workspace' | t }}</a>
           } @else if (auth.isLoggedIn()) {
-            <p class="small muted">Signed in as {{ auth.user()?.email }}</p>
-            <button class="btn primary" type="button" [disabled]="busy()" (click)="accept()">Join workspace</button>
+            <p class="small muted">{{ 'Signed in as {email}' | t: { email: auth.user()?.email } }}</p>
+            <button class="btn primary" type="button" [disabled]="busy()" (click)="accept()">{{ 'Join workspace' | t }}</button>
           } @else {
             <div class="actions">
-              <a class="btn primary" routerLink="/register" [queryParams]="{ next: here }">Create an account</a>
-              <a class="btn" routerLink="/login" [queryParams]="{ next: here }">I have an account</a>
+              <a class="btn primary" routerLink="/register" [queryParams]="{ next: here }">{{ 'Create an account' | t }}</a>
+              <a class="btn" routerLink="/login" [queryParams]="{ next: here }">{{ 'I have an account' | t }}</a>
             </div>
           }
         } @else {
-          <p class="muted">Loading invitation…</p>
+          <p class="muted">{{ 'Loading invitation…' | t }}</p>
         }
       </section>
     </main>
@@ -58,6 +64,7 @@ export class JoinPage implements OnInit {
   private router = inject(Router);
   private store = inject(WorkspaceStore);
   protected auth = inject(AuthService);
+  private i18n = inject(I18nService);
 
   protected preview = signal<InvitationPreview | null>(null);
   protected error = signal<string | null>(null);
@@ -70,7 +77,7 @@ export class JoinPage implements OnInit {
     try {
       this.preview.set(await this.api.invitationPreview(this.token()));
     } catch (err) {
-      this.error.set(errorMessage(err, 'This invitation link is no longer valid.'));
+      this.error.set(errorMessage(err, this.i18n.t('This invitation link is no longer valid.')));
     }
   }
 

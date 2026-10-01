@@ -210,3 +210,13 @@ label.grow {
   font-size: 0.85rem;
   margin: 8px 16px 4px;
 }
+
+.lang {
+  display: grid;
+  gap: 4px;
+  margin-right: 16px;
+
+  select {
+    width: auto;
+  }
+}

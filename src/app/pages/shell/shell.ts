@@ -5,8 +5,9 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { Logo, logoSvg } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
-import { DatePipe } from '@angular/common';
 
+import { I18nService } from '../../core/i18n.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { AppNotification } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { TimerService } from '../../core/timer.service';
@@ -17,7 +18,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, DatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, TranslatePipe, LocalDatePipe],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   host: { '[style.--brand]': 'brandColor()' },
@@ -34,6 +35,7 @@ export class Shell {
   private api = inject(ApiService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   protected creating = signal(false);
   protected newName = '';
@@ -56,7 +58,7 @@ export class Shell {
     effect(() => setFavicon(this.brandColor()));
     this.notifications.start();
     this.timer.start();
-    this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, 'Could not load your workspaces.')));
+    this.store.loadWorkspaces().catch((err) => this.toast.error(errorMessage(err, this.i18n.t('Could not load your workspaces.'))));
   }
 
   protected openTimerTask() {

@@ -1,19 +1,19 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../core/api.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { SharedTask } from '../../core/models';
 
 @Component({
   selector: 'app-shared-page',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, TranslatePipe, LocalDatePipe],
   template: `
     <div class="page">
       <header>
         <div>
-          <h1>Shared with me</h1>
-          <p class="muted">Tasks from other people's workspaces that were shared with you.</p>
+          <h1>{{ 'Shared with me' | t }}</h1>
+          <p class="muted">{{ "Tasks from other people's workspaces that were shared with you." | t }}</p>
         </div>
       </header>
       <section class="panel">
@@ -23,10 +23,10 @@ import { SharedTask } from '../../core/models';
               <strong [class.done]="t.status_done">{{ t.title }}</strong>
               <span class="muted small">{{ t.workspace }}{{ t.project ? ' / ' + t.project : '' }} · {{ t.status }}</span>
             </span>
-            <span class="muted small">{{ t.updated_at | date: 'MMM d' }}</span>
+            <span class="muted small">{{ t.updated_at | ldate: 'MMM d' }}</span>
           </a>
         } @empty {
-          <p class="empty">{{ loaded() ? 'Nothing has been shared with you yet.' : 'Loading…' }}</p>
+          <p class="empty">{{ (loaded() ? 'Nothing has been shared with you yet.' : 'Loading…') | t }}</p>
         }
       </section>
     </div>

@@ -3,56 +3,61 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-workspace-settings',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="page">
       <header>
         <div>
-          <h1>Workspace settings</h1>
-          <p class="muted">How {{ store.current()?.name }} looks and which features it uses.</p>
+          <h1>{{ 'Workspace settings' | t }}</h1>
+          <p class="muted">{{ 'How {name} looks and which features it uses.' | t: { name: store.current()?.name } }}</p>
         </div>
       </header>
 
       @if (!store.canManage()) {
-        <section class="panel"><p class="empty">Only owners and admins can change workspace settings.</p></section>
+        <section class="panel"><p class="empty">{{ 'Only owners and admins can change workspace settings.' | t }}</p></section>
       } @else {
         <section class="panel">
-          <h2>Identity</h2>
+          <h2>{{ 'Identity' | t }}</h2>
           <form class="inline-form" (ngSubmit)="saveIdentity()">
-            <input type="color" name="color" [(ngModel)]="color" aria-label="Workspace colour" title="Tints the Flowly logo while you're in this workspace" />
-            <input name="name" [(ngModel)]="name" aria-label="Workspace name" />
-            <button class="btn primary" type="submit" [disabled]="!name.trim()">Save</button>
+            <input type="color" name="color" [(ngModel)]="color" [attr.aria-label]="'Workspace colour' | t" [title]="'Tints the Flowly logo while you\\'re in this workspace' | t" />
+            <input name="name" [(ngModel)]="name" [attr.aria-label]="'Workspace name' | t" />
+            <button class="btn primary" type="submit" [disabled]="!name.trim()">{{ 'Save' | t }}</button>
           </form>
         </section>
 
         <section class="panel">
-          <h2>Features</h2>
+          <h2>{{ 'Features' | t }}</h2>
           <div class="row feature">
             <div class="grow">
-              <strong>Time tracking</strong>
-              <div class="muted small">Timers and logged time on tasks. Off hides Time and Billing here. Individual projects can still opt out on the <a routerLink="../projects">Projects</a> page.</div>
+              <strong>{{ 'Time tracking' | t }}</strong>
+              <div class="muted small">
+                {{ 'Timers and logged time on tasks. Off hides Time and Billing here. Individual projects can still opt out on the Projects page.' | t }}
+                <a routerLink="../projects">{{ 'Projects' | t }}</a>
+              </div>
             </div>
             <label class="switch">
-              <input type="checkbox" [checked]="store.current()?.time_tracking" (change)="setTimeTracking($any($event.target).checked)" aria-label="Time tracking" />
+              <input type="checkbox" [checked]="store.current()?.time_tracking" (change)="setTimeTracking($any($event.target).checked)" [attr.aria-label]="'Time tracking' | t" />
               <span></span>
             </label>
           </div>
           <div class="row feature" [class.disabled]="!store.current()?.time_tracking">
             <div class="grow">
-              <strong>Billing</strong>
+              <strong>{{ 'Billing' | t }}</strong>
               <div class="muted small">
-                Turn tracked time into invoices. Rates, rounding, tax and invoices are on the
-                <a routerLink="../billing">Billing</a> page; projects can opt out on the Projects page.
+                {{ 'Turn tracked time into invoices. Rates, rounding, tax and invoices are on the Billing page; projects can opt out on the Projects page.' | t }}
+                <a routerLink="../billing">{{ 'Billing' | t }}</a>
               </div>
             </div>
             <label class="switch">
               <input type="checkbox" [checked]="store.current()?.billing_enabled" [disabled]="!store.current()?.time_tracking"
-                (change)="setBilling($any($event.target).checked)" aria-label="Billing" />
+                (change)="setBilling($any($event.target).checked)" [attr.aria-label]="'Billing' | t" />
               <span></span>
             </label>
           </div>
@@ -60,14 +65,14 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
         @if (store.current()?.my_role === 'owner') {
           <section class="panel">
-            <h2>Danger zone</h2>
+            <h2>{{ 'Danger zone' | t }}</h2>
             <div class="row">
-              <div class="grow muted">Deleting the workspace removes all of its projects, tags, tasks, time and invoices for everyone.</div>
+              <div class="grow muted">{{ 'Deleting the workspace removes all of its projects, tags, tasks, time and invoices for everyone.' | t }}</div>
               @if (confirming()) {
-                <button class="btn danger small" type="button" (click)="remove()">Delete forever</button>
-                <button class="btn ghost small" type="button" (click)="confirming.set(false)">Cancel</button>
+                <button class="btn danger small" type="button" (click)="remove()">{{ 'Delete forever' | t }}</button>
+                <button class="btn ghost small" type="button" (click)="confirming.set(false)">{{ 'Cancel' | t }}</button>
               } @else {
-                <button class="btn danger small" type="button" (click)="confirming.set(true)">Delete workspace</button>
+                <button class="btn danger small" type="button" (click)="confirming.set(true)">{{ 'Delete workspace' | t }}</button>
               }
             </div>
           </section>
@@ -92,6 +97,7 @@ export class WorkspaceSettings implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private i18n = inject(I18nService);
 
   protected name = '';
   protected color = '#4f46e5';
@@ -107,18 +113,21 @@ export class WorkspaceSettings implements OnInit {
   }
 
   async saveIdentity() {
-    await this.update({ name: this.name.trim(), color: this.color }, 'Saved.');
+    await this.update({ name: this.name.trim(), color: this.color }, this.i18n.t('Saved.'));
   }
 
   async setTimeTracking(on: boolean) {
-    await this.update({ time_tracking: on }, on ? 'Time tracking is on.' : 'Time tracking is off for this workspace.');
+    await this.update(
+      { time_tracking: on },
+      this.i18n.t(on ? 'Time tracking is on.' : 'Time tracking is off for this workspace.'),
+    );
   }
 
   async setBilling(on: boolean) {
     try {
       await this.api.updateBilling(this.wsId, { enabled: on });
       await this.store.loadWorkspaces();
-      this.toast.show(on ? 'Billing is on. Set rates on the Billing page.' : 'Billing is off.');
+      this.toast.show(this.i18n.t(on ? 'Billing is on. Set rates on the Billing page.' : 'Billing is off.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }

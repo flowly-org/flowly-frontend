@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiService, errorMessage } from './api.service';
 import { TimeEntry } from './models';
+import { I18nService } from './i18n.service';
 import { ToastService } from './toast.service';
 
 /** The user's single running timer (shared by the top bar, cards and the task dialog). */
@@ -9,6 +10,7 @@ import { ToastService } from './toast.service';
 export class TimerService {
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   readonly entry = signal<TimeEntry | null>(null);
   readonly now = signal(Date.now());
@@ -45,7 +47,7 @@ export class TimerService {
       this.entry.set((await this.api.startTimer(workspace, task, description)).entry);
       if (had) this.version.update((v) => v + 1);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not start the timer.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not start the timer.')));
     }
   }
 
@@ -56,10 +58,11 @@ export class TimerService {
       this.version.update((v) => v + 1);
       if (res.stopped) {
         const mins = Math.round(res.stopped.duration_seconds / 60);
-        this.toast.show(`Tracked ${Math.floor(mins / 60)}h ${mins % 60}m${res.stopped.task_title ? ' on ' + res.stopped.task_title : ''}.`);
+        const params = { h: Math.floor(mins / 60), m: mins % 60, task: res.stopped.task_title };
+        this.toast.show(this.i18n.t(res.stopped.task_title ? 'Tracked {h}h {m}m on {task}.' : 'Tracked {h}h {m}m.', params));
       }
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not stop the timer.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not stop the timer.')));
     }
   }
 

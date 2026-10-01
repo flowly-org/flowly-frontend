@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -6,11 +5,13 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { pickFromGoogleDrive, pickFromOneDrive } from '../../core/cloud-pickers';
 import { Attachment, PublicConfig } from '../../core/models';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-task-attachments',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, LocalDatePipe, TranslatePipe],
   templateUrl: './task-attachments.html',
   styleUrl: './task-attachments.scss',
 })
@@ -22,6 +23,7 @@ export class TaskAttachments implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   protected items = signal<Attachment[]>([]);
   protected config = signal<PublicConfig | null>(null);
@@ -38,7 +40,7 @@ export class TaskAttachments implements OnInit {
       this.items.set(items);
       this.config.set(config);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not load attachments.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not load attachments.')));
     }
   }
 
@@ -77,7 +79,7 @@ export class TaskAttachments implements OnInit {
       else window.location.href = url;
     } catch (err) {
       tab?.close();
-      this.toast.error(errorMessage(err, 'Could not open the file.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not open the file.')));
     }
   }
 
@@ -95,7 +97,7 @@ export class TaskAttachments implements OnInit {
     const max = (this.config()?.uploads.max_mb ?? 25) * 1024 * 1024;
     for (const file of files) {
       if (file.size > max) {
-        this.toast.error(`${file.name} is larger than ${this.config()?.uploads.max_mb} MB.`);
+        this.toast.error(this.i18n.t('{name} is larger than {mb} MB.', { name: file.name, mb: this.config()?.uploads.max_mb }));
         continue;
       }
       this.uploading.update((n) => n + 1);
@@ -104,7 +106,7 @@ export class TaskAttachments implements OnInit {
         this.items.update((l) => [...l, a]);
         this.changed.emit(this.items().length);
       } catch (err) {
-        this.toast.error(errorMessage(err, `Could not upload ${file.name}.`));
+        this.toast.error(errorMessage(err, this.i18n.t('Could not upload {name}.', { name: file.name })));
       } finally {
         this.uploading.update((n) => n - 1);
       }
@@ -126,7 +128,7 @@ export class TaskAttachments implements OnInit {
     try {
       await this.add(await pickFromGoogleDrive(cfg));
     } catch (err) {
-      this.toast.error(err instanceof Error ? err.message : 'Google Drive picker failed.');
+      this.toast.error(err instanceof Error ? err.message : this.i18n.t('Google Drive picker failed.'));
     }
   }
 
@@ -136,7 +138,7 @@ export class TaskAttachments implements OnInit {
     try {
       await this.add(await pickFromOneDrive(cfg));
     } catch (err) {
-      this.toast.error(err instanceof Error ? err.message : 'OneDrive picker failed.');
+      this.toast.error(err instanceof Error ? err.message : this.i18n.t('OneDrive picker failed.'));
     }
   }
 
@@ -146,7 +148,7 @@ export class TaskAttachments implements OnInit {
         const a = await this.api.addAttachment(this.wsId(), this.taskId(), data);
         this.items.update((l) => [...l, a]);
       } catch (err) {
-        this.toast.error(errorMessage(err, 'Could not attach that.'));
+        this.toast.error(errorMessage(err, this.i18n.t('Could not attach that.')));
       }
     }
     this.changed.emit(this.items().length);

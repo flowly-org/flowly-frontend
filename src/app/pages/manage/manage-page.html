@@ -1,42 +1,42 @@
 <div class="page wide">
   <header>
     <div>
-      <h1>Admin</h1>
-      <p class="muted">Instance-wide settings, services and plans. Changes apply within a few seconds; no restart needed.</p>
+      <h1>{{ 'Admin' | t }}</h1>
+      <p class="muted">{{ 'Instance-wide settings, services and plans. Changes apply within a few seconds; no restart needed.' | t }}</p>
     </div>
   </header>
 
   <nav class="tabs" role="tablist">
-    <button type="button" role="tab" [class.on]="tab() === 'overview'" (click)="tab.set('overview')">Overview</button>
-    <button type="button" role="tab" [class.on]="tab() === 'users'" (click)="tab.set('users')">Users & plans</button>
-    <button type="button" role="tab" [class.on]="tab() === 'settings'" (click)="tab.set('settings')">Settings</button>
-    <button type="button" role="tab" [class.on]="tab() === 'github'" (click)="tab.set('github')">GitHub App</button>
+    <button type="button" role="tab" [class.on]="tab() === 'overview'" (click)="tab.set('overview')">{{ 'Overview' | t }}</button>
+    <button type="button" role="tab" [class.on]="tab() === 'users'" (click)="tab.set('users')">{{ 'Users & plans' | t }}</button>
+    <button type="button" role="tab" [class.on]="tab() === 'settings'" (click)="tab.set('settings')">{{ 'Settings' | t }}</button>
+    <button type="button" role="tab" [class.on]="tab() === 'github'" (click)="tab.set('github')">{{ 'GitHub App' | t }}</button>
   </nav>
 
   @if (tab() === 'overview') {
     @if (overview(); as o) {
       <section class="stats">
-        <div class="stat"><span>{{ o['users'] }}</span>users</div>
+        <div class="stat"><span>{{ o['users'] }}</span>{{ 'users' | t }}</div>
         <div class="stat"><span>{{ o['pro_users'] }}</span>Pro</div>
-        <div class="stat"><span>{{ o['workspaces'] }}</span>workspaces</div>
-        <div class="stat"><span>{{ o['tasks'] }}</span>tasks</div>
-        <div class="stat"><span>{{ o['integrations'] }}</span>active integrations</div>
-        <div class="stat" [class.bad]="o['failed_deliveries_24h']"><span>{{ o['failed_deliveries_24h'] }}</span>failed deliveries (24h)</div>
-        <div class="stat"><span>{{ o['pending_deliveries'] }}</span>queued deliveries</div>
-        <div class="stat"><span>{{ o['telegram_linked'] }}</span>Telegram users</div>
-        <div class="stat"><span>{{ o['ai_today']['requests'] }}</span>AI requests today</div>
-        <div class="stat"><span>{{ o['ai_today']['tokens'] | number }}</span>AI tokens today</div>
+        <div class="stat"><span>{{ o['workspaces'] }}</span>{{ 'workspaces' | t }}</div>
+        <div class="stat"><span>{{ o['tasks'] }}</span>{{ 'tasks' | t }}</div>
+        <div class="stat"><span>{{ o['integrations'] }}</span>{{ 'active integrations' | t }}</div>
+        <div class="stat" [class.bad]="o['failed_deliveries_24h']"><span>{{ o['failed_deliveries_24h'] }}</span>{{ 'failed deliveries (24h)' | t }}</div>
+        <div class="stat"><span>{{ o['pending_deliveries'] }}</span>{{ 'queued deliveries' | t }}</div>
+        <div class="stat"><span>{{ o['telegram_linked'] }}</span>{{ 'Telegram users' | t }}</div>
+        <div class="stat"><span>{{ o['ai_today']['requests'] }}</span>{{ 'AI requests today' | t }}</div>
+        <div class="stat"><span>{{ o['ai_today']['tokens'] | number }}</span>{{ 'AI tokens today' | t }}</div>
       </section>
     }
     <section class="panel">
-      <h2>Service checks</h2>
+      <h2>{{ 'Service checks' | t }}</h2>
       @for (svc of [{ s: 'telegram', l: 'Telegram bot' }, { s: 'openrouter', l: 'OpenRouter' }, { s: 's3', l: 'File storage' }, { s: 'github', l: 'GitHub App' }]; track svc.s) {
         <div class="row">
-          <strong class="svc">{{ svc.l }}</strong>
+          <strong class="svc">{{ svc.l | t }}</strong>
           <span class="grow check-msg" [class.ok]="checkResult(svc.s)?.ok" [class.fail]="checkResult(svc.s) && !checkResult(svc.s)?.ok">
-            {{ checks()[svc.s] === 'running' ? 'Checking…' : (checkResult(svc.s)?.message ?? '') }}
+            {{ checks()[svc.s] === 'running' ? ('Checking…' | t) : (checkResult(svc.s)?.message ?? '') }}
           </span>
-          <button class="btn small" type="button" (click)="check(svc.s)">Check</button>
+          <button class="btn small" type="button" (click)="check(svc.s)">{{ 'Check' | t }}</button>
         </div>
       }
     </section>
@@ -45,34 +45,34 @@
   @if (tab() === 'users') {
     <section class="panel">
       <form class="inline-form" (ngSubmit)="loadUsers()">
-        <input name="q" [(ngModel)]="userQuery" placeholder="Search by email or name" aria-label="Search users" />
-        <button class="btn" type="submit">Search</button>
+        <input name="q" [(ngModel)]="userQuery" [placeholder]="'Search by email or name' | t" [attr.aria-label]="'Search users' | t" />
+        <button class="btn" type="submit">{{ 'Search' | t }}</button>
       </form>
       <div class="table-wrap">
         <table class="users">
           <thead>
-            <tr><th>User</th><th>Plan</th><th>Pro until</th><th>Admin</th><th>Active</th><th>Workspaces</th><th>AI tokens (30d)</th><th>Joined</th></tr>
+            <tr><th>{{ 'User' | t }}</th><th>{{ 'Plan' | t }}</th><th>{{ 'Pro until' | t }}</th><th>{{ 'Admin' | t }}</th><th>{{ 'Active' | t }}</th><th>{{ 'Workspaces' | t }}</th><th>{{ 'AI tokens (30d)' | t }}</th><th>{{ 'Joined' | t }}</th></tr>
           </thead>
           <tbody>
             @for (u of users(); track u.id) {
               <tr [class.inactive]="!u.is_active">
                 <td><strong>{{ u.full_name || '—' }}</strong><div class="muted small">{{ u.email }}</div></td>
                 <td>
-                  <select [value]="u.plan" (change)="updateUser(u, { plan: $any($event.target).value })" [attr.aria-label]="'Plan of ' + u.email">
-                    <option value="free" [selected]="u.plan === 'free'">Free</option>
+                  <select [value]="u.plan" (change)="updateUser(u, { plan: $any($event.target).value })" [attr.aria-label]="'Plan of {email}' | t: { email: u.email }">
+                    <option value="free" [selected]="u.plan === 'free'">{{ 'Free' | t }}</option>
                     <option value="pro" [selected]="u.plan === 'pro'">Pro</option>
                   </select>
                 </td>
                 <td>
                   <input type="date" [value]="u.plan_expires_at ? u.plan_expires_at.slice(0, 10) : ''" [disabled]="u.plan !== 'pro'"
                     (change)="updateUser(u, { plan_expires_at: $any($event.target).value ? $any($event.target).value + 'T23:59:59Z' : null })"
-                    [attr.aria-label]="'Pro expiry of ' + u.email" title="Empty = no expiry" />
+                    [attr.aria-label]="'Pro expiry of {email}' | t: { email: u.email }" [title]="'Empty = no expiry' | t" />
                 </td>
-                <td><input type="checkbox" [checked]="u.is_staff" [disabled]="u.id === auth.user()?.id" (change)="updateUser(u, { is_staff: $any($event.target).checked })" [attr.aria-label]="'Admin: ' + u.email" /></td>
-                <td><input type="checkbox" [checked]="u.is_active" [disabled]="u.id === auth.user()?.id" (change)="updateUser(u, { is_active: $any($event.target).checked })" [attr.aria-label]="'Active: ' + u.email" /></td>
+                <td><input type="checkbox" [checked]="u.is_staff" [disabled]="u.id === auth.user()?.id" (change)="updateUser(u, { is_staff: $any($event.target).checked })" [attr.aria-label]="'Admin: {email}' | t: { email: u.email }" /></td>
+                <td><input type="checkbox" [checked]="u.is_active" [disabled]="u.id === auth.user()?.id" (change)="updateUser(u, { is_active: $any($event.target).checked })" [attr.aria-label]="'Active: {email}' | t: { email: u.email }" /></td>
                 <td>{{ u.workspaces }}</td>
                 <td>{{ u.tokens_30d | number }}</td>
-                <td class="nowrap">{{ u.date_joined | date: 'MMM d, y' }}</td>
+                <td class="nowrap">{{ u.date_joined | ldate: 'MMM d, y' }}</td>
               </tr>
             }
           </tbody>
@@ -85,92 +85,92 @@
     @if (gh(); as g) {
       <section class="panel">
         <h2>
-          <span class="group-title">GitHub App <span class="source" [attr.data-source]="g['configured'] ? 'admin' : 'unset'">{{ g['configured'] ? 'connected' : 'not set up' }}</span></span>
+          <span class="group-title">{{ 'GitHub App' | t }} <span class="source" [attr.data-source]="g['configured'] ? 'admin' : 'unset'">{{ (g['configured'] ? 'connected' : 'not set up') | t }}</span></span>
           @if (g['configured']) {
             <span class="actions">
-              <button class="btn small ghost" type="button" (click)="check('github')">Test</button>
+              <button class="btn small ghost" type="button" (click)="check('github')">{{ 'Test' | t }}</button>
               @if (ghConfirmRemove()) {
-                <button class="btn small danger" type="button" (click)="removeGithub()">Disconnect app</button>
-                <button class="btn small ghost" type="button" (click)="ghConfirmRemove.set(false)">Cancel</button>
+                <button class="btn small danger" type="button" (click)="removeGithub()">{{ 'Disconnect app' | t }}</button>
+                <button class="btn small ghost" type="button" (click)="ghConfirmRemove.set(false)">{{ 'Cancel' | t }}</button>
               } @else {
-                <button class="btn small ghost danger" type="button" (click)="ghConfirmRemove.set(true)">Disconnect…</button>
+                <button class="btn small ghost danger" type="button" (click)="ghConfirmRemove.set(true)">{{ 'Disconnect…' | t }}</button>
               }
             </span>
           }
         </h2>
         @if (checks()['github']) {
           <p class="check-line" [class.ok]="checkResult('github')?.ok" [class.fail]="checkResult('github') && !checkResult('github')?.ok">
-            {{ checks()['github'] === 'running' ? 'Checking…' : checkResult('github')?.message }}
+            {{ checks()['github'] === 'running' ? ('Checking…' | t) : checkResult('github')?.message }}
           </p>
         }
         @if (g['error']) {
           <p class="check-line fail">{{ g['error'] }}</p>
         }
         @if (ghConfirmRemove()) {
-          <p class="check-line fail">Disconnecting stops every GitHub integration ({{ g['integrations'] }}) until an app is connected again. The app itself stays on GitHub.</p>
+          <p class="check-line fail">{{ 'Disconnecting stops every GitHub integration ({n}) until an app is connected again. The app itself stays on GitHub.' | t: { n: g['integrations'] } }}</p>
         }
 
         @if (g['app']; as a) {
           <dl class="facts">
-            <dt>App</dt><dd><a [href]="a.html_url" target="_blank" rel="noopener">{{ a.name }}</a> <code>{{ a.slug }}</code></dd>
-            <dt>Owner</dt><dd>{{ a.owner || '—' }}</dd>
-            <dt>App ID</dt><dd>{{ a.app_id }}</dd>
-            <dt>Client ID</dt><dd><code>{{ a.client_id }}</code></dd>
-            <dt>Secrets</dt>
+            <dt>{{ 'App' | t }}</dt><dd><a [href]="a.html_url" target="_blank" rel="noopener">{{ a.name }}</a> <code>{{ a.slug }}</code></dd>
+            <dt>{{ 'Owner' | t }}</dt><dd>{{ a.owner || '—' }}</dd>
+            <dt>{{ 'App ID' | t }}</dt><dd>{{ a.app_id }}</dd>
+            <dt>{{ 'Client ID' | t }}</dt><dd><code>{{ a.client_id }}</code></dd>
+            <dt>{{ 'Secrets' | t }}</dt>
             <dd class="muted small">
-              private key {{ a.has_private_key ? '✓' : '✗' }} · webhook secret {{ a.has_webhook_secret ? '✓' : '✗' }} · client secret {{ a.has_client_secret ? '✓' : '✗' }}
+              {{ 'private key' | t }} {{ a.has_private_key ? '✓' : '✗' }} · {{ 'webhook secret' | t }} {{ a.has_webhook_secret ? '✓' : '✗' }} · {{ 'client secret' | t }} {{ a.has_client_secret ? '✓' : '✗' }}
             </dd>
-            <dt>Used by</dt><dd>{{ g['integrations'] }} GitHub integration{{ g['integrations'] === 1 ? '' : 's' }}</dd>
+            <dt>{{ 'Used by' | t }}</dt><dd>{{ (g['integrations'] === 1 ? '{n} GitHub integration' : '{n} GitHub integrations') | t: { n: g['integrations'] } }}</dd>
           </dl>
-          <h3 class="sub">Installations</h3>
+          <h3 class="sub">{{ 'Installations' | t }}</h3>
           @for (i of g['installations']; track i.id) {
             <div class="row">
-              <span class="grow"><strong>{{ i.account }}</strong> <span class="muted small">{{ i.type }} · {{ i.repositories === 'all' ? 'all repositories' : 'selected repositories' }}</span></span>
+              <span class="grow"><strong>{{ i.account }}</strong> <span class="muted small">{{ i.type }} · {{ (i.repositories === 'all' ? 'all repositories' : 'selected repositories') | t }}</span></span>
               @if (i.url) {
-                <a class="btn small ghost" [href]="i.url" target="_blank" rel="noopener">Manage on GitHub</a>
+                <a class="btn small ghost" [href]="i.url" target="_blank" rel="noopener">{{ 'Manage on GitHub' | t }}</a>
               }
             </div>
           } @empty {
-            <p class="empty">Not installed anywhere yet. Members install it from Integrations → GitHub.</p>
+            <p class="empty">{{ 'Not installed anywhere yet. Members install it from Integrations → GitHub.' | t }}</p>
           }
         } @else {
           <div class="callout-box">
-            <strong>Create a new app</strong>
-            <p class="muted small">GitHub opens with everything pre-filled (permissions, webhook, callbacks); you confirm and come back here.</p>
+            <strong>{{ 'Create a new app' | t }}</strong>
+            <p class="muted small">{{ 'GitHub opens with everything pre-filled (permissions, webhook, callbacks); you confirm and come back here.' | t }}</p>
             <div class="inline-form tight">
-              <input [(ngModel)]="ghAppName" placeholder="App name (unique on GitHub)" aria-label="App name" />
-              <input [(ngModel)]="ghOrg" placeholder="Organization (optional)" aria-label="Organization" />
-              <button class="btn primary" type="button" (click)="createGithubApp()">Create on GitHub</button>
+              <input [(ngModel)]="ghAppName" [placeholder]="'App name (unique on GitHub)' | t" [attr.aria-label]="'App name' | t" />
+              <input [(ngModel)]="ghOrg" [placeholder]="'Organization (optional)' | t" [attr.aria-label]="'Organization' | t" />
+              <button class="btn primary" type="button" (click)="createGithubApp()">{{ 'Create on GitHub' | t }}</button>
             </div>
           </div>
         }
 
         <div class="row">
           <span class="grow small muted">
-            {{ g['configured'] ? 'Replace the credentials, e.g. after rotating the private key or webhook secret.' : 'Or connect an app you already have.' }}
+            {{ (g['configured'] ? 'Replace the credentials, e.g. after rotating the private key or webhook secret.' : 'Or connect an app you already have.') | t }}
           </span>
-          <button class="btn small" type="button" (click)="ghManual.set(!ghManual())">{{ ghManual() ? 'Cancel' : (g['configured'] ? 'Update credentials' : 'Connect existing app') }}</button>
+          <button class="btn small" type="button" (click)="ghManual.set(!ghManual())">{{ (ghManual() ? 'Cancel' : (g['configured'] ? 'Update credentials' : 'Connect existing app')) | t }}</button>
         </div>
         @if (ghManual()) {
           <form class="gh-form" (ngSubmit)="saveGithub()">
-            <label>App ID <input name="app_id" [(ngModel)]="ghForm['app_id']" [placeholder]="g['app']?.app_id ?? '123456'" /></label>
-            <label>App slug <input name="slug" [(ngModel)]="ghForm['slug']" [placeholder]="g['app']?.slug ?? 'flowly-acme'" /></label>
-            <label>Client ID <input name="client_id" [(ngModel)]="ghForm['client_id']" [placeholder]="g['app']?.client_id ?? 'Iv1.…'" /></label>
-            <label>Client secret <input name="client_secret" type="password" autocomplete="off" [(ngModel)]="ghForm['client_secret']" [placeholder]="g['app']?.has_client_secret ? 'Saved; type to replace' : ''" /></label>
-            <label>Webhook secret <input name="webhook_secret" type="password" autocomplete="off" [(ngModel)]="ghForm['webhook_secret']" [placeholder]="g['app']?.has_webhook_secret ? 'Saved; type to replace' : ''" /></label>
-            <label class="wide">Private key (.pem)
-              <textarea name="private_key" rows="5" autocomplete="off" [(ngModel)]="ghForm['private_key']" [placeholder]="g['app']?.has_private_key ? 'Saved; paste a new key to replace' : '-----BEGIN RSA PRIVATE KEY-----'"></textarea>
+            <label>{{ 'App ID' | t }} <input name="app_id" [(ngModel)]="ghForm['app_id']" [placeholder]="g['app']?.app_id ?? '123456'" /></label>
+            <label>{{ 'App slug' | t }} <input name="slug" [(ngModel)]="ghForm['slug']" [placeholder]="g['app']?.slug ?? 'flowly-acme'" /></label>
+            <label>{{ 'Client ID' | t }} <input name="client_id" [(ngModel)]="ghForm['client_id']" [placeholder]="g['app']?.client_id ?? 'Iv1.…'" /></label>
+            <label>{{ 'Client secret' | t }} <input name="client_secret" type="password" autocomplete="off" [(ngModel)]="ghForm['client_secret']" [placeholder]="g['app']?.has_client_secret ? ('Saved; type to replace' | t) : ''" /></label>
+            <label>{{ 'Webhook secret' | t }} <input name="webhook_secret" type="password" autocomplete="off" [(ngModel)]="ghForm['webhook_secret']" [placeholder]="g['app']?.has_webhook_secret ? ('Saved; type to replace' | t) : ''" /></label>
+            <label class="wide">{{ 'Private key (.pem)' | t }}
+              <textarea name="private_key" rows="5" autocomplete="off" [(ngModel)]="ghForm['private_key']" [placeholder]="g['app']?.has_private_key ? ('Saved; paste a new key to replace' | t) : '-----BEGIN RSA PRIVATE KEY-----'"></textarea>
             </label>
-            <div class="wide right"><button class="btn primary" type="submit">Verify & save</button></div>
+            <div class="wide right"><button class="btn primary" type="submit">{{ 'Verify & save' | t }}</button></div>
           </form>
         }
 
-        <h3 class="sub">URLs for the GitHub App settings</h3>
+        <h3 class="sub">{{ 'URLs for the GitHub App settings' | t }}</h3>
         <dl class="facts">
-          <dt>Webhook URL</dt><dd><code>{{ g['webhook_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['webhook_url'])">Copy</button></dd>
-          <dt>Setup URL</dt><dd><code>{{ g['setup_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['setup_url'])">Copy</button></dd>
-          <dt>Callback URL</dt><dd><code>{{ g['callback_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['callback_url'])">Copy</button></dd>
-          <dt>Permissions</dt><dd class="muted small">Issues: read &amp; write · Metadata: read · Events: Issues, Issue comment</dd>
+          <dt>{{ 'Webhook URL' | t }}</dt><dd><code>{{ g['webhook_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['webhook_url'])">Copy</button></dd>
+          <dt>{{ 'Setup URL' | t }}</dt><dd><code>{{ g['setup_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['setup_url'])">Copy</button></dd>
+          <dt>{{ 'Callback URL' | t }}</dt><dd><code>{{ g['callback_url'] }}</code> <button class="btn ghost small" type="button" (click)="copy(g['callback_url'])">Copy</button></dd>
+          <dt>{{ 'Permissions' | t }}</dt><dd class="muted small">{{ 'Issues: read & write · Metadata: read · Events: Issues, Issue comment' | t }}</dd>
         </dl>
       </section>
     }
@@ -183,28 +183,28 @@
           {{ group.name }}
           <span class="actions">
             @if (groupChecks[group.name]; as c) {
-              <button class="btn small ghost" type="button" (click)="check(c.service)">{{ c.label }}</button>
+              <button class="btn small ghost" type="button" (click)="check(c.service)">{{ c.label | t }}</button>
             }
-            <button class="btn small primary" type="button" [disabled]="!dirty(group)" (click)="saveGroup(group)">Save</button>
+            <button class="btn small primary" type="button" [disabled]="!dirty(group)" (click)="saveGroup(group)">{{ 'Save' | t }}</button>
           </span>
         </h2>
         @if (groupChecks[group.name]; as c) {
           @if (checks()[c.service]) {
             <p class="check-line" [class.ok]="checkResult(c.service)?.ok" [class.fail]="checkResult(c.service) && !checkResult(c.service)?.ok">
-              {{ checks()[c.service] === 'running' ? 'Checking…' : checkResult(c.service)?.message }}
+              {{ checks()[c.service] === 'running' ? ('Checking…' | t) : checkResult(c.service)?.message }}
             </p>
           }
         }
         @if (group.name === 'Telegram') {
           <div class="row">
             <span class="grow small muted">
-              Currently receiving messages by <strong>{{ telegramMode() }}</strong>.
-              Webhook mode needs the API URL over HTTPS and is instant; polling runs in the worker.
+              {{ 'Currently receiving messages by' | t }} <strong>{{ telegramMode() }}</strong>.
+              {{ 'Webhook mode needs the API URL over HTTPS and is instant; polling runs in the worker.' | t }}
             </span>
             @if (telegramMode() === 'webhook') {
-              <button class="btn small" type="button" (click)="setWebhook(false)">Switch to polling</button>
+              <button class="btn small" type="button" (click)="setWebhook(false)">{{ 'Switch to polling' | t }}</button>
             } @else {
-              <button class="btn small" type="button" (click)="setWebhook(true)">Use webhook</button>
+              <button class="btn small" type="button" (click)="setWebhook(true)">{{ 'Use webhook' | t }}</button>
             }
           </div>
         }
@@ -212,7 +212,7 @@
           @if (r.key !== 'TELEGRAM_MODE' && r.key !== 'TELEGRAM_WEBHOOK_SECRET') {
             <div class="row setting">
               <label class="grow" [for]="'s-' + r.key">
-                <span class="label">{{ r.label }} <span class="source" [attr.data-source]="r.source">{{ r.source === 'admin' ? 'set here' : r.source === 'environment' ? 'from server env' : 'not set' }}</span></span>
+                <span class="label">{{ r.label }} <span class="source" [attr.data-source]="r.source">{{ (r.source === 'admin' ? 'set here' : r.source === 'environment' ? 'from server env' : 'not set') | t }}</span></span>
                 @if (r.help) {
                   <span class="help muted">{{ r.help }}</span>
                 }
@@ -225,7 +225,7 @@
                   @case ('choice') {
                     <select [id]="'s-' + r.key" [(ngModel)]="drafts[r.key]">
                       @for (c of r.choices; track c) {
-                        <option [value]="c">{{ c || '(default)' }}</option>
+                        <option [value]="c">{{ c || ('(default)' | t) }}</option>
                       }
                     </select>
                   }
@@ -235,14 +235,14 @@
                   @default {
                     @if (r.secret) {
                       <input [id]="'s-' + r.key" type="password" autocomplete="off" [(ngModel)]="drafts[r.key]"
-                        [placeholder]="r.is_set ? 'Saved (' + r.value + '); type to replace' : 'Not set'" />
+                        [placeholder]="r.is_set ? ('Saved ({value}); type to replace' | t: { value: $any(r.value) }) : ('Not set' | t)" />
                     } @else {
                       <input [id]="'s-' + r.key" [type]="r.type === 'url' ? 'url' : 'text'" [(ngModel)]="drafts[r.key]" />
                     }
                   }
                 }
                 @if (r.source === 'admin') {
-                  <button class="btn ghost small" type="button" (click)="reset(r)" title="Remove the override and use the server's environment value">Reset</button>
+                  <button class="btn ghost small" type="button" (click)="reset(r)" [title]="'Remove the override and use the server’s environment value' | t">{{ 'Reset' | t }}</button>
                 }
               </div>
             </div>

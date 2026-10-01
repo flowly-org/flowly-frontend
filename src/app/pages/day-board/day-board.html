@@ -1,26 +1,26 @@
 <div class="toolbar">
   <div class="day-nav">
     <div class="btn-group">
-      <button class="btn icon" type="button" aria-label="Previous day" (click)="shiftDay(-1)">‹</button>
-      <button class="btn" type="button" [disabled]="isToday()" (click)="goToday()">Today</button>
-      <button class="btn icon" type="button" aria-label="Next day" (click)="shiftDay(1)">›</button>
+      <button class="btn icon" type="button" [attr.aria-label]="'Previous day' | t" (click)="shiftDay(-1)">‹</button>
+      <button class="btn" type="button" [disabled]="isToday()" (click)="goToday()">{{ 'Today' | t }}</button>
+      <button class="btn icon" type="button" [attr.aria-label]="'Next day' | t" (click)="shiftDay(1)">›</button>
     </div>
     <div class="titles">
       <span class="eyebrow">{{ title() }}</span>
       <h1>{{ dateLabel() }}</h1>
     </div>
-    <label class="sr-only" for="board-date">Pick a date</label>
+    <label class="sr-only" for="board-date">{{ 'Pick a date' | t }}</label>
     <input id="board-date" class="date-input" type="date" [value]="date()" (change)="setDate($any($event.target).value)" />
   </div>
 
-  <div class="progress" [attr.aria-label]="progress().done + ' of ' + progress().total + ' tasks done'">
+  <div class="progress" [attr.aria-label]="'{done} of {total} tasks done' | t: { done: progress().done, total: progress().total }">
     <div class="bar"><span [style.width.%]="progress().pct"></span></div>
-    <span class="muted">{{ progress().done }}/{{ progress().total }} done</span>
+    <span class="muted">{{ '{done}/{total} done' | t: { done: progress().done, total: progress().total } }}</span>
   </div>
 
   <div class="controls">
     <label class="field">
-      <span>Swimlanes</span>
+      <span>{{ 'Swimlanes' | t }}</span>
       <select [ngModel]="groupBy()" (ngModelChange)="groupBy.set($event)">
         @for (opt of groupChoices(); track opt.value) {
           <option [value]="opt.value">{{ opt.label }}</option>
@@ -28,26 +28,26 @@
       </select>
     </label>
 
-    <div class="segmented" role="group" aria-label="Whose tasks">
-      <button type="button" [class.on]="scope() === 'me'" [attr.aria-pressed]="scope() === 'me'" (click)="scope.set('me')">Mine</button>
-      <button type="button" [class.on]="scope() === 'all'" [attr.aria-pressed]="scope() === 'all'" (click)="scope.set('all')">Everyone</button>
+    <div class="segmented" role="group" [attr.aria-label]="'Whose tasks' | t">
+      <button type="button" [class.on]="scope() === 'me'" [attr.aria-pressed]="scope() === 'me'" (click)="scope.set('me')">{{ 'Mine' | t }}</button>
+      <button type="button" [class.on]="scope() === 'all'" [attr.aria-pressed]="scope() === 'all'" (click)="scope.set('all')">{{ 'Everyone' | t }}</button>
     </div>
 
-    <label class="toggle" title="Show unfinished tasks planned for earlier days">
+    <label class="toggle" [title]="'Show unfinished tasks planned for earlier days' | t">
       <input type="checkbox" [ngModel]="includeOverdue()" (ngModelChange)="includeOverdue.set($event)" />
-      Carry over
+      {{ 'Carry over' | t }}
     </label>
     <label class="toggle">
       <input type="checkbox" [ngModel]="hideEmpty()" (ngModelChange)="hideEmpty.set($event)" />
-      Hide empty lanes
+      {{ 'Hide empty lanes' | t }}
     </label>
 
     <button class="btn" type="button" [class.active]="showBacklog()" (click)="showBacklog.set(!showBacklog())">
-      Backlog <span class="count">{{ backlog().length }}</span>
+      {{ 'Backlog' | t }} <span class="count">{{ backlog().length }}</span>
     </button>
     @if (mode === 'global' && data.multi()) {
-      <label class="field" title="Workspace new tasks are added to">
-        <span>Add to</span>
+      <label class="field" [title]="'Workspace new tasks are added to' | t">
+        <span>{{ 'Add to' | t }}</span>
         <select [ngModel]="newTaskWs()" (ngModelChange)="targetWs.set(+$event)">
           @for (c of contexts(); track c.id) {
             <option [ngValue]="c.id">{{ c.name }}</option>
@@ -55,8 +55,8 @@
         </select>
       </label>
     }
-    <button class="btn" type="button" (click)="bulk.set('day')" title="Paste a list to add many tasks at once">Bulk add</button>
-    <button class="btn primary" type="button" (click)="openNew()">+ New task</button>
+    <button class="btn" type="button" (click)="bulk.set('day')" [title]="'Paste a list to add many tasks at once' | t">{{ 'Bulk add' | t }}</button>
+    <button class="btn primary" type="button" (click)="openNew()">{{ '+ New task' | t }}</button>
   </div>
 </div>
 
@@ -109,7 +109,6 @@
                       [showWorkspace]="showWorkspaceOnCards()"
                       [hideGroup]="hiddenGroup()"
                       (open)="openTask($event)"
-            (openOn)="openTask($event.task, $event.tab)"
                       (openOn)="openTask($event.task, $event.tab)"
                       (toggleDone)="toggleDone($event)"
                     >
@@ -122,15 +121,15 @@
                         <input
                           name="quick"
                           [(ngModel)]="quickAddTitle"
-                          placeholder="Task title, Enter to add"
-                          aria-label="New task title"
+                          [placeholder]="'Task title, Enter to add' | t"
+                          [attr.aria-label]="'New task title' | t"
                           autofocus
                           (keydown.escape)="quickAddLane.set(null)"
                           (blur)="quickAdd(lane, col)"
                         />
                       </form>
                     } @else {
-                      <button type="button" class="add-btn" (click)="startQuickAdd(lane)">+ Add</button>
+                      <button type="button" class="add-btn" (click)="startQuickAdd(lane)">{{ '+ Add' | t }}</button>
                     }
                   }
                 </div>
@@ -141,9 +140,9 @@
       } @empty {
         <p class="center-note">
           @if (hideEmpty() && lanes().length) {
-            Nothing planned for this day. Drag tasks from the backlog or add a new one.
+            {{ 'Nothing planned for this day. Drag tasks from the backlog or add a new one.' | t }}
           } @else {
-            No swimlanes here yet. Add tags to this group on the Tags page, or pick a different grouping.
+            {{ 'No swimlanes here yet. Add tags to this group on the Tags page, or pick a different grouping.' | t }}
           }
         </p>
       }
@@ -151,22 +150,22 @@
   </div>
 
   @if (showBacklog()) {
-    <aside class="backlog" aria-label="Backlog">
+    <aside class="backlog" [attr.aria-label]="'Backlog' | t">
       <header>
-        <h2>Backlog <span class="count">{{ backlog().length }}</span></h2>
-        <button class="btn ghost icon" type="button" aria-label="Close backlog" (click)="showBacklog.set(false)">✕</button>
+        <h2>{{ 'Backlog' | t }} <span class="count">{{ backlog().length }}</span></h2>
+        <button class="btn ghost icon" type="button" [attr.aria-label]="'Close backlog' | t" (click)="showBacklog.set(false)">✕</button>
       </header>
-      <p class="hint muted">Unscheduled tasks. Drag one onto the board to plan it for this day.</p>
-      <button class="btn ghost small bulk-backlog" type="button" (click)="bulk.set('backlog')">Paste a list…</button>
+      <p class="hint muted">{{ 'Unscheduled tasks. Drag one onto the board to plan it for this day.' | t }}</p>
+      <button class="btn ghost small bulk-backlog" type="button" (click)="bulk.set('backlog')">{{ 'Paste a list…' | t }}</button>
       <form class="inline" (ngSubmit)="addToBacklog()">
-        <input name="backlogTitle" [(ngModel)]="backlogTitle" placeholder="Add to backlog…" aria-label="New backlog task" />
+        <input name="backlogTitle" [(ngModel)]="backlogTitle" [placeholder]="'Add to backlog…' | t" [attr.aria-label]="'New backlog task' | t" />
       </form>
       @if (backlog().length > 5) {
         <input
           class="search"
           type="search"
-          placeholder="Filter backlog"
-          aria-label="Filter backlog"
+          [placeholder]="'Filter backlog' | t"
+          [attr.aria-label]="'Filter backlog' | t"
           [ngModel]="backlogQuery()"
           (ngModelChange)="backlogQuery.set($event)"
         />
@@ -187,7 +186,7 @@
             <div class="drop-placeholder" *cdkDragPlaceholder></div>
           </app-task-card>
         } @empty {
-          <p class="empty">Nothing in the backlog.</p>
+          <p class="empty">{{ 'Nothing in the backlog.' | t }}</p>
         }
       </div>
     </aside>

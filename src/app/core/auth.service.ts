@@ -33,6 +33,8 @@ export class AuthService {
   private router = inject(Router);
 
   readonly user = signal<User | null>(null);
+  /** Set by I18nService: use the account's language on a device that has no choice saved yet. */
+  adoptLanguage?: (lang: string | undefined) => void;
   readonly isLoggedIn = computed(() => this.user() !== null);
 
   private accessToken = storageGet(ACCESS);
@@ -61,6 +63,7 @@ export class AuthService {
         email,
         password,
         full_name: fullName,
+        language: document.documentElement.lang || 'en',
       }),
     );
     this.setTokens(res.access, res.refresh);
@@ -72,6 +75,7 @@ export class AuthService {
     try {
       const me = await firstValueFrom(this.http.get<User>(`${this.config.apiUrl}/auth/me/`));
       this.user.set(me);
+      this.adoptLanguage?.(me.language);
       return me;
     } catch {
       this.clear();
@@ -79,7 +83,7 @@ export class AuthService {
     }
   }
 
-  async updateProfile(data: Partial<Pick<User, 'full_name' | 'github_login'>>): Promise<void> {
+  async updateProfile(data: Partial<Pick<User, 'full_name' | 'github_login' | 'language'>>): Promise<void> {
     const me = await firstValueFrom(this.http.patch<User>(`${this.config.apiUrl}/auth/me/`, data));
     this.user.set(me);
   }

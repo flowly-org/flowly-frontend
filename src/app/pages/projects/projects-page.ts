@@ -4,19 +4,22 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { PALETTE, Project } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-projects-page',
-  imports: [FormsModule, NgTemplateOutlet, RouterLink],
+  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe],
   templateUrl: './projects-page.html',
 })
 export class ProjectsPage {
   protected store = inject(WorkspaceStore);
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   protected newName = '';
   protected newColor = PALETTE[this.store.projects().length % PALETTE.length];
@@ -84,7 +87,7 @@ export class ProjectsPage {
     try {
       await this.api.deleteProject(this.wsId, p.id);
       await this.store.refreshProjects();
-      this.toast.show(`Deleted "${p.name}". Its tasks are kept without a project.`);
+      this.toast.show(this.i18n.t('Deleted “{name}”. Its tasks are kept without a project.', { name: p.name }));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }

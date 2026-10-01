@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 
+import { DICTIONARIES } from '../i18n';
 import { ConfigService } from './config.service';
 import {
   WorkspaceMcp,
@@ -465,11 +466,18 @@ function toParams(query: TaskQuery): HttpParams {
 }
 
 /** Flattens DRF validation errors into one readable line. */
-export function errorMessage(err: unknown, fallback = 'Something went wrong.'): string {
+/** Translation of a fixed message for the current UI language (errorMessage is a plain function, outside DI). */
+function tr(text: string, params?: Record<string, string | number>): string {
+  const lang = document.documentElement.lang || 'en';
+  const translated = (lang !== 'en' && DICTIONARIES[lang]?.[text]) || text;
+  return params ? translated.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? '')) : translated;
+}
+
+export function errorMessage(err: unknown, fallback = tr('Something went wrong.')): string {
   const e = err as { error?: unknown; status?: number };
-  if (e?.status === 0) return 'Cannot reach the server.';
+  if (e?.status === 0) return tr('Cannot reach the server.');
   const body = e?.error;
-  if ((e?.status ?? 0) >= 500) return `Server error (${e.status}). Please try again.`;
+  if ((e?.status ?? 0) >= 500) return tr('Server error ({status}). Please try again.', { status: e.status! });
   if (typeof body === 'string' && body.length < 200 && !body.trimStart().startsWith('<')) return body;
   if (body && typeof body === 'object') {
     const parts: string[] = [];

@@ -1,58 +1,58 @@
 <div class="page">
   <header>
     <div>
-      <h1>Members</h1>
-      <p class="muted">Everyone here can see and edit this workspace's projects, tags and tasks.</p>
+      <h1>{{ 'Members' | t }}</h1>
+      <p class="muted">{{ 'Everyone here can see and edit this workspace\'s projects, tags and tasks.' | t }}</p>
     </div>
   </header>
 
   @if (store.canManage()) {
     <section class="panel">
-      <h2>Invite someone</h2>
+      <h2>{{ 'Invite someone' | t }}</h2>
       <form class="inline-form" (ngSubmit)="invite()">
-        <input name="email" type="email" [(ngModel)]="inviteEmail" placeholder="colleague@example.com" aria-label="Email to invite" />
-        <select name="role" [(ngModel)]="inviteRole" aria-label="Role" style="flex: 0 1 140px">
-          <option value="member">Member</option>
-          <option value="admin">Admin</option>
+        <input name="email" type="email" [(ngModel)]="inviteEmail" placeholder="colleague@example.com" [attr.aria-label]="'Email to invite' | t" />
+        <select name="role" [(ngModel)]="inviteRole" [attr.aria-label]="'Role' | t" style="flex: 0 1 140px">
+          <option value="member">{{ 'Member' | t }}</option>
+          <option value="admin">{{ 'Admin' | t }}</option>
         </select>
-        <button class="btn primary" type="submit" [disabled]="!inviteEmail.trim()">Invite</button>
+        <button class="btn primary" type="submit" [disabled]="!inviteEmail.trim()">{{ 'Invite' | t }}</button>
       </form>
     </section>
   }
 
   <section class="panel">
-    <h2>People <span class="muted">{{ store.members().length }}</span></h2>
+    <h2>{{ 'People' | t }} <span class="muted">{{ store.members().length }}</span></h2>
     @for (m of store.members(); track m.id) {
       <div class="row">
         <div class="grow">
           <strong>{{ m.user.full_name || m.user.email }}</strong>
           @if (m.user.is_bot) {
-            <span class="chip" title="Service identity of a workspace MCP token (Integrations)">bot</span>
+            <span class="chip" [title]="'Service identity of a workspace MCP token (Integrations)' | t">{{ 'bot' | t }}</span>
           }
           @if (m.user.id === auth.user()?.id) {
-            <span class="muted"> (you)</span>
+            <span class="muted"> {{ '(you)' | t }}</span>
           }
           @if (!m.user.is_bot) {
             <div class="muted">{{ m.user.email }}</div>
           }
         </div>
         @if (store.canManage() && m.role !== 'owner') {
-          <select [ngModel]="m.role" (ngModelChange)="setRole(m, $event)" [attr.aria-label]="'Role of ' + m.user.email" style="width: auto">
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
+          <select [ngModel]="m.role" (ngModelChange)="setRole(m, $event)" [attr.aria-label]="'Role of {email}' | t: { email: m.user.email }" style="width: auto">
+            <option value="member">{{ 'Member' | t }}</option>
+            <option value="admin">{{ 'Admin' | t }}</option>
           </select>
         } @else {
-          <span class="chip">{{ m.role }}</span>
+          <span class="chip">{{ roleLabel(m.role) | t }}</span>
         }
         @if (m.role !== 'owner' && (store.canManage() || m.user.id === auth.user()?.id)) {
           @if (confirming() === 'm' + m.id) {
             <button class="btn danger small" type="button" (click)="remove(m)">
-              {{ m.user.id === auth.user()?.id ? 'Leave workspace' : 'Remove' }}
+              {{ (m.user.id === auth.user()?.id ? 'Leave workspace' : 'Remove') | t }}
             </button>
-            <button class="btn ghost small" type="button" (click)="confirming.set(null)">Cancel</button>
+            <button class="btn ghost small" type="button" (click)="confirming.set(null)">{{ 'Cancel' | t }}</button>
           } @else {
             <button class="btn ghost danger small" type="button" (click)="confirming.set('m' + m.id)">
-              {{ m.user.id === auth.user()?.id ? 'Leave' : 'Remove' }}
+              {{ (m.user.id === auth.user()?.id ? 'Leave' : 'Remove') | t }}
             </button>
           }
         }
@@ -62,28 +62,34 @@
 
   @if (invitations().length) {
     <section class="panel">
-      <h2>Pending invitations</h2>
+      <h2>{{ 'Pending invitations' | t }}</h2>
       @for (inv of invitations(); track inv.id) {
         <div class="row">
           <div class="grow">
-            {{ inv.email }} <span class="muted">· {{ inv.role }} · waiting to join</span>
+            {{ inv.email }} <span class="muted">· {{ roleLabel(inv.role) | t }} · {{ 'waiting to join' | t }}</span>
           </div>
           @if (store.canManage()) {
             @if (inv.link && !inv.link_expired) {
-              <button class="btn small" type="button" (click)="copyLink(inv.link)" title="Anyone with this link can join with this role">Copy join link</button>
+              <button class="btn small" type="button" (click)="copyLink(inv.link)" [title]="'Anyone with this link can join with this role' | t">{{ 'Copy join link' | t }}</button>
             } @else if (inv.link_expired) {
-              <span class="muted small">link expired</span>
+              <span class="muted small">{{ 'link expired' | t }}</span>
             }
-            <button class="btn ghost danger small" type="button" (click)="revoke(inv)">Revoke</button>
+            <button class="btn ghost danger small" type="button" (click)="revoke(inv)">{{ 'Revoke' | t }}</button>
           }
         </div>
       }
     </section>
   }
 
-  <p class="muted">Your name, GitHub username and concierge live in <a routerLink="/settings">Settings</a>.</p>
+  <p class="muted">
+    {{ 'Your name, GitHub username and concierge are in your personal settings.' | t }}
+    <a routerLink="/settings">{{ 'Open settings' | t }}</a>
+  </p>
 
   @if (store.canManage()) {
-    <p class="muted">Name, colour, time tracking, billing and deleting the workspace are in <a routerLink="../settings">Workspace settings</a>.</p>
+    <p class="muted">
+      {{ 'Name, colour, time tracking, billing and deleting the workspace are in the workspace settings.' | t }}
+      <a routerLink="../settings">{{ 'Workspace settings' | t }}</a>
+    </p>
   }
 </div>

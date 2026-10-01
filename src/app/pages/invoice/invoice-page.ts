@@ -1,16 +1,17 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
+import { I18nService } from '../../core/i18n.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { Invoice } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-invoice-page',
-  imports: [FormsModule, RouterLink, DatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, LocalDatePipe],
   templateUrl: './invoice-page.html',
   styleUrl: './invoice-page.scss',
 })
@@ -21,6 +22,9 @@ export class InvoicePage implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private i18n = inject(I18nService);
+
+  protected readonly statusLabels: Record<string, string> = { draft: 'Draft', sent: 'Sent', paid: 'Paid', void: 'Void' };
 
   protected invoice = signal<Invoice | null>(null);
   protected confirmDelete = signal(false);
@@ -36,7 +40,7 @@ export class InvoicePage implements OnInit {
       this.invoice.set(inv);
       this.edit = { client_name: inv.client_name, client_details: inv.client_details, notes: inv.notes, due_date: inv.due_date };
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Invoice not found.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Invoice not found.')));
     }
   }
 
@@ -45,7 +49,7 @@ export class InvoicePage implements OnInit {
     if (!inv) return;
     try {
       this.invoice.set(await this.api.updateInvoice(this.wsId, inv.id, data));
-      this.toast.show('Invoice updated.');
+      this.toast.show(this.i18n.t('Invoice updated.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }

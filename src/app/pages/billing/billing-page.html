@@ -1,84 +1,84 @@
 <div class="page wide">
   <header>
     <div>
-      <h1>Billing</h1>
-      <p class="muted">Turn billing on for {{ store.current()?.name }}, set rates per project (or opt projects out), and invoice tracked time.</p>
+      <h1>{{ 'Billing' | t }}</h1>
+      <p class="muted">{{ 'Turn billing on for {name}, set rates per project (or opt projects out), and invoice tracked time.' | t: { name: store.current()?.name } }}</p>
     </div>
   </header>
 
   @if (!store.canManage()) {
-    <section class="panel"><p class="empty">Only workspace owners and admins can manage billing.</p></section>
+    <section class="panel"><p class="empty">{{ 'Only workspace owners and admins can manage billing.' | t }}</p></section>
   } @else if (settings(); as s) {
     <section class="panel">
       <h2>
-        <span class="group-title">Billing <span class="state" [class.on]="s.enabled">{{ s.enabled ? 'ON' : 'OFF' }}</span></span>
+        <span class="group-title">{{ 'Billing' | t }} <span class="state" [class.on]="s.enabled">{{ (s.enabled ? 'ON' : 'OFF') | t }}</span></span>
         <label class="switch-line">
           <input type="checkbox" [checked]="s.enabled" (change)="toggleEnabled($any($event.target).checked)" />
-          Enable billing for this workspace
+          {{ 'Enable billing for this workspace' | t }}
         </label>
       </h2>
       <form class="grid" (ngSubmit)="saveSettings()">
-        <label>Currency <input name="currency" [(ngModel)]="form.currency" maxlength="3" /></label>
-        <label>Default hourly rate <input name="rate" type="number" step="0.01" min="0" [(ngModel)]="form.default_rate" /></label>
+        <label>{{ 'Currency' | t }} <input name="currency" [(ngModel)]="form.currency" maxlength="3" /></label>
+        <label>{{ 'Default hourly rate' | t }} <input name="rate" type="number" step="0.01" min="0" [(ngModel)]="form.default_rate" /></label>
         <label>
-          Round each entry up to
+          {{ 'Round each entry up to' | t }}
           <select name="rounding" [(ngModel)]="form.rounding_minutes">
-            <option [ngValue]="0">exact time</option>
-            <option [ngValue]="5">5 minutes</option>
-            <option [ngValue]="6">6 minutes</option>
-            <option [ngValue]="10">10 minutes</option>
-            <option [ngValue]="15">15 minutes</option>
-            <option [ngValue]="30">30 minutes</option>
-            <option [ngValue]="60">1 hour</option>
+            <option [ngValue]="0">{{ 'exact time' | t }}</option>
+            <option [ngValue]="5">{{ '{n} minutes' | t: { n: 5 } }}</option>
+            <option [ngValue]="6">{{ '{n} minutes' | t: { n: 6 } }}</option>
+            <option [ngValue]="10">{{ '{n} minutes' | t: { n: 10 } }}</option>
+            <option [ngValue]="15">{{ '{n} minutes' | t: { n: 15 } }}</option>
+            <option [ngValue]="30">{{ '{n} minutes' | t: { n: 30 } }}</option>
+            <option [ngValue]="60">{{ '1 hour' | t }}</option>
           </select>
         </label>
-        <label>Tax rate (%) <input name="tax" type="number" step="0.01" min="0" [(ngModel)]="form.tax_rate" /></label>
-        <label>Invoice prefix <input name="prefix" [(ngModel)]="form.invoice_prefix" /></label>
-        <label>Next number <input name="next" type="number" min="1" [(ngModel)]="form.next_invoice_number" /></label>
-        <label>Payment terms (days) <input name="terms" type="number" min="0" [(ngModel)]="form.payment_terms_days" /></label>
-        <label class="check-line"><input type="checkbox" name="billable_default" [(ngModel)]="form.billable_by_default" /> New time is billable by default</label>
-        <label class="wide">Your business name <input name="issuer" [(ngModel)]="form.issuer_name" /></label>
-        <label class="wide">Your details on invoices <textarea name="issuer_details" rows="3" [(ngModel)]="form.issuer_details" placeholder="Address, VAT number, IBAN…"></textarea></label>
-        <label class="wide">Default invoice notes <textarea name="notes" rows="2" [(ngModel)]="form.invoice_notes"></textarea></label>
-        <div class="wide actions"><button class="btn primary" type="submit">Save settings</button></div>
+        <label>{{ 'Tax rate (%)' | t }} <input name="tax" type="number" step="0.01" min="0" [(ngModel)]="form.tax_rate" /></label>
+        <label>{{ 'Invoice prefix' | t }} <input name="prefix" [(ngModel)]="form.invoice_prefix" /></label>
+        <label>{{ 'Next number' | t }} <input name="next" type="number" min="1" [(ngModel)]="form.next_invoice_number" /></label>
+        <label>{{ 'Payment terms (days)' | t }} <input name="terms" type="number" min="0" [(ngModel)]="form.payment_terms_days" /></label>
+        <label class="check-line"><input type="checkbox" name="billable_default" [(ngModel)]="form.billable_by_default" /> {{ 'New time is billable by default' | t }}</label>
+        <label class="wide">{{ 'Your business name' | t }} <input name="issuer" [(ngModel)]="form.issuer_name" /></label>
+        <label class="wide">{{ 'Your details on invoices' | t }} <textarea name="issuer_details" rows="3" [(ngModel)]="form.issuer_details" [placeholder]="'Address, VAT number, IBAN…' | t"></textarea></label>
+        <label class="wide">{{ 'Default invoice notes' | t }} <textarea name="notes" rows="2" [(ngModel)]="form.invoice_notes"></textarea></label>
+        <div class="wide actions"><button class="btn primary" type="submit">{{ 'Save settings' | t }}</button></div>
       </form>
     </section>
 
     <section class="panel">
-      <h2>Projects</h2>
+      <h2>{{ 'Projects' | t }}</h2>
       <div class="table-wrap">
         <table class="projects">
           <thead>
-            <tr><th>Project</th><th>Billing</th><th>Rate / h</th><th>Client</th><th class="num">Tracked</th><th class="num">Unbilled</th></tr>
+            <tr><th>{{ 'Project' | t }}</th><th>{{ 'Billing' | t }}</th><th>{{ 'Rate / h' | t }}</th><th>{{ 'Client' | t }}</th><th class="num">{{ 'Tracked' | t }}</th><th class="num">{{ 'Unbilled' | t }}</th></tr>
           </thead>
           <tbody>
             @for (p of projects(); track p.project) {
               <tr [class.muted-row]="p.archived">
                 <td><span class="dot" [style.background]="p.color"></span> {{ p.name }}</td>
                 <td>
-                  <select [value]="p.mode" (change)="updateProject(p, { mode: $any($event.target).value })" [attr.aria-label]="'Billing for ' + p.name">
-                    <option value="inherit" [selected]="p.mode === 'inherit'">Default rate</option>
-                    <option value="hourly" [selected]="p.mode === 'hourly'">Own rate</option>
-                    <option value="off" [selected]="p.mode === 'off'">Not billable</option>
+                  <select [value]="p.mode" (change)="updateProject(p, { mode: $any($event.target).value })" [attr.aria-label]="'Billing for {name}' | t: { name: p.name }">
+                    <option value="inherit" [selected]="p.mode === 'inherit'">{{ 'Default rate' | t }}</option>
+                    <option value="hourly" [selected]="p.mode === 'hourly'">{{ 'Own rate' | t }}</option>
+                    <option value="off" [selected]="p.mode === 'off'">{{ 'Not billable' | t }}</option>
                   </select>
                 </td>
                 <td>
                   @if (p.mode === 'hourly') {
                     <input type="number" step="0.01" min="0" class="rate" [value]="p.hourly_rate ?? ''"
-                      (change)="updateProject(p, { mode: 'hourly', hourly_rate: $any($event.target).value })" [attr.aria-label]="'Rate for ' + p.name" />
+                      (change)="updateProject(p, { mode: 'hourly', hourly_rate: $any($event.target).value })" [attr.aria-label]="'Rate for {name}' | t: { name: p.name }" />
                   } @else {
                     <span class="muted">{{ p.effective_rate ?? '—' }}</span>
                   }
                 </td>
                 <td>
-                  <input class="client" [value]="p.client_name" placeholder="Client name" (change)="updateProject(p, { client_name: $any($event.target).value })"
-                    [attr.aria-label]="'Client for ' + p.name" />
+                  <input class="client" [value]="p.client_name" [placeholder]="'Client name' | t" (change)="updateProject(p, { client_name: $any($event.target).value })"
+                    [attr.aria-label]="'Client for {name}' | t: { name: p.name }" />
                 </td>
                 <td class="num">{{ p.tracked_hours }} h</td>
                 <td class="num">{{ p.mode === 'off' ? '—' : p.unbilled_hours + ' h' }}</td>
               </tr>
             } @empty {
-              <tr><td colspan="6" class="muted">No projects yet.</td></tr>
+              <tr><td colspan="6" class="muted">{{ 'No projects yet.' | t }}</td></tr>
             }
           </tbody>
         </table>
@@ -86,34 +86,34 @@
     </section>
 
     <section class="panel">
-      <h2>Invoices</h2>
+      <h2>{{ 'Invoices' | t }}</h2>
       @if (s.enabled) {
         <form class="inline-form" (ngSubmit)="createInvoice()">
-          <select name="project" [(ngModel)]="newInvoice.project" aria-label="Project to invoice">
-            <option [ngValue]="null">All projects</option>
+          <select name="project" [(ngModel)]="newInvoice.project" [attr.aria-label]="'Project to invoice' | t">
+            <option [ngValue]="null">{{ 'All projects' | t }}</option>
             @for (p of projects(); track p.project) {
               @if (p.mode !== 'off') {
                 <option [ngValue]="p.project">{{ p.name }}{{ p.client_name ? ' (' + p.client_name + ')' : '' }}</option>
               }
             }
           </select>
-          <input type="date" name="from" [(ngModel)]="newInvoice.period_start" aria-label="From" />
-          <input type="date" name="to" [(ngModel)]="newInvoice.period_end" aria-label="To" />
-          <select name="group" [(ngModel)]="newInvoice.group_by" aria-label="Lines">
-            <option value="task">One line per task</option>
-            <option value="day">One line per day</option>
-            <option value="entry">One line per entry</option>
+          <input type="date" name="from" [(ngModel)]="newInvoice.period_start" [attr.aria-label]="'From' | t" />
+          <input type="date" name="to" [(ngModel)]="newInvoice.period_end" [attr.aria-label]="'To' | t" />
+          <select name="group" [(ngModel)]="newInvoice.group_by" [attr.aria-label]="'Lines' | t">
+            <option value="task">{{ 'One line per task' | t }}</option>
+            <option value="day">{{ 'One line per day' | t }}</option>
+            <option value="entry">{{ 'One line per entry' | t }}</option>
           </select>
-          <button class="btn primary" type="submit" [disabled]="creating()">Create draft invoice</button>
+          <button class="btn primary" type="submit" [disabled]="creating()">{{ 'Create draft invoice' | t }}</button>
         </form>
       } @else {
-        <p class="empty">Enable billing to create invoices.</p>
+        <p class="empty">{{ 'Enable billing to create invoices.' | t }}</p>
       }
       @for (inv of invoices(); track inv.id) {
         <a class="row invoice-row" [routerLink]="['invoices', inv.id]">
           <strong class="num-col">{{ inv.number }}</strong>
-          <span class="grow">{{ inv.client_name || inv.project_name || 'All projects' }} <span class="muted small">· {{ inv.period_start | date: 'MMM d' }} – {{ inv.period_end | date: 'MMM d, y' }}</span></span>
-          <span class="status" [attr.data-status]="inv.status">{{ inv.status }}</span>
+          <span class="grow">{{ inv.client_name || inv.project_name || ('All projects' | t) }} <span class="muted small">· {{ inv.period_start | ldate: 'MMM d' }} – {{ inv.period_end | ldate: 'MMM d, y' }}</span></span>
+          <span class="status" [attr.data-status]="inv.status">{{ statusLabels[inv.status] | t }}</span>
           <strong class="amount">{{ inv.total }} {{ inv.currency }}</strong>
         </a>
       }

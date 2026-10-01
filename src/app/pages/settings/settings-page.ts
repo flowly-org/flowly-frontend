@@ -1,9 +1,10 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService, LANGUAGES } from '../../core/i18n.service';
 import { ApiTokenRow, ConciergeState } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
@@ -16,7 +17,7 @@ interface ChatLine {
 
 @Component({
   selector: 'app-settings-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, TranslatePipe, LocalDatePipe],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.scss',
 })
@@ -26,6 +27,8 @@ export class SettingsPage implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private notifications = inject(NotificationService);
+  protected i18n = inject(I18nService);
+  protected readonly languages = LANGUAGES;
 
   protected fullName = this.auth.user()?.full_name ?? '';
   protected githubLogin = this.auth.user()?.github_login ?? '';
@@ -98,7 +101,7 @@ export class SettingsPage implements OnInit {
   }
 
   protected copy(text: string) {
-    const done = () => this.toast.show('Copied.');
+    const done = () => this.toast.show(this.i18n.t('Copied.'));
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(done);
       return;
@@ -116,14 +119,14 @@ export class SettingsPage implements OnInit {
     try {
       this.state.set(await this.api.concierge());
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not load concierge settings.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not load concierge settings.')));
     }
   }
 
   async saveProfile() {
     try {
       await this.auth.updateProfile({ full_name: this.fullName.trim(), github_login: this.githubLogin.trim() });
-      this.toast.show('Profile saved.');
+      this.toast.show(this.i18n.t('Profile saved.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -157,9 +160,9 @@ export class SettingsPage implements OnInit {
     await this.load();
     if (this.state()?.telegram.linked) {
       this.linkUrl.set(null);
-      this.toast.show('Telegram connected.');
+      this.toast.show(this.i18n.t('Telegram connected.'));
     } else {
-      this.toast.show('Not linked yet. Tap Start in Telegram, then check again.');
+      this.toast.show(this.i18n.t('Not linked yet. Tap Start in Telegram, then check again.'));
     }
   }
 
@@ -186,7 +189,7 @@ export class SettingsPage implements OnInit {
       this.chat.update((c) => [...c, { role: 'assistant', text: reply }]);
       this.notifications.refresh(false);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'The concierge did not answer.'));
+      this.toast.error(errorMessage(err, this.i18n.t('The concierge did not answer.')));
     } finally {
       this.busy.set(false);
       this.load();
@@ -205,7 +208,7 @@ export class SettingsPage implements OnInit {
     await this.api.forgetConcierge();
     this.chat.set([]);
     await this.load();
-    this.toast.show('Memory and chat history cleared.');
+    this.toast.show(this.i18n.t('Memory and chat history cleared.'));
   }
 
   async enableSystem() {

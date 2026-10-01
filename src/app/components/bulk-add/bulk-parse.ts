@@ -20,7 +20,8 @@ export interface Draft {
   project: Project | null;
   /** undefined = use the dialog's default day; null = backlog. */
   date: string | null | undefined;
-  warnings: string[];
+  /** Untranslated message keys with a {value} placeholder; shown with the `t` pipe. */
+  warnings: { key: string; value: string }[];
 }
 
 const BULLET = /^(?:[-*•+]|\d+[.)])\s+/;
@@ -81,7 +82,7 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
           draft.priority = p;
           continue;
         }
-        draft.warnings.push(`No priority “${value}”`);
+        draft.warnings.push({ key: 'No priority “{value}”: left in the title', value });
       } else if (value && sigil === '#') {
         const tag = labelTags.find((t) => norm(t.name) === norm(value) || norm(t.name) === norm('@' + value));
         if (tag) {
@@ -89,14 +90,14 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
           draft.tags.push(tag);
           continue;
         }
-        draft.warnings.push(`No tag “${value}”`);
+        draft.warnings.push({ key: 'No tag “{value}”: left in the title', value });
       } else if (value && sigil === '+') {
         const project = projects.find((p) => norm(p.name) === norm(value)) ?? projects.find((p) => norm(p.name).startsWith(norm(value)));
         if (project) {
           draft.project = project;
           continue;
         }
-        draft.warnings.push(`No project “${value}”`);
+        draft.warnings.push({ key: 'No project “{value}”: left in the title', value });
       } else if (value && sigil === '@') {
         const tag = labelTags.find((t) => norm(t.name) === norm(word));
         if (tag) {
@@ -110,7 +111,7 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
           draft.date = date;
           continue;
         }
-        draft.warnings.push(`Didn't understand “${word}”`);
+        draft.warnings.push({ key: 'Didn’t understand “{value}”: left in the title', value: word });
       }
       words.push(word);
     }

@@ -6,7 +6,10 @@ import localeFr from '@angular/common/locales/fr';
 import localeIt from '@angular/common/locales/it';
 import localePt from '@angular/common/locales/pt';
 
+import { inject } from '@angular/core';
+
 import { DICTIONARIES } from '../i18n';
+import { AuthService } from './auth.service';
 
 export type Lang = 'en' | 'it' | 'es' | 'fr' | 'de' | 'pt';
 
@@ -40,16 +43,31 @@ function detect(): Lang {
 export class I18nService {
   readonly lang = signal<Lang>(detect());
 
+  private auth = inject(AuthService);
+
   constructor() {
     document.documentElement.lang = this.lang();
+    this.auth.adoptLanguage = (lang) => {
+      let saved: string | null = null;
+      try {
+        saved = localStorage.getItem(KEY);
+      } catch {}
+      if (!saved && lang && LANGUAGES.some((l) => l.code === lang) && lang !== this.lang()) this.apply(lang as Lang);
+    };
   }
 
+  /** Change the language from the UI: remembered on this device and on the account. */
   set(lang: Lang) {
-    this.lang.set(lang);
-    document.documentElement.lang = lang;
+    this.apply(lang);
     try {
       localStorage.setItem(KEY, lang);
     } catch {}
+    if (this.auth.isLoggedIn()) this.auth.updateProfile({ language: lang }).catch(() => {});
+  }
+
+  private apply(lang: Lang) {
+    this.lang.set(lang);
+    document.documentElement.lang = lang;
   }
 
   t(text: string, params?: Record<string, string | number | null | undefined>): string {

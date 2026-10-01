@@ -35,6 +35,10 @@ export interface Column {
 
 const norm = (s: string) => s.trim().toLowerCase();
 
+/** Translates fixed labels ("No project", "Unassigned"…); identity when not given. */
+export type Translate = (text: string, params?: Record<string, string>) => string;
+const same: Translate = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? '') : text);
+
 export function accepts(lane: Lane, wsId: number): boolean {
   return lane.workspaces === null || lane.workspaces.includes(wsId);
 }
@@ -53,7 +57,9 @@ export function buildColumns(contexts: WorkspaceContext[]): Column[] {
       col.statusIds.set(ctx.id, tag.id);
     }
   }
-  return [...columns.values()];
+  // Columns that count as done go last, even when only some workspaces have them.
+  const all = [...columns.values()];
+  return [...all.filter((c) => !c.isDone), ...all.filter((c) => c.isDone)];
 }
 
 export function columnKeyOf(task: Task, tagById: Map<number, Tag>): string | null {
@@ -62,16 +68,16 @@ export function columnKeyOf(task: Task, tagById: Map<number, Tag>): string | nul
 }
 
 /** Group-by choices: tag groups of every kind except status (those are the columns), merged by name. */
-export function groupOptions(contexts: WorkspaceContext[]): { value: GroupBy; label: string }[] {
+export function groupOptions(contexts: WorkspaceContext[], t: Translate = same): { value: GroupBy; label: string }[] {
   const names = new Map<string, string>();
   for (const ctx of contexts)
     for (const g of ctx.tag_groups) if (g.kind !== 'status' && !names.has(norm(g.name))) names.set(norm(g.name), g.name);
   return [
-    ...(contexts.length > 1 ? [{ value: 'workspace' as GroupBy, label: 'Workspace' }] : []),
-    { value: 'project', label: 'Project' },
-    { value: 'assignee', label: 'Assignee' },
+    ...(contexts.length > 1 ? [{ value: 'workspace' as GroupBy, label: t('Workspace') }] : []),
+    { value: 'project', label: t('Project') },
+    { value: 'assignee', label: t('Assignee') },
     ...[...names.values()].map((name) => ({ value: `tags:${name}` as GroupBy, label: name })),
-    { value: 'none', label: 'No grouping' },
+    { value: 'none', label: t('No grouping') },
   ];
 }
 
@@ -111,7 +117,7 @@ export function laneKeyOf(
   return `t:${tag ? norm(tag.name) : 'none'}`;
 }
 
-export function buildLanes(groupBy: GroupBy, contexts: WorkspaceContext[], tasks: Task[]): Lane[] {
+export function buildLanes(groupBy: GroupBy, contexts: WorkspaceContext[], tasks: Task[], t: Translate = same): Lane[] {
   const multi = contexts.length > 1;
 
   if (groupBy === 'workspace') {
@@ -141,7 +147,7 @@ export function buildLanes(groupBy: GroupBy, contexts: WorkspaceContext[], tasks
         });
       }
     }
-    lanes.push({ key: 'p:none', label: 'No project', sublabel: null, color: null, workspaces: null, assign: () => ({ project: null }) });
+    lanes.push({ key: 'p:none', label: t('No project'), sublabel: null, color: null, workspaces: null, assign: () => ({ project: null }) });
     return lanes;
   }
 
@@ -163,12 +169,12 @@ export function buildLanes(groupBy: GroupBy, contexts: WorkspaceContext[], tasks
         workspaces,
         assign: () => ({ assignee: user.id }),
       })),
-      { key: 'u:none', label: 'Unassigned', sublabel: null, color: null, workspaces: null, assign: () => ({ assignee: null }) },
+      { key: 'u:none', label: t('Unassigned'), sublabel: null, color: null, workspaces: null, assign: () => ({ assignee: null }) },
     ];
   }
 
   if (groupBy === 'none') {
-    return [{ key: 'all', label: 'All tasks', sublabel: null, color: null, workspaces: null, assign: () => ({}) }];
+    return [{ key: 'all', label: t('All tasks'), sublabel: null, color: null, workspaces: null, assign: () => ({}) }];
   }
 
   const name = groupNameOf(groupBy)!;
@@ -198,7 +204,7 @@ export function buildLanes(groupBy: GroupBy, contexts: WorkspaceContext[], tasks
     ...lanes.values(),
     {
       key: 't:none',
-      label: `No ${label.toLowerCase()}`,
+      label: t('No {group}', { group: label.toLowerCase() }),
       sublabel: null,
       color: null,
       workspaces: null,

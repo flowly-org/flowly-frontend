@@ -1,9 +1,11 @@
-import { DatePipe, JsonPipe } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { Delivery, GitHubAppInfo, Integration, IntegrationKind, TASK_EVENTS, WorkspaceMcp } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
@@ -43,7 +45,7 @@ const DEFAULT_EVENTS: Partial<Record<IntegrationKind, string[]>> = {
 
 @Component({
   selector: 'app-integrations-page',
-  imports: [FormsModule, DatePipe, JsonPipe],
+  imports: [FormsModule, JsonPipe, TranslatePipe, LocalDatePipe],
   templateUrl: './integrations-page.html',
   styleUrl: './integrations-page.scss',
 })
@@ -53,6 +55,7 @@ export class IntegrationsPage implements OnInit {
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private i18n = inject(I18nService);
 
   protected readonly kinds = KINDS;
   protected readonly events = TASK_EVENTS;
@@ -68,7 +71,7 @@ export class IntegrationsPage implements OnInit {
   protected appName = 'Flowly';
   protected mcp = signal<WorkspaceMcp | null>(null);
   protected mcpNew = signal<WorkspaceMcp['tokens'][number] | null>(null);
-  protected mcpTokenName = 'Automation';
+  protected mcpTokenName = this.i18n.t('Automation');
   protected appOrg = '';
 
   protected readonly current = computed(() => {
@@ -102,7 +105,7 @@ export class IntegrationsPage implements OnInit {
     try {
       this.items.set(await this.api.integrations(this.wsId));
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not load integrations.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not load integrations.')));
     }
   }
 
@@ -114,7 +117,7 @@ export class IntegrationsPage implements OnInit {
 
   async createMcpToken() {
     try {
-      this.mcpNew.set(await this.api.createWorkspaceMcpToken(this.wsId, this.mcpTokenName.trim() || 'Automation'));
+      this.mcpNew.set(await this.api.createWorkspaceMcpToken(this.wsId, this.mcpTokenName.trim() || this.i18n.t('Automation')));
       await this.loadMcp();
     } catch (err) {
       this.toast.error(errorMessage(err));
@@ -142,7 +145,7 @@ export class IntegrationsPage implements OnInit {
   }
 
   protected projectName(id: number | null): string {
-    return id === null ? 'Whole workspace' : (this.store.projectById().get(id)?.name ?? 'Project');
+    return id === null ? this.i18n.t('Whole workspace') : (this.store.projectById().get(id)?.name ?? this.i18n.t('Project'));
   }
 
   protected setFilter(value: string) {
@@ -212,7 +215,7 @@ export class IntegrationsPage implements OnInit {
     if (f.kind === 'outgoing_webhook' || f.kind === 'slack') config['events'] = [...f.events];
     const payload: Partial<Integration> & { api_key?: string } = {
       kind: f.kind,
-      name: f.name.trim() || this.kindInfo(f.kind).label,
+      name: f.name.trim() || this.i18n.t(this.kindInfo(f.kind).label),
       project: f.project,
       enabled: f.enabled,
       config,
@@ -224,10 +227,12 @@ export class IntegrationsPage implements OnInit {
         ? await this.api.updateIntegration(this.wsId, f.id, payload)
         : await this.api.createIntegration(this.wsId, payload);
       await this.load();
-      this.toast.show(f.id ? 'Saved.' : `${this.kindInfo(f.kind).label} integration added.`);
+      this.toast.show(
+        f.id ? this.i18n.t('Saved.') : this.i18n.t('{kind} integration added.', { kind: this.i18n.t(this.kindInfo(f.kind).label) }),
+      );
       this.edit(saved);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not save the integration.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not save the integration.')));
     } finally {
       this.busy.set(false);
     }
@@ -249,7 +254,7 @@ export class IntegrationsPage implements OnInit {
       await this.api.deleteIntegration(this.wsId, f.id);
       this.form.set(null);
       await this.load();
-      this.toast.show('Integration removed.');
+      this.toast.show(this.i18n.t('Integration removed.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -261,8 +266,13 @@ export class IntegrationsPage implements OnInit {
     this.busy.set(true);
     try {
       const d = await this.api.testIntegration(this.wsId, f.id);
-      if (d.status === 'success') this.toast.show(`Test delivered${d.response_body ? ': ' + d.response_body.slice(0, 80) : '.'}`);
-      else this.toast.error(`Test failed: ${d.last_error || d.response_status}`);
+      if (d.status === 'success')
+        this.toast.show(
+          d.response_body
+            ? this.i18n.t('Test delivered: {response}', { response: d.response_body.slice(0, 80) })
+            : this.i18n.t('Test delivered.'),
+        );
+      else this.toast.error(this.i18n.t('Test failed: {error}', { error: d.last_error || d.response_status }));
       await Promise.all([this.loadDeliveries(), this.load()]);
     } catch (err) {
       this.toast.error(errorMessage(err));
@@ -277,7 +287,7 @@ export class IntegrationsPage implements OnInit {
     try {
       await this.api.rotateSecret(this.wsId, f.id);
       await this.load();
-      this.toast.show('New secret generated. Update the other side.');
+      this.toast.show(this.i18n.t('New secret generated. Update the other side.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -296,7 +306,9 @@ export class IntegrationsPage implements OnInit {
     if (!f?.id) return;
     try {
       const res = await this.api.retryDelivery(this.wsId, f.id, d.id);
-      this.toast.show(res.status === 'success' ? 'Delivered.' : `Still failing: ${res.last_error}`);
+      this.toast.show(
+        res.status === 'success' ? this.i18n.t('Delivered.') : this.i18n.t('Still failing: {error}', { error: res.last_error }),
+      );
       await this.loadDeliveries();
     } catch (err) {
       this.toast.error(errorMessage(err));
@@ -322,7 +334,7 @@ export class IntegrationsPage implements OnInit {
     try {
       this.repos.set(await this.api.githubRepos(this.wsId, f.id));
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not list repositories.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not list repositories.')));
     }
   }
 
@@ -350,8 +362,9 @@ export class IntegrationsPage implements OnInit {
 
   // --- helpers --------------------------------------------------------------
 
-  protected copy(text: string, what = 'Copied') {
-    const done = () => this.toast.show(`${what} to clipboard.`);
+  /** `message` is an English key, e.g. 'URL copied to clipboard.' */
+  protected copy(text: string, message = 'Copied to clipboard.') {
+    const done = () => this.toast.show(this.i18n.t(message));
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(done, () => this.fallbackCopy(text, done));
     } else {
@@ -370,9 +383,18 @@ export class IntegrationsPage implements OnInit {
       document.execCommand('copy');
       done();
     } catch {
-      this.toast.error('Copy failed; select the text and copy it manually.');
+      this.toast.error(this.i18n.t('Copy failed; select the text and copy it manually.'));
     }
     area.remove();
+  }
+
+  protected inboundExample(token: string): string {
+    return `${token}@your-inbound-domain`;
+  }
+
+  /** English label of a delivery status (translated in the template). */
+  protected statusLabel(status: string): string {
+    return ({ pending: 'Pending', success: 'Success', failed: 'Failed', ignored: 'Ignored' } as Record<string, string>)[status] ?? status;
   }
 
   protected isAi(kind: IntegrationKind): boolean {

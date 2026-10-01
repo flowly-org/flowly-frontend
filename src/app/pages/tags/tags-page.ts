@@ -3,13 +3,14 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
 import { PALETTE, Tag, TagGroup } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-tags-page',
-  imports: [FormsModule, NgTemplateOutlet],
+  imports: [FormsModule, NgTemplateOutlet, TranslatePipe],
   templateUrl: './tags-page.html',
 })
 export class TagsPage {
@@ -17,6 +18,8 @@ export class TagsPage {
   private api = inject(ApiService);
   private toast = inject(ToastService);
 
+  protected readonly contextExamples = '@office, @home';
+  protected readonly energyExamples = 'deep, light';
   protected newGroupName = '';
   /** Draft tag name per group id ('free' for ungrouped tags). */
   protected drafts: Record<string, string> = {};

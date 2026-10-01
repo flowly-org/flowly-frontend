@@ -1,17 +1,17 @@
 <div class="page wide">
   <header>
     <div>
-      <h1>Time</h1>
-      <p class="muted">Time tracked in {{ store.current()?.name }}. Start a timer from any task card (▶) or log time here.</p>
+      <h1>{{ 'Time' | t }}</h1>
+      <p class="muted">{{ 'Time tracked in {name}. Start a timer from any task card (▶) or log time here.' | t: { name: store.current()?.name } }}</p>
     </div>
     <div class="week">
-      <button class="btn icon" type="button" aria-label="Previous week" (click)="shift(-1)">‹</button>
-      <span>{{ from() | date: 'MMM d' }} – {{ to() | date: 'MMM d, y' }}</span>
-      <button class="btn icon" type="button" aria-label="Next week" (click)="shift(1)">›</button>
+      <button class="btn icon" type="button" [attr.aria-label]="'Previous week' | t" (click)="shift(-1)">‹</button>
+      <span>{{ from() | ldate: 'MMM d' }} – {{ to() | ldate: 'MMM d, y' }}</span>
+      <button class="btn icon" type="button" [attr.aria-label]="'Next week' | t" (click)="shift(1)">›</button>
       @if (store.canManage()) {
-        <div class="segmented" role="group" aria-label="Whose time">
-          <button type="button" [class.on]="who() === 'me'" (click)="who.set('me')">Mine</button>
-          <button type="button" [class.on]="who() === 'all'" (click)="who.set('all')">Everyone</button>
+        <div class="segmented" role="group" [attr.aria-label]="'Whose time' | t">
+          <button type="button" [class.on]="who() === 'me'" (click)="who.set('me')">{{ 'Mine' | t }}</button>
+          <button type="button" [class.on]="who() === 'all'" (click)="who.set('all')">{{ 'Everyone' | t }}</button>
         </div>
       }
     </div>
@@ -20,21 +20,21 @@
   @if (report(); as r) {
     <section class="panel">
       <h2>
-        Summary
-        <select [ngModel]="group()" (ngModelChange)="group.set($event)" aria-label="Group by">
-          <option value="project">By project</option>
-          <option value="task">By task</option>
-          <option value="day">By day</option>
+        {{ 'Summary' | t }}
+        <select [ngModel]="group()" (ngModelChange)="group.set($event)" [attr.aria-label]="'Group by' | t">
+          <option value="project">{{ 'By project' | t }}</option>
+          <option value="task">{{ 'By task' | t }}</option>
+          <option value="day">{{ 'By day' | t }}</option>
           @if (who() === 'all') {
-            <option value="user">By person</option>
+            <option value="user">{{ 'By person' | t }}</option>
           }
         </select>
       </h2>
       <div class="table-wrap">
         <table class="report">
           <thead>
-            <tr><th></th><th class="num">Tracked</th>
-              @if (r.billing_enabled) {<th class="num">Billable</th><th class="num">Amount ({{ r.currency }})</th>}
+            <tr><th></th><th class="num">{{ 'Tracked' | t }}</th>
+              @if (r.billing_enabled) {<th class="num">{{ 'Billable' | t }}</th><th class="num">{{ 'Amount ({currency})' | t: { currency: r.currency } }}</th>}
             </tr>
           </thead>
           <tbody>
@@ -48,12 +48,12 @@
                 }
               </tr>
             } @empty {
-              <tr><td class="muted" colspan="4">No time this week.</td></tr>
+              <tr><td class="muted" colspan="4">{{ 'No time this week.' | t }}</td></tr>
             }
           </tbody>
           <tfoot>
             <tr>
-              <th>Total</th>
+              <th>{{ 'Total' | t }}</th>
               <th class="num">{{ formatDuration(r.totals.seconds) }}</th>
               @if (r.billing_enabled) {
                 <th class="num">{{ formatDuration(r.totals.billable_seconds) }}</th>
@@ -67,48 +67,48 @@
   }
 
   <section class="panel">
-    <h2>Add time</h2>
+    <h2>{{ 'Add time' | t }}</h2>
     <form class="inline-form add" (ngSubmit)="add()">
-      <input type="date" name="day" [(ngModel)]="draft.day" aria-label="Day" />
-      <input type="time" name="start" [(ngModel)]="draft.start" aria-label="Start" />
+      <input type="date" name="day" [(ngModel)]="draft.day" [attr.aria-label]="'Day' | t" />
+      <input type="time" name="start" [(ngModel)]="draft.start" [attr.aria-label]="'Start' | t" />
       <span class="muted">–</span>
-      <input type="time" name="end" [(ngModel)]="draft.end" aria-label="End" />
-      <select name="project" [(ngModel)]="draft.project" aria-label="Project">
-        <option [ngValue]="null">No project</option>
+      <input type="time" name="end" [(ngModel)]="draft.end" [attr.aria-label]="'End' | t" />
+      <select name="project" [(ngModel)]="draft.project" [attr.aria-label]="'Project' | t">
+        <option [ngValue]="null">{{ 'No project' | t }}</option>
         @for (p of store.activeProjects(); track p.id) {
           <option [ngValue]="p.id">{{ p.name }}</option>
         }
       </select>
-      <input name="description" [(ngModel)]="draft.description" placeholder="What did you work on?" aria-label="Description" />
-      <button class="btn primary" type="submit">Add</button>
+      <input name="description" [(ngModel)]="draft.description" [placeholder]="'What did you work on?' | t" [attr.aria-label]="'Description' | t" />
+      <button class="btn primary" type="submit">{{ 'Add' | t }}</button>
     </form>
   </section>
 
   @for (d of byDay(); track d.day) {
     <section class="panel">
-      <h2>{{ d.day | date: 'EEEE d MMMM' }} <span class="muted">{{ formatDuration(d.seconds) }}</span></h2>
+      <h2>{{ d.day | ldate: 'EEEE d MMMM' }} <span class="muted">{{ formatDuration(d.seconds) }}</span></h2>
       @for (e of d.list; track e.id) {
         <div class="row entry" [class.running]="e.running">
           <span class="dur">{{ formatDuration(e.running ? timer.elapsed() : e.seconds) }}</span>
           <span class="grow">
-            <strong>{{ e.task_title || e.description || 'Untitled work' }}</strong>
+            <strong>{{ e.task_title || e.description || ('Untitled work' | t) }}</strong>
             <span class="muted small">
-              {{ e.project_name || 'No project' }}
+              {{ e.project_name || ('No project' | t) }}
               @if (e.task_title && e.description) { · {{ e.description }} }
-              · {{ e.started_at | date: 'HH:mm' }}–{{ e.running ? 'now' : (e.ended_at | date: 'HH:mm') }}
+              · {{ e.started_at | ldate: 'HH:mm' }}–{{ e.running ? ('now' | t) : (e.ended_at | ldate: 'HH:mm') }}
               @if (who() === 'all') { · {{ e.user.full_name || e.user.email }} }
             </span>
           </span>
           @if (e.invoiced) {
-            <span class="chip" title="Invoiced">{{ e.invoiced }}</span>
+            <span class="chip" [title]="'Invoiced' | t">{{ e.invoiced }}</span>
           } @else {
             <button type="button" class="chip billable" [class.off]="!e.billable" [disabled]="!canEdit(e)"
-              (click)="toggleBillable(e)" [title]="e.billable ? 'Billable: click to mark non-billable' : 'Non-billable'">
-              {{ e.billable ? '$ billable' : 'non-billable' }}
+              (click)="toggleBillable(e)" [title]="(e.billable ? 'Billable: click to mark non-billable' : 'Non-billable') | t">
+              {{ (e.billable ? '$ billable' : 'non-billable') | t }}
             </button>
           }
           @if (canEdit(e)) {
-            <button class="btn ghost icon small" type="button" aria-label="Delete entry" (click)="remove(e)">✕</button>
+            <button class="btn ghost icon small" type="button" [attr.aria-label]="'Delete entry' | t" (click)="remove(e)">✕</button>
           }
         </div>
       }

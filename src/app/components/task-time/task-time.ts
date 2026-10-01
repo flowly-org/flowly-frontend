@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -7,29 +6,31 @@ import { AuthService } from '../../core/auth.service';
 import { today } from '../../core/dates';
 import { Task, TimeEntry, formatDuration } from '../../core/models';
 import { TimerService } from '../../core/timer.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-task-time',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, LocalDatePipe, TranslatePipe],
   template: `
     <div class="head">
       <div>
         <div class="total">{{ formatDuration(total()) }}</div>
-        <div class="muted small">tracked on this task</div>
+        <div class="muted small">{{ 'tracked on this task' | t }}</div>
       </div>
       @if (timer.isRunningOn(task().id)) {
-        <button class="btn danger" type="button" (click)="timer.stop()">■ Stop · {{ formatDuration(timer.elapsed()) }}</button>
+        <button class="btn danger" type="button" (click)="timer.stop()">■ {{ 'Stop' | t }} · {{ formatDuration(timer.elapsed()) }}</button>
       } @else {
-        <button class="btn primary" type="button" (click)="timer.startOn(task().workspace, task().id)">▶ Start timer</button>
+        <button class="btn primary" type="button" (click)="timer.startOn(task().workspace, task().id)">▶ {{ 'Start timer' | t }}</button>
       }
     </div>
 
     <form class="log" (ngSubmit)="log()">
-      <input name="mins" type="text" [(ngModel)]="amount" placeholder="1:30 or 45m" aria-label="Time spent" />
-      <input name="day" type="date" [(ngModel)]="day" aria-label="Day" />
-      <input name="note" [(ngModel)]="note" placeholder="What did you do? (optional)" aria-label="Note" class="note" />
-      <button class="btn" type="submit" [disabled]="!amount.trim()">Log time</button>
+      <input name="mins" type="text" [(ngModel)]="amount" [placeholder]="'1:30 or 45m' | t" [attr.aria-label]="'Time spent' | t" />
+      <input name="day" type="date" [(ngModel)]="day" [attr.aria-label]="'Day' | t" />
+      <input name="note" [(ngModel)]="note" [placeholder]="'What did you do? (optional)' | t" [attr.aria-label]="'Note' | t" class="note" />
+      <button class="btn" type="submit" [disabled]="!amount.trim()">{{ 'Log time' | t }}</button>
     </form>
 
     <div class="entries">
@@ -38,19 +39,19 @@ import { ToastService } from '../../core/toast.service';
           <span class="dur">{{ formatDuration(e.running ? timer.elapsed() : e.seconds) }}</span>
           <span class="grow">
             {{ e.description || '—' }}
-            <span class="muted small">· {{ e.user.full_name || e.user.email }} · {{ e.started_at | date: 'MMM d, HH:mm' }}</span>
+            <span class="muted small">· {{ e.user.full_name || e.user.email }} · {{ e.started_at | ldate: 'MMM d, HH:mm' }}</span>
           </span>
           @if (e.invoiced) {
-            <span class="chip small" title="On an invoice">{{ e.invoiced }}</span>
+            <span class="chip small" [title]="'On an invoice' | t">{{ e.invoiced }}</span>
           } @else if (!e.billable) {
-            <span class="muted small">non-billable</span>
+            <span class="muted small">{{ 'non-billable' | t }}</span>
           }
           @if (!e.running && !e.invoice && e.user.id === auth.user()?.id) {
-            <button class="btn ghost icon small" type="button" aria-label="Delete entry" (click)="remove(e)">✕</button>
+            <button class="btn ghost icon small" type="button" [attr.aria-label]="'Delete entry' | t" (click)="remove(e)">✕</button>
           }
         </div>
       } @empty {
-        <p class="muted small">No time tracked yet.</p>
+        <p class="muted small">{{ 'No time tracked yet.' | t }}</p>
       }
     </div>
   `,
@@ -61,6 +62,7 @@ export class TaskTime implements OnInit {
 
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
   protected timer = inject(TimerService);
   protected auth = inject(AuthService);
 
@@ -105,7 +107,7 @@ export class TaskTime implements OnInit {
   async log() {
     const seconds = this.parse(this.amount);
     if (!seconds) {
-      this.toast.error('Enter time like 1:30, 45m or 2h.');
+      this.toast.error(this.i18n.t('Enter time like 1:30, 45m or 2h.'));
       return;
     }
     const start = new Date(`${this.day}T09:00:00`);
@@ -120,7 +122,7 @@ export class TaskTime implements OnInit {
       this.note = '';
       this.timer.version.update((v) => v + 1);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not log the time.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not log the time.')));
     }
   }
 

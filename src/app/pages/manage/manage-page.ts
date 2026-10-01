@@ -1,9 +1,11 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { AdminUser, InstanceSettingRow } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
@@ -15,7 +17,7 @@ const GROUP_CHECKS: Record<string, { service: string; label: string }> = {
 
 @Component({
   selector: 'app-manage-page',
-  imports: [FormsModule, DatePipe, DecimalPipe],
+  imports: [FormsModule, DecimalPipe, TranslatePipe, LocalDatePipe],
   templateUrl: './manage-page.html',
   styleUrl: './manage-page.scss',
 })
@@ -23,6 +25,7 @@ export class ManagePage implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   protected auth = inject(AuthService);
+  private i18n = inject(I18nService);
 
   protected tab = signal<'overview' | 'users' | 'settings' | 'github'>('overview');
   protected gh = signal<Record<string, any> | null>(null);
@@ -66,7 +69,7 @@ export class ManagePage implements OnInit {
       this.gh.set(await this.api.saveAdminGithubApp(data));
       this.ghForm = {};
       this.ghManual.set(false);
-      this.toast.show('GitHub App connected and verified.');
+      this.toast.show(this.i18n.t('GitHub App connected and verified.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -77,7 +80,7 @@ export class ManagePage implements OnInit {
     try {
       await this.api.deleteAdminGithubApp();
       await this.loadGithub();
-      this.toast.show('GitHub App disconnected.');
+      this.toast.show(this.i18n.t('GitHub App disconnected.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -107,7 +110,7 @@ export class ManagePage implements OnInit {
 
   protected copy(text: string) {
     navigator.clipboard?.writeText(text).then(
-      () => this.toast.show('Copied.'),
+      () => this.toast.show(this.i18n.t('Copied.')),
       () => this.toast.show(text),
     );
   }
@@ -151,7 +154,7 @@ export class ManagePage implements OnInit {
     try {
       this.rows.set(await this.api.updateAdminSettings(values));
       for (const r of group.rows) this.drafts[r.key] = r.secret ? '' : this.rows().find((x) => x.key === r.key)!.value;
-      this.toast.show('Settings saved.');
+      this.toast.show(this.i18n.t('Settings saved.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -162,7 +165,7 @@ export class ManagePage implements OnInit {
       this.rows.set(await this.api.updateAdminSettings({ [r.key]: null }));
       const fresh = this.rows().find((x) => x.key === r.key)!;
       this.drafts[r.key] = r.secret ? '' : fresh.value;
-      this.toast.show(`${r.label} reverted to the server default.`);
+      this.toast.show(this.i18n.t('{label} reverted to the server default.', { label: r.label }));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -186,7 +189,7 @@ export class ManagePage implements OnInit {
   async setWebhook(enable: boolean) {
     try {
       const res = await this.api.adminTelegramWebhook(enable);
-      this.toast.show(res.mode === 'webhook' ? `Webhook active: ${res.webhook}` : 'Switched to polling.');
+      this.toast.show(res.mode === 'webhook' ? this.i18n.t('Webhook active: {url}', { url: res.webhook }) : this.i18n.t('Switched to polling.'));
       await this.loadSettings();
     } catch (err) {
       this.toast.error(errorMessage(err));
@@ -201,7 +204,7 @@ export class ManagePage implements OnInit {
     try {
       const fresh = await this.api.updateAdminUser(u.id, data);
       this.users.update((list) => list.map((x) => (x.id === u.id ? fresh : x)));
-      this.toast.show(`${u.email} updated.`);
+      this.toast.show(this.i18n.t('{email} updated.', { email: u.email }));
       this.loadOverview();
     } catch (err) {
       this.toast.error(errorMessage(err));

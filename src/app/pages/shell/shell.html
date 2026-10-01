@@ -1,44 +1,44 @@
 <header class="topbar">
-  <a class="brand" routerLink="/" aria-label="Flowly home">
+  <a class="brand" routerLink="/" [attr.aria-label]="'Flowly home' | t">
     <app-logo [color]="brandColor()" [size]="26" />
     <span class="brand-name">Flowly</span>
   </a>
 
   <nav class="nav">
-    <a routerLink="/day" routerLinkActive="active" class="my-day">My day</a>
-    <a routerLink="/shared" routerLinkActive="active">Shared</a>
+    <a routerLink="/day" routerLinkActive="active" class="my-day">{{ 'My day' | t }}</a>
+    <a routerLink="/shared" routerLinkActive="active">{{ 'Shared' | t }}</a>
     <span class="divider" aria-hidden="true"></span>
 
     @if (creating()) {
       <form class="ws-create" (ngSubmit)="createWorkspace()">
-        <input name="ws" [(ngModel)]="newName" placeholder="Workspace name" aria-label="New workspace name" autofocus />
-        <button class="btn primary small" type="submit">Create</button>
-        <button class="btn ghost small" type="button" (click)="creating.set(false)">Cancel</button>
+        <input name="ws" [(ngModel)]="newName" [placeholder]="'Workspace name' | t" [attr.aria-label]="'New workspace name' | t" autofocus />
+        <button class="btn primary small" type="submit">{{ 'Create' | t }}</button>
+        <button class="btn ghost small" type="button" (click)="creating.set(false)">{{ 'Cancel' | t }}</button>
       </form>
     } @else {
       <span class="ws-dot" [style.background]="store.current()?.color ?? 'var(--line)'" aria-hidden="true"></span>
-      <select class="ws-select" aria-label="Workspace" (change)="switchTo($any($event.target).value)">
+      <select class="ws-select" [attr.aria-label]="'Workspace' | t" (change)="switchTo($any($event.target).value)">
         @for (ws of store.workspaces(); track ws.id) {
           <option [value]="ws.id" [selected]="ws.id === store.navId()">{{ ws.name }}</option>
         }
-        <option value="new">+ New workspace…</option>
+        <option value="new">{{ '+ New workspace…' | t }}</option>
       </select>
     }
 
     @if (store.navId(); as id) {
-      <a [routerLink]="['/w', id, 'board']" routerLinkActive="active">Board</a>
-      <a [routerLink]="['/w', id, 'projects']" routerLinkActive="active">Projects</a>
-      <a [routerLink]="['/w', id, 'tags']" routerLinkActive="active">Tags</a>
+      <a [routerLink]="['/w', id, 'board']" routerLinkActive="active">{{ 'Board' | t }}</a>
+      <a [routerLink]="['/w', id, 'projects']" routerLinkActive="active">{{ 'Projects' | t }}</a>
+      <a [routerLink]="['/w', id, 'tags']" routerLinkActive="active">{{ 'Tags' | t }}</a>
       @if (store.navTimeTracking()) {
-        <a [routerLink]="['/w', id, 'time']" routerLinkActive="active">Time</a>
+        <a [routerLink]="['/w', id, 'time']" routerLinkActive="active">{{ 'Time' | t }}</a>
         @if (store.navCanManage()) {
-          <a [routerLink]="['/w', id, 'billing']" routerLinkActive="active">Billing</a>
+          <a [routerLink]="['/w', id, 'billing']" routerLinkActive="active">{{ 'Billing' | t }}</a>
         }
       }
-      <a [routerLink]="['/w', id, 'integrations']" routerLinkActive="active">Integrations</a>
-      <a [routerLink]="['/w', id, 'members']" routerLinkActive="active">Members</a>
+      <a [routerLink]="['/w', id, 'integrations']" routerLinkActive="active">{{ 'Integrations' | t }}</a>
+      <a [routerLink]="['/w', id, 'members']" routerLinkActive="active">{{ 'Members' | t }}</a>
       @if (store.navCanManage()) {
-        <a [routerLink]="['/w', id, 'settings']" routerLinkActive="active">Settings</a>
+        <a [routerLink]="['/w', id, 'settings']" routerLinkActive="active">{{ 'Settings' | t }}</a>
       }
     }
   </nav>
@@ -46,28 +46,28 @@
   @if (timer.entry(); as t) {
     <div class="timer-pill" role="status">
       <span class="rec" aria-hidden="true"></span>
-      <button type="button" class="timer-what" (click)="openTimerTask()" [title]="t.task_title || t.description || 'Timer'">
+      <button type="button" class="timer-what" (click)="openTimerTask()" [title]="t.task_title || t.description || ('Timer' | t)">
         <strong>{{ formatDuration(timer.elapsed()) }}</strong>
-        <span>{{ t.task_title || t.description || 'Untitled work' }}</span>
+        <span>{{ t.task_title || t.description || ('Untitled work' | t) }}</span>
       </button>
-      <button type="button" class="timer-stop" aria-label="Stop timer" (click)="timer.stop()">■</button>
+      <button type="button" class="timer-stop" [attr.aria-label]="'Stop timer' | t" (click)="timer.stop()">■</button>
     </div>
   }
 
   <div class="bell-wrap">
     <button class="btn ghost icon bell" type="button" (click)="bellOpen.set(!bellOpen()); menuOpen.set(false)"
-      [attr.aria-expanded]="bellOpen()" [attr.aria-label]="notifications.unread() + ' unread notifications'">
+      [attr.aria-expanded]="bellOpen()" [attr.aria-label]="'{n} unread notifications' | t: { n: notifications.unread() }">
       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.2L4.3 15a1 1 0 0 0 .9 1.5h13.6a1 1 0 0 0 .9-1.5L18 12.2V9a6 6 0 0 0-6-6Zm-2 15a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       @if (notifications.unread()) {
         <span class="bell-count">{{ notifications.unread() > 9 ? '9+' : notifications.unread() }}</span>
       }
     </button>
     @if (bellOpen()) {
-      <div class="menu notif-menu" role="dialog" aria-label="Notifications">
+      <div class="menu notif-menu" role="dialog" [attr.aria-label]="'Notifications' | t">
         <div class="notif-head">
-          <strong>Notifications</strong>
+          <strong>{{ 'Notifications' | t }}</strong>
           @if (notifications.unread()) {
-            <button class="btn ghost small" type="button" (click)="notifications.markRead('all')">Mark all read</button>
+            <button class="btn ghost small" type="button" (click)="notifications.markRead('all')">{{ 'Mark all read' | t }}</button>
           }
         </div>
         @for (n of notifications.items(); track n.id) {
@@ -78,11 +78,11 @@
               @if (n.body) {
                 <span class="notif-body">{{ n.body }}</span>
               }
-              <span class="notif-time">{{ n.created_at | date: 'MMM d, HH:mm' }}</span>
+              <span class="notif-time">{{ n.created_at | ldate: 'MMM d, HH:mm' }}</span>
             </span>
           </button>
         } @empty {
-          <p class="notif-empty">You're all caught up.</p>
+          <p class="notif-empty">{{ "You're all caught up." | t }}</p>
         }
       </div>
     }
@@ -101,12 +101,12 @@
             <span class="pro-badge">PRO</span>
           }
         </div>
-        <a class="btn ghost block menu-link" routerLink="/settings" (click)="menuOpen.set(false)">Settings & concierge</a>
+        <a class="btn ghost block menu-link" routerLink="/settings" (click)="menuOpen.set(false)">{{ 'Settings & concierge' | t }}</a>
         @if (auth.user()?.is_staff) {
-          <a class="btn ghost block menu-link" routerLink="/manage" (click)="menuOpen.set(false)">Admin</a>
+          <a class="btn ghost block menu-link" routerLink="/manage" (click)="menuOpen.set(false)">{{ 'Admin' | t }}</a>
         }
-        <div class="menu-label">Theme</div>
-        <div class="theme-switch" role="group" aria-label="Theme">
+        <div class="menu-label">{{ 'Theme' | t }}</div>
+        <div class="theme-switch" role="group" [attr.aria-label]="'Theme' | t">
           @for (opt of themes; track opt.value) {
             <button
               type="button"
@@ -114,11 +114,11 @@
               [attr.aria-pressed]="theme.theme() === opt.value"
               (click)="theme.set(opt.value)"
             >
-              <span aria-hidden="true">{{ opt.icon }}</span> {{ opt.label }}
+              <span aria-hidden="true">{{ opt.icon }}</span> {{ opt.label | t }}
             </button>
           }
         </div>
-        <button class="btn ghost block" type="button" role="menuitem" (click)="auth.logout()">Sign out</button>
+        <button class="btn ghost block" type="button" role="menuitem" (click)="auth.logout()">{{ 'Sign out' | t }}</button>
       </div>
     }
   </div>

@@ -7,10 +7,12 @@ import { map } from 'rxjs';
 import { Logo } from '../../components/logo/logo';
 import { errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 
 @Component({
   selector: 'app-auth-page',
-  imports: [FormsModule, RouterLink, Logo],
+  imports: [FormsModule, RouterLink, Logo, TranslatePipe],
   templateUrl: './auth-page.html',
   styleUrl: './auth-page.scss',
 })
@@ -18,6 +20,7 @@ export class AuthPage {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private i18n = inject(I18nService);
 
   protected mode = toSignal(inject(ActivatedRoute).data.pipe(map((d) => d['mode'] as 'login' | 'register')), {
     initialValue: 'login' as const,
@@ -40,7 +43,7 @@ export class AuthPage {
       this.router.navigateByUrl(next && next.startsWith('/') && !next.startsWith('//') ? next : '/');
     } catch (err) {
       this.error.set(
-        errorMessage(err, this.isRegister() ? 'Could not create your account.' : 'Wrong email or password.'),
+        errorMessage(err, this.i18n.t(this.isRegister() ? 'Could not create your account.' : 'Wrong email or password.')),
       );
     } finally {
       this.busy.set(false);

@@ -4,13 +4,15 @@ import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { Invitation, Membership, Role } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-members-page',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   templateUrl: './members-page.html',
 })
 export class MembersPage implements OnInit {
@@ -19,6 +21,7 @@ export class MembersPage implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private i18n = inject(I18nService);
 
   protected invitations = signal<Invitation[]>([]);
   protected inviteEmail = '';
@@ -49,11 +52,11 @@ export class MembersPage implements OnInit {
       this.inviteEmail = '';
       if (res.status === 202) {
         const link = (res.body as Invitation).link;
-        if (link) this.copyLink(link, `${email} has no account yet. Join link copied: send it to them`);
-        else this.toast.show(`${email} has no account yet. They'll join automatically when they sign up with that email.`);
+        if (link) this.copyLink(link, this.i18n.t('{email} has no account yet. Join link copied: send it to them', { email }));
+        else this.toast.show(this.i18n.t('{email} has no account yet. They\'ll join automatically when they sign up with that email.', { email }));
         await this.loadInvitations();
       } else {
-        this.toast.show(`${email} added.`);
+        this.toast.show(this.i18n.t('{email} added.', { email }));
         await this.store.refreshMembers();
       }
       await this.store.loadWorkspaces();
@@ -87,8 +90,13 @@ export class MembersPage implements OnInit {
     }
   }
 
-  protected copyLink(link: string, message = 'Join link copied.') {
-    const done = () => this.toast.show(message);
+  /** English label of a role (translated in the template). */
+  protected roleLabel(role: Role): string {
+    return { owner: 'Owner', admin: 'Admin', member: 'Member' }[role] ?? role;
+  }
+
+  protected copyLink(link: string, message?: string) {
+    const done = () => this.toast.show(message ?? this.i18n.t('Join link copied.'));
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(link).then(done, () => this.toast.show(link));
       return;

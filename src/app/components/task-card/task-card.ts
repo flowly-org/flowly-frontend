@@ -3,10 +3,13 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { BoardData } from '../../core/board-data';
 import { TimerService } from '../../core/timer.service';
 import { formatShort } from '../../core/dates';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { Tag, Task, VISIBILITIES } from '../../core/models';
 
 @Component({
   selector: 'app-task-card',
+  imports: [TranslatePipe],
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
   host: { '[class.done]': 'done()', '[class.timing]': 'timing()' },
@@ -27,6 +30,7 @@ export class TaskCard {
   readonly toggleDone = output<Task>();
 
   private data = inject(BoardData);
+  private i18n = inject(I18nService);
   protected timer = inject(TimerService);
   protected timing = computed(() => this.timer.isRunningOn(this.task().id));
   protected trackable = computed(() => this.data.canTrack(this.task()));
@@ -40,7 +44,9 @@ export class TaskCard {
     const v = this.task().visibility;
     return v && v !== 'team' ? VISIBILITIES.find((x) => x.value === v)?.icon : null;
   });
-  protected visibilityLabel = computed(() => VISIBILITIES.find((x) => x.value === this.task().visibility)?.label ?? '');
+  protected visibilityLabel = computed(() =>
+    this.i18n.t(VISIBILITIES.find((x) => x.value === this.task().visibility)?.label ?? ''),
+  );
 
   protected done = computed(() => this.data.isDone(this.task()));
   protected canToggle = computed(() => this.data.toggledStatus(this.task()) !== null);
@@ -79,6 +85,7 @@ export class TaskCard {
   protected carriedFrom = computed(() => {
     const t = this.task();
     const day = this.day();
+    this.i18n.lang();
     return day && t.planned_date && t.planned_date < day && !this.done() ? formatShort(t.planned_date) : null;
   });
 
@@ -86,6 +93,7 @@ export class TaskCard {
     const d = this.task().due_date;
     if (!d) return null;
     const ref = this.day();
+    this.i18n.lang();
     return { label: formatShort(d), late: !!ref && d < ref && !this.done(), today: d === ref };
   });
 

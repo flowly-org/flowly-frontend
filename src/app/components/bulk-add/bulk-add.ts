@@ -5,12 +5,14 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
 import { formatShort } from '../../core/dates';
+import { TranslatePipe } from '../../core/i18n.pipes';
+import { I18nService } from '../../core/i18n.service';
 import { Task, TaskInput } from '../../core/models';
 import { parseList } from './bulk-parse';
 
 @Component({
   selector: 'app-bulk-add',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './bulk-add.html',
   styleUrl: './bulk-add.scss',
   host: { '(document:keydown.escape)': 'closed.emit()' },
@@ -25,6 +27,8 @@ export class BulkAdd implements OnInit {
   readonly closed = output<void>();
 
   protected data = inject(BoardData);
+
+  protected i18n = inject(I18nService);
   private api = inject(ApiService);
   private auth = inject(AuthService);
 
@@ -47,8 +51,9 @@ export class BulkAdd implements OnInit {
   }
 
   protected dateLabel(d: string | null | undefined): string {
-    if (d === undefined) return this.planned() === 'backlog' || !this.day() ? 'Backlog' : formatShort(this.day()!);
-    return d === null ? 'Backlog' : formatShort(d);
+    this.i18n.lang();
+    if (d === undefined) return this.planned() === 'backlog' || !this.day() ? this.i18n.t('Backlog') : formatShort(this.day()!);
+    return d === null ? this.i18n.t('Backlog') : formatShort(d);
   }
 
   protected changeWorkspace(id: number) {
@@ -78,7 +83,7 @@ export class BulkAdd implements OnInit {
     try {
       this.created.emit(await this.api.bulkCreateTasks(this.wsId(), payload));
     } catch (err) {
-      this.error.set(errorMessage(err, 'Could not create the tasks.'));
+      this.error.set(errorMessage(err, this.i18n.t('Could not create the tasks.')));
     } finally {
       this.busy.set(false);
     }

@@ -1,17 +1,18 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { addDays, today } from '../../core/dates';
+import { I18nService } from '../../core/i18n.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { BillingSettings, Invoice, ProjectBillingRow } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-billing-page',
-  imports: [FormsModule, RouterLink, DatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, LocalDatePipe],
   templateUrl: './billing-page.html',
   styleUrl: './billing-page.scss',
 })
@@ -20,6 +21,9 @@ export class BillingPage implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private i18n = inject(I18nService);
+
+  protected readonly statusLabels: Record<string, string> = { draft: 'Draft', sent: 'Sent', paid: 'Paid', void: 'Void' };
 
   protected settings = signal<BillingSettings | null>(null);
   protected form: Partial<BillingSettings> = {};
@@ -59,7 +63,7 @@ export class BillingPage implements OnInit {
       this.settings.set(res.settings);
       this.form = { ...res.settings };
       this.projects.set(res.projects);
-      this.toast.show('Billing settings saved.');
+      this.toast.show(this.i18n.t('Billing settings saved.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
     }
@@ -86,7 +90,7 @@ export class BillingPage implements OnInit {
       const inv = await this.api.createInvoice(this.wsId, this.newInvoice);
       this.router.navigate(['/w', this.wsId, 'billing', 'invoices', inv.id]);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not create the invoice.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not create the invoice.')));
     } finally {
       this.creating.set(false);
     }

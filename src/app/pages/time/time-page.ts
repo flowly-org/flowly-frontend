@@ -1,10 +1,11 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { addDays, today } from '../../core/dates';
+import { I18nService } from '../../core/i18n.service';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { TimeEntry, TimeReport, formatDuration } from '../../core/models';
 import { TimerService } from '../../core/timer.service';
 import { ToastService } from '../../core/toast.service';
@@ -17,7 +18,7 @@ function monday(iso: string): string {
 
 @Component({
   selector: 'app-time-page',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, TranslatePipe, LocalDatePipe],
   templateUrl: './time-page.html',
   styleUrl: './time-page.scss',
 })
@@ -27,6 +28,7 @@ export class TimePage implements OnInit {
   protected timer = inject(TimerService);
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   protected from = signal(monday(today()));
   protected to = computed(() => addDays(this.from(), 6));
@@ -78,7 +80,7 @@ export class TimePage implements OnInit {
       this.entries.set(entries);
       this.report.set(report);
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not load time.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not load time.')));
     }
   }
 
@@ -90,7 +92,7 @@ export class TimePage implements OnInit {
     const start = new Date(`${this.draft.day}T${this.draft.start}`);
     const end = new Date(`${this.draft.day}T${this.draft.end}`);
     if (!(end > start)) {
-      this.toast.error('The end must be after the start.');
+      this.toast.error(this.i18n.t('The end must be after the start.'));
       return;
     }
     try {
@@ -103,7 +105,7 @@ export class TimePage implements OnInit {
       this.draft.description = '';
       this.load();
     } catch (err) {
-      this.toast.error(errorMessage(err, 'Could not add the entry.'));
+      this.toast.error(errorMessage(err, this.i18n.t('Could not add the entry.')));
     }
   }
 

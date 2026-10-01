@@ -6,6 +6,7 @@ export interface User {
   email: string;
   full_name: string;
   github_login?: string;
+  language?: string;
   is_staff?: boolean;
   plan?: 'free' | 'pro';
   has_pro?: boolean;

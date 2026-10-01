@@ -1,91 +1,99 @@
 <div class="page wide">
   <header>
     <div>
-      <h1>Integrations</h1>
-      <p class="muted">Connect {{ store.current()?.name }} or a single project to other tools. Incoming connectors create and update tasks; outgoing ones react to task changes.</p>
+      <h1>{{ 'Integrations' | t }}</h1>
+      <p class="muted">{{ 'Connect {name} or a single project to other tools. Incoming connectors create and update tasks; outgoing ones react to task changes.' | t: { name: store.current()?.name } }}</p>
     </div>
     <label class="scope-filter">
-      <span class="muted">Show</span>
+      <span class="muted">{{ 'Show' | t }}</span>
       <select [value]="projectFilter() ?? ''" (change)="setFilter($any($event.target).value)">
-        <option value="">All integrations</option>
+        <option value="">{{ 'All integrations' | t }}</option>
         @for (p of store.projects(); track p.id) {
-          <option [value]="p.id">Project: {{ p.name }}</option>
+          <option [value]="p.id">{{ 'Project: {name}' | t: { name: p.name } }}</option>
         }
       </select>
     </label>
   </header>
 
   @if (!store.canManage()) {
-    <section class="panel"><p class="empty">Only workspace owners and admins can manage integrations.</p></section>
+    <section class="panel"><p class="empty">{{ 'Only workspace owners and admins can manage integrations.' | t }}</p></section>
   } @else {
     @if (mcp(); as m) {
       <section class="panel mcp">
-        <h2>MCP server for this workspace</h2>
+        <h2>{{ 'MCP server for this workspace' | t }}</h2>
         <p class="intro muted">
-          AI assistants and automation tools can work with {{ store.current()?.name }}'s tasks, discussions and time through this
-          endpoint. Everything is limited to this workspace. Members connect with OAuth (ChatGPT, Claude, Cursor…) using their own
-          permissions; automations (n8n, Zapier, internal agents) use a service token, which acts as a bot member of the workspace.
+          {{ 'AI assistants and automation tools can work with the tasks, discussions and time of {name} through this endpoint. Everything is limited to this workspace. Members connect with OAuth (ChatGPT, Claude, Cursor…) using their own permissions; automations (n8n, Zapier, internal agents) use a service token, which acts as a bot member of the workspace.' | t: { name: store.current()?.name } }}
         </p>
         <div class="copy-row pad">
-          <input readonly [value]="m.url" (focus)="$any($event.target).select()" aria-label="Workspace MCP URL" />
-          <button class="btn small" type="button" (click)="copy(m.url, 'MCP URL copied')">Copy</button>
+          <input readonly [value]="m.url" (focus)="$any($event.target).select()" [attr.aria-label]="'Workspace MCP URL' | t" />
+          <button class="btn small" type="button" (click)="copy(m.url, 'MCP URL copied to clipboard.')">{{ 'Copy' | t }}</button>
         </div>
         <form class="inline-form" (ngSubmit)="createMcpToken()">
-          <input name="mcpTokenName" [(ngModel)]="mcpTokenName" placeholder="Service token name, e.g. n8n" aria-label="Service token name" />
-          <button class="btn" type="submit">Create service token</button>
+          <input name="mcpTokenName" [(ngModel)]="mcpTokenName" [placeholder]="'Service token name, e.g. n8n' | t" [attr.aria-label]="'Service token name' | t" />
+          <button class="btn" type="submit">{{ 'Create service token' | t }}</button>
         </form>
         @if (mcpNew(); as t) {
           <div class="new-token">
-            <strong>Copy the token now. It won't be shown again.</strong>
+            <strong>{{ 'Copy the token now. It won\'t be shown again.' | t }}</strong>
             <div class="copy-row">
-              <input readonly [value]="t.token" (focus)="$any($event.target).select()" aria-label="Service token" />
-              <button class="btn small" type="button" (click)="copy(t.token!, 'Token copied')">Copy</button>
+              <input readonly [value]="t.token" (focus)="$any($event.target).select()" [attr.aria-label]="'Service token' | t" />
+              <button class="btn small" type="button" (click)="copy(t.token!, 'Token copied to clipboard.')">{{ 'Copy' | t }}</button>
             </div>
-            <span class="muted small">Send it as <code>Authorization: Bearer {{ t.hint }}…</code> to {{ m.url }}. Actions appear as “{{ t.bot }}”.</span>
+            <span class="muted small">
+              <code>Authorization: Bearer {{ t.hint }}…</code> · {{ m.url }} ·
+              {{ 'Actions appear as “{bot}”.' | t: { bot: t.bot } }}
+            </span>
           </div>
         }
         @for (t of m.tokens; track t.id) {
           <div class="row">
             <span class="grow">
               <strong>{{ t.name }}</strong> <code class="small">{{ t.hint }}…</code>
-              <span class="muted small"> · {{ t.bot }} · {{ t.last_used_at ? 'last used ' + (t.last_used_at | date: 'MMM d, HH:mm') : 'never used' }}</span>
+              <span class="muted small">
+                · {{ t.bot }} ·
+                @if (t.last_used_at) {
+                  {{ 'last used {when}' | t: { when: (t.last_used_at | ldate: 'MMM d, HH:mm') } }}
+                } @else {
+                  {{ 'never used' | t }}
+                }
+              </span>
             </span>
-            <button class="btn ghost danger small" type="button" (click)="revokeMcpToken(t.id)">Revoke</button>
+            <button class="btn ghost danger small" type="button" (click)="revokeMcpToken(t.id)">{{ 'Revoke' | t }}</button>
           </div>
         }
       </section>
     }
 
-    <section class="kinds" aria-label="Add an integration">
+    <section class="kinds" [attr.aria-label]="'Add an integration' | t">
       @for (k of kinds; track k.kind) {
         <button type="button" class="kind-card" [class.on]="form()?.kind === k.kind && !form()?.id" (click)="startNew(k.kind)">
           <span class="kind-icon" [attr.data-kind]="k.kind" aria-hidden="true">{{ k.icon }}</span>
-          <strong>{{ k.label }}</strong>
-          <span class="muted">{{ k.blurb }}</span>
+          <strong>{{ k.label | t }}</strong>
+          <span class="muted">{{ k.blurb | t }}</span>
         </button>
       }
     </section>
 
     <div class="layout" [class.with-editor]="form()">
       <section class="panel list">
-        <h2>Connected <span class="muted">{{ visible().length }}</span></h2>
+        <h2>{{ 'Connected' | t }} <span class="muted">{{ visible().length }}</span></h2>
         @for (item of visible(); track item.id) {
           <div class="row item" [class.selected]="form()?.id === item.id">
             <span class="kind-icon small" [attr.data-kind]="item.kind" aria-hidden="true">{{ kindInfo(item.kind).icon }}</span>
             <button class="grow item-main" type="button" (click)="edit(item)">
               <strong>{{ item.name }}</strong>
-              <span class="muted">{{ kindInfo(item.kind).label }} · {{ projectName(item.project) }}</span>
+              <span class="muted">{{ kindInfo(item.kind).label | t }} · {{ projectName(item.project) }}</span>
             </button>
             @if (item.last_delivery; as d) {
-              <span class="status-dot" [attr.data-status]="d.status" [title]="d.event + ': ' + d.status + ' · ' + (d.created_at | date: 'short')"></span>
+              <span class="status-dot" [attr.data-status]="d.status" [title]="d.event + ': ' + (statusLabel(d.status) | t) + ' · ' + (d.created_at | ldate: 'short')"></span>
             }
-            <label class="switch" [title]="item.enabled ? 'Enabled' : 'Disabled'">
-              <input type="checkbox" [checked]="item.enabled" (change)="toggleEnabled(item)" [attr.aria-label]="'Enable ' + item.name" />
+            <label class="switch" [title]="(item.enabled ? 'Enabled' : 'Disabled') | t">
+              <input type="checkbox" [checked]="item.enabled" (change)="toggleEnabled(item)" [attr.aria-label]="'Enable {name}' | t: { name: item.name }" />
               <span></span>
             </label>
           </div>
         } @empty {
-          <p class="empty">No integrations yet. Pick one above to get started.</p>
+          <p class="empty">{{ 'No integrations yet. Pick one above to get started.' | t }}</p>
         }
       </section>
 
@@ -94,20 +102,20 @@
           <h2>
             <span class="group-title">
               <span class="kind-icon small" [attr.data-kind]="f.kind" aria-hidden="true">{{ kindInfo(f.kind).icon }}</span>
-              {{ f.id ? f.name : 'New ' + kindInfo(f.kind).label + ' integration' }}
+              {{ f.id ? f.name : ('New {kind} integration' | t: { kind: (kindInfo(f.kind).label | t) }) }}
             </span>
-            <button class="btn ghost icon" type="button" aria-label="Close" (click)="close()">✕</button>
+            <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="close()">✕</button>
           </h2>
 
           <form class="fields" (ngSubmit)="save()">
             <div class="grid2">
-              <label>Name <input name="name" [(ngModel)]="f.name" /></label>
+              <label>{{ 'Name' | t }} <input name="name" [(ngModel)]="f.name" /></label>
               <label>
-                Applies to
+                {{ 'Applies to' | t }}
                 <select name="project" [(ngModel)]="f.project">
-                  <option [ngValue]="null">Whole workspace</option>
+                  <option [ngValue]="null">{{ 'Whole workspace' | t }}</option>
                   @for (p of store.projects(); track p.id) {
-                    <option [ngValue]="p.id">Project: {{ p.name }}</option>
+                    <option [ngValue]="p.id">{{ 'Project: {name}' | t: { name: p.name } }}</option>
                   }
                 </select>
               </label>
@@ -115,96 +123,96 @@
 
             @switch (f.kind) {
               @case ('outgoing_webhook') {
-                <label>Payload URL <input name="url" type="url" [(ngModel)]="f.config['url']" placeholder="https://example.com/flowly-hook" required /></label>
+                <label>{{ 'Payload URL' | t }} <input name="url" type="url" [(ngModel)]="f.config['url']" placeholder="https://example.com/flowly-hook" required /></label>
               }
               @case ('slack') {
                 <label>
-                  Slack incoming-webhook URL
+                  {{ 'Slack incoming-webhook URL' | t }}
                   <input name="webhook_url" type="url" [(ngModel)]="f.config['webhook_url']" placeholder="https://hooks.slack.com/services/…" required />
-                  <small class="muted">In Slack: Apps → Incoming Webhooks → Add to Slack, pick a channel, copy the URL.</small>
+                  <small class="muted">{{ 'In Slack: Apps → Incoming Webhooks → Add to Slack, pick a channel, copy the URL.' | t }}</small>
                 </label>
               }
               @case ('incoming_webhook') {
                 <div class="grid2">
                   <label>
-                    New tasks go to
+                    {{ 'New tasks go to' | t }}
                     <select name="schedule" [(ngModel)]="f.config['schedule']">
-                      <option value="backlog">Backlog</option>
-                      <option value="today">Today</option>
+                      <option value="backlog">{{ 'Backlog' | t }}</option>
+                      <option value="today">{{ 'Today' | t }}</option>
                     </select>
                   </label>
                   <label class="check-line">
                     <input type="checkbox" name="sig" [(ngModel)]="f.config['require_signature']" />
-                    Require an X-Flowly-Signature header
+                    {{ 'Require an X-Flowly-Signature header' | t }}
                   </label>
                 </div>
               }
               @case ('email') {
                 <div class="grid2">
                   <label>
-                    Accept email from
+                    {{ 'Accept email from' | t }}
                     <select name="senders" [(ngModel)]="f.config['allowed_senders']">
-                      <option value="members">Workspace members only</option>
-                      <option value="anyone">Anyone</option>
+                      <option value="members">{{ 'Workspace members only' | t }}</option>
+                      <option value="anyone">{{ 'Anyone' | t }}</option>
                     </select>
                   </label>
                   <label>
-                    New tasks go to
+                    {{ 'New tasks go to' | t }}
                     <select name="schedule" [(ngModel)]="f.config['schedule']">
-                      <option value="backlog">Backlog</option>
-                      <option value="today">Today</option>
+                      <option value="backlog">{{ 'Backlog' | t }}</option>
+                      <option value="today">{{ 'Today' | t }}</option>
                     </select>
                   </label>
                 </div>
               }
               @case ('openrouter') {
                 <div class="grid2">
-                  <label>Model <input name="model" [(ngModel)]="f.config['model']" placeholder="e.g. mistralai/mistral-small-3.2-24b-instruct" required /></label>
+                  <label>{{ 'Model' | t }} <input name="model" [(ngModel)]="f.config['model']" [placeholder]="'e.g. {example}' | t: { example: 'mistralai/mistral-small-3.2-24b-instruct' }" required /></label>
                   <label>
-                    OpenRouter API key
+                    {{ 'OpenRouter API key' | t }}
                     <input name="apiKey" type="password" [(ngModel)]="f.apiKey" autocomplete="off"
-                      [placeholder]="current()?.info?.['api_key'] ? 'Saved (' + current()?.info?.['api_key'] + '); type to replace' : 'sk-or-…'" />
+                      [placeholder]="current()?.info?.['api_key'] ? ('Saved ({hint}); type to replace' | t: { hint: current()?.info?.['api_key'] }) : 'sk-or-…'" />
                   </label>
                 </div>
-                <label class="check-line"><input type="checkbox" name="exclusive" [(ngModel)]="f.config['exclusive']" /> Exclusive: this workspace's tasks are only ever sent to this model</label>
-                <p class="hint muted">Use a model that supports tool calling. The key is stored encrypted and never shown again.</p>
+                <label class="check-line"><input type="checkbox" name="exclusive" [(ngModel)]="f.config['exclusive']" /> {{ 'Exclusive: this workspace\'s tasks are only ever sent to this model' | t }}</label>
+                <p class="hint muted">{{ 'Use a model that supports tool calling. The key is stored encrypted and never shown again.' | t }}</p>
               }
               @case ('openai_compatible') {
                 <div class="grid2">
-                  <label>API base URL <input name="base_url" [(ngModel)]="f.config['base_url']" placeholder="https://llm.example.com/v1" required /></label>
-                  <label>Model <input name="model" [(ngModel)]="f.config['model']" placeholder="e.g. llama3.1:70b" required /></label>
+                  <label>{{ 'API base URL' | t }} <input name="base_url" [(ngModel)]="f.config['base_url']" placeholder="https://llm.example.com/v1" required /></label>
+                  <label>{{ 'Model' | t }} <input name="model" [(ngModel)]="f.config['model']" [placeholder]="'e.g. {example}' | t: { example: 'llama3.1:70b' }" required /></label>
                   <label>
-                    API key (optional)
+                    {{ 'API key (optional)' | t }}
                     <input name="apiKey" type="password" [(ngModel)]="f.apiKey" autocomplete="off"
-                      [placeholder]="current()?.info?.['api_key'] ? 'Saved (' + current()?.info?.['api_key'] + '); type to replace' : 'Bearer token, if required'" />
+                      [placeholder]="current()?.info?.['api_key'] ? ('Saved ({hint}); type to replace' | t: { hint: current()?.info?.['api_key'] }) : ('Bearer token, if required' | t)" />
                   </label>
                 </div>
-                <label class="check-line"><input type="checkbox" name="exclusive" [(ngModel)]="f.config['exclusive']" /> Exclusive: this workspace's tasks are only ever sent to this endpoint</label>
-                <p class="hint muted">Must speak the OpenAI <code>/chat/completions</code> API (vLLM, Ollama, LM Studio, LiteLLM…) and be reachable from the Flowly server.</p>
+                <label class="check-line"><input type="checkbox" name="exclusive" [(ngModel)]="f.config['exclusive']" /> {{ 'Exclusive: this workspace\'s tasks are only ever sent to this endpoint' | t }}</label>
+                <p class="hint muted">{{ 'Must speak the OpenAI /chat/completions API (vLLM, Ollama, LM Studio, LiteLLM…) and be reachable from the Flowly server.' | t }}</p>
               }
               @case ('github') {
                 @if (!githubApp()?.configured) {
                   <div class="callout">
-                    <strong>GitHub App not set up yet</strong>
+                    <strong>{{ 'GitHub App not set up yet' | t }}</strong>
                     @if (githubApp()?.can_setup) {
-                      <p class="muted">Flowly connects through its own GitHub App. Create it once for this Flowly instance. GitHub opens, you confirm, and you come back here.</p>
+                      <p class="muted">{{ 'Flowly connects through its own GitHub App. Create it once for this Flowly instance. GitHub opens, you confirm, and you come back here.' | t }}</p>
                       <div class="grid2">
-                        <label>App name (must be unique on GitHub) <input name="appName" [(ngModel)]="appName" /></label>
-                        <label>Organization (optional) <input name="appOrg" [(ngModel)]="appOrg" placeholder="Leave empty for your personal account" /></label>
+                        <label>{{ 'App name (must be unique on GitHub)' | t }} <input name="appName" [(ngModel)]="appName" /></label>
+                        <label>{{ 'Organization (optional)' | t }} <input name="appOrg" [(ngModel)]="appOrg" [placeholder]="'Leave empty for your personal account' | t" /></label>
                       </div>
-                      <button class="btn primary" type="button" (click)="createGithubApp()">Create GitHub App</button>
+                      <button class="btn primary" type="button" (click)="createGithubApp()">{{ 'Create GitHub App' | t }}</button>
                     } @else {
-                      <p class="muted">An instance admin has to create Flowly's GitHub App first.</p>
+                      <p class="muted">{{ 'An instance admin has to create Flowly\'s GitHub App first.' | t }}</p>
                     }
                   </div>
                 } @else if (f.id) {
                   @if (current()?.info?.['installed']) {
                     <div class="grid2">
                       <label>
-                        Repository
+                        {{ 'Repository' | t }}
                         @if (repos(); as list) {
                           <select name="repo" [(ngModel)]="f.config['repo']">
-                            <option value="">Choose…</option>
+                            <option value="">{{ 'Choose…' | t }}</option>
                             @for (r of list; track r) {
                               <option [value]="r">{{ r }}</option>
                             }
@@ -214,25 +222,25 @@
                         }
                       </label>
                       <label>
-                        New issues go to
+                        {{ 'New issues go to' | t }}
                         <select name="schedule" [(ngModel)]="f.config['schedule']">
-                          <option value="backlog">Backlog</option>
-                          <option value="today">Today</option>
+                          <option value="backlog">{{ 'Backlog' | t }}</option>
+                          <option value="today">{{ 'Today' | t }}</option>
                         </select>
                       </label>
                       <label>
-                        Closed issue → status
+                        {{ 'Closed issue → status' | t }}
                         <select name="done_status" [(ngModel)]="f.config['done_status']">
-                          <option [ngValue]="null">First "done" status</option>
+                          <option [ngValue]="null">{{ 'First “done” status' | t }}</option>
                           @for (s of statusTags(); track s.id) {
                             <option [ngValue]="s.id">{{ s.name }}</option>
                           }
                         </select>
                       </label>
                       <label>
-                        Reopened issue → status
+                        {{ 'Reopened issue → status' | t }}
                         <select name="open_status" [(ngModel)]="f.config['open_status']">
-                          <option [ngValue]="null">First open status</option>
+                          <option [ngValue]="null">{{ 'First open status' | t }}</option>
                           @for (s of statusTags(); track s.id) {
                             <option [ngValue]="s.id">{{ s.name }}</option>
                           }
@@ -240,119 +248,117 @@
                       </label>
                     </div>
                     <div class="checks">
-                      <label class="check-line"><input type="checkbox" name="sync_labels" [(ngModel)]="f.config['sync_labels']" /> Issue labels set matching Flowly tags</label>
-                      <label class="check-line"><input type="checkbox" name="status_labels" [(ngModel)]="f.config['status_labels']" /> Mirror the task status as a "flowly: …" label</label>
-                      <label class="check-line"><input type="checkbox" name="create_issues" [(ngModel)]="f.config['create_issues']" /> Open an issue for tasks created in Flowly{{ f.project ? ' in this project' : '' }}</label>
+                      <label class="check-line"><input type="checkbox" name="sync_labels" [(ngModel)]="f.config['sync_labels']" /> {{ 'Issue labels set matching Flowly tags' | t }}</label>
+                      <label class="check-line"><input type="checkbox" name="status_labels" [(ngModel)]="f.config['status_labels']" /> {{ 'Mirror the task status as a “flowly: …” label' | t }}</label>
+                      <label class="check-line"><input type="checkbox" name="create_issues" [(ngModel)]="f.config['create_issues']" /> {{ (f.project ? 'Open an issue for tasks created in Flowly in this project' : 'Open an issue for tasks created in Flowly') | t }}</label>
                     </div>
                     <p class="hint muted">
-                      Closing or reopening the issue moves the task. Moving the task into or out of a "done" status closes or reopens the issue.
-                      Assignees are matched by the GitHub username in each member's profile.
+                      {{ 'Closing or reopening the issue moves the task. Moving the task into or out of a “done” status closes or reopens the issue. Assignees are matched by the GitHub username in each member\'s profile.' | t }}
                     </p>
-                    <button class="btn small" type="button" (click)="installGithub()">Change installation…</button>
+                    <button class="btn small" type="button" (click)="installGithub()">{{ 'Change installation…' | t }}</button>
                   } @else {
                     <div class="callout">
-                      <strong>Install {{ githubApp()?.app?.name }} on GitHub</strong>
-                      <p class="muted">Choose the account and repositories Flowly may access. You'll come back here to pick the repository.</p>
-                      <button class="btn primary" type="button" (click)="installGithub()">Install on GitHub</button>
+                      <strong>{{ 'Install {name} on GitHub' | t: { name: githubApp()?.app?.name } }}</strong>
+                      <p class="muted">{{ 'Choose the account and repositories Flowly may access. You\'ll come back here to pick the repository.' | t }}</p>
+                      <button class="btn primary" type="button" (click)="installGithub()">{{ 'Install on GitHub' | t }}</button>
                     </div>
                   }
                 } @else {
-                  <p class="muted">Save first, then install the app on your GitHub account and pick a repository.</p>
+                  <p class="muted">{{ 'Save first, then install the app on your GitHub account and pick a repository.' | t }}</p>
                 }
               }
             }
 
             @if (f.kind === 'outgoing_webhook' || f.kind === 'slack') {
               <fieldset class="events">
-                <legend>Send on</legend>
+                <legend>{{ 'Send on' | t }}</legend>
                 @for (e of events; track e.key) {
                   <label class="check-line">
                     <input type="checkbox" [checked]="f.events.has(e.key)" (change)="toggleEvent(f, e.key)" />
-                    {{ e.label }}
+                    {{ e.label | t }}
                   </label>
                 }
               </fieldset>
             }
 
             <div class="actions">
-              <label class="check-line"><input type="checkbox" name="enabled" [(ngModel)]="f.enabled" /> Enabled</label>
+              <label class="check-line"><input type="checkbox" name="enabled" [(ngModel)]="f.enabled" /> {{ 'Enabled' | t }}</label>
               <span class="spacer"></span>
               @if (f.id && (f.kind === 'outgoing_webhook' || f.kind === 'slack' || f.kind === 'github' || isAi(f.kind))) {
-                <button class="btn" type="button" [disabled]="busy()" (click)="test()">Send test</button>
+                <button class="btn" type="button" [disabled]="busy()" (click)="test()">{{ 'Send test' | t }}</button>
               }
-              <button class="btn primary" type="submit" [disabled]="busy()">{{ f.id ? 'Save' : 'Add integration' }}</button>
+              <button class="btn primary" type="submit" [disabled]="busy()">{{ (f.id ? 'Save' : 'Add integration') | t }}</button>
             </div>
           </form>
 
           @if (current(); as item) {
             <div class="details">
               @if (item.kind === 'incoming_webhook') {
-                <h3>Endpoint</h3>
+                <h3>{{ 'Endpoint' | t }}</h3>
                 <div class="copy-row">
-                  <input readonly [value]="item.info['url']" (focus)="$any($event.target).select()" aria-label="Webhook URL" />
-                  <button class="btn small" type="button" (click)="copy(item.info['url'], 'URL copied')">Copy</button>
+                  <input readonly [value]="item.info['url']" (focus)="$any($event.target).select()" [attr.aria-label]="'Webhook URL' | t" />
+                  <button class="btn small" type="button" (click)="copy(item.info['url'], 'URL copied to clipboard.')">{{ 'Copy' | t }}</button>
                 </div>
-                <p class="hint muted">POST JSON. Send the same <code>external_id</code> again to update that task. Unknown tag names are ignored, and the assignee is matched by email.</p>
+                <p class="hint muted">{{ 'POST JSON. Send the same external_id again to update that task. Unknown tag names are ignored, and the assignee is matched by email.' | t }}</p>
                 <pre>{{ curlExample(item) }}</pre>
                 <details>
-                  <summary>All fields</summary>
+                  <summary>{{ 'All fields' | t }}</summary>
                   <pre>{{ item.info['example'] | json }}</pre>
                 </details>
               }
               @if (item.kind === 'email') {
-                <h3>Address</h3>
+                <h3>{{ 'Address' | t }}</h3>
                 @if (item.info['address']) {
                   <div class="copy-row">
-                    <input readonly [value]="item.info['address']" (focus)="$any($event.target).select()" aria-label="Email address" />
-                    <button class="btn small" type="button" (click)="copy(item.info['address'], 'Address copied')">Copy</button>
+                    <input readonly [value]="item.info['address']" (focus)="$any($event.target).select()" [attr.aria-label]="'Email address' | t" />
+                    <button class="btn small" type="button" (click)="copy(item.info['address'], 'Address copied to clipboard.')">{{ 'Copy' | t }}</button>
                   </div>
-                  <p class="hint muted">The subject becomes the title and the body becomes the notes. If the sender is a member, the task is assigned to them.</p>
+                  <p class="hint muted">{{ 'The subject becomes the title and the body becomes the notes. If the sender is a member, the task is assigned to them.' | t }}</p>
                 } @else {
                   <p class="hint muted">
-                    Email-in needs a receiving domain. Set <code>EMAIL_INBOUND_DOMAIN</code> on the server and route that domain's mail to
-                    <code>{{ item.info['endpoint'] }}</code> (Cloudflare Email Workers, Mailgun, SendGrid or Postmark inbound).
-                    Until then, the address is <code>{{ item.token }}&#64;your-inbound-domain</code>.
+                    {{ 'Email-in needs a receiving domain. Set EMAIL_INBOUND_DOMAIN on the server and route that domain\'s mail to {endpoint} (Cloudflare Email Workers, Mailgun, SendGrid or Postmark inbound).' | t: { endpoint: item.info['endpoint'] } }}
+                    {{ 'Until then, the address is {address}.' | t: { address: inboundExample(item.token) } }}
                   </p>
                 }
               }
               @if (item.kind === 'outgoing_webhook' || item.kind === 'incoming_webhook') {
-                <h3>Signing secret</h3>
+                <h3>{{ 'Signing secret' | t }}</h3>
                 <div class="copy-row">
-                  <input readonly type="password" [value]="item.secret" aria-label="Signing secret" #secretInput
+                  <input readonly type="password" [value]="item.secret" [attr.aria-label]="'Signing secret' | t" #secretInput
                     (focus)="secretInput.type = 'text'; secretInput.select()" (blur)="secretInput.type = 'password'" />
-                  <button class="btn small" type="button" (click)="copy(item.secret, 'Secret copied')">Copy</button>
-                  <button class="btn small ghost" type="button" (click)="rotate()">Regenerate</button>
+                  <button class="btn small" type="button" (click)="copy(item.secret, 'Secret copied to clipboard.')">{{ 'Copy' | t }}</button>
+                  <button class="btn small ghost" type="button" (click)="rotate()">{{ 'Regenerate' | t }}</button>
                 </div>
                 <p class="hint muted">
-                  Signature: <code>X-Flowly-Signature: sha256=&lt;HMAC-SHA256 of the raw body with this secret&gt;</code>
+                  {{ 'Signature:' | t }} <code>X-Flowly-Signature: sha256=…</code> ({{ 'HMAC-SHA256 of the raw body with this secret' | t }})
                 </p>
               }
 
               <h3>
-                Activity
-                <button class="btn ghost small" type="button" (click)="loadDeliveries()">Refresh</button>
+                {{ 'Activity' | t }}
+                <button class="btn ghost small" type="button" (click)="loadDeliveries()">{{ 'Refresh' | t }}</button>
               </h3>
               @if (deliveries().length) {
                 <div class="table-wrap">
                   <table class="deliveries">
-                    <thead><tr><th></th><th>When</th><th>Event</th><th>Result</th><th></th></tr></thead>
+                    <thead><tr><th></th><th>{{ 'When' | t }}</th><th>{{ 'Event' | t }}</th><th>{{ 'Result' | t }}</th><th></th></tr></thead>
                     <tbody>
                       @for (d of deliveries(); track d.id) {
                         <tr [class.open]="expanded() === d.id">
-                          <td><span class="status-dot" [attr.data-status]="d.status" [title]="d.status"></span></td>
-                          <td class="nowrap">{{ d.created_at | date: 'MMM d, HH:mm:ss' }}</td>
+                          <td><span class="status-dot" [attr.data-status]="d.status" [title]="statusLabel(d.status) | t"></span></td>
+                          <td class="nowrap">{{ d.created_at | ldate: 'MMM d, HH:mm:ss' }}</td>
                           <td><span class="dir">{{ d.direction === 'in' ? '↘' : '↗' }}</span> {{ d.event }}</td>
                           <td class="result">
                             @if (d.status === 'pending') {
-                              retrying ({{ d.attempts }} tries) · {{ d.last_error }}
+                              {{ 'retrying ({n} tries)' | t: { n: d.attempts } }} · {{ d.last_error }}
                             } @else {
-                              {{ d.last_error || d.response_body || d.status }}
+                              {{ d.last_error || d.response_body || (statusLabel(d.status) | t) }}
                             }
                           </td>
                           <td class="nowrap">
-                            <button class="btn ghost small" type="button" (click)="expanded.set(expanded() === d.id ? null : d.id)">Details</button>
+                            <button class="btn ghost small" type="button" (click)="expanded.set(expanded() === d.id ? null : d.id)">{{ 'Details' | t }}</button>
                             @if (d.direction === 'out' && d.status !== 'success') {
-                              <button class="btn small" type="button" (click)="retry(d)">Retry</button>
+                              <button class="btn small" type="button" (click)="retry(d)">{{ 'Retry' | t }}</button>
                             }
                           </td>
                         </tr>
@@ -364,16 +370,16 @@
                   </table>
                 </div>
               } @else {
-                <p class="empty">Nothing yet.</p>
+                <p class="empty">{{ 'Nothing yet.' | t }}</p>
               }
 
               <div class="danger-zone">
                 @if (confirmDelete()) {
-                  <span>Remove this integration and its history?</span>
-                  <button class="btn danger small" type="button" (click)="remove()">Remove</button>
-                  <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">Cancel</button>
+                  <span>{{ 'Remove this integration and its history?' | t }}</span>
+                  <button class="btn danger small" type="button" (click)="remove()">{{ 'Remove' | t }}</button>
+                  <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">{{ 'Cancel' | t }}</button>
                 } @else {
-                  <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">Remove integration</button>
+                  <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">{{ 'Remove integration' | t }}</button>
                 }
               </div>
             </div>

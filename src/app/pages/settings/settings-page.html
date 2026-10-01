@@ -1,116 +1,123 @@
 <div class="page">
   <header>
     <div>
-      <h1>Settings</h1>
-      <p class="muted">Your profile, appearance and personal concierge.</p>
+      <h1>{{ 'Settings' | t }}</h1>
+      <p class="muted">{{ 'Your profile, appearance and personal concierge.' | t }}</p>
     </div>
   </header>
 
   <section class="panel">
-    <h2>Profile</h2>
+    <h2>{{ 'Profile' | t }}</h2>
     <form class="inline-form" (ngSubmit)="saveProfile()">
-      <input name="fullName" [(ngModel)]="fullName" placeholder="Your name" aria-label="Your name" />
-      <input name="githubLogin" [(ngModel)]="githubLogin" placeholder="GitHub username" aria-label="GitHub username"
-        title="Matches GitHub issue assignees to you" />
-      <button class="btn" type="submit">Save</button>
+      <input name="fullName" [(ngModel)]="fullName" [placeholder]="'Your name' | t" [attr.aria-label]="'Your name' | t" />
+      <input name="githubLogin" [(ngModel)]="githubLogin" [placeholder]="'GitHub username' | t" [attr.aria-label]="'GitHub username' | t"
+        [title]="'Matches GitHub issue assignees to you' | t" />
+      <button class="btn" type="submit">{{ 'Save' | t }}</button>
     </form>
   </section>
 
   <section class="panel">
-    <h2>Appearance</h2>
+    <h2>{{ 'Appearance' | t }}</h2>
     <div class="inline-form">
-      @for (t of themes; track t.value) {
+      <label class="lang">
+        <span class="small muted">{{ 'Language' | t }}</span>
+        <select [value]="i18n.lang()" (change)="i18n.set($any($event.target).value)" [attr.aria-label]="'Language' | t">
+          @for (l of languages; track l.code) {
+            <option [value]="l.code" [selected]="l.code === i18n.lang()">{{ l.label }}</option>
+          }
+        </select>
+      </label>
+      @for (th of themes; track th.value) {
         <label class="radio">
-          <input type="radio" name="theme" [checked]="theme.theme() === t.value" (change)="theme.set(t.value)" />
-          {{ t.label }}
+          <input type="radio" name="theme" [checked]="theme.theme() === th.value" (change)="theme.set(th.value)" />
+          {{ th.label | t }}
         </label>
       }
     </div>
   </section>
 
   <section class="panel">
-    <h2>Notifications</h2>
+    <h2>{{ 'Notifications' | t }}</h2>
     <div class="row">
       <div class="grow">
-        In-app notifications are on: assignments, urgent tasks for today and comments on your tasks appear under the bell.
+        {{ 'In-app notifications are on: assignments, urgent tasks for today and comments on your tasks appear under the bell.' | t }}
         @if (systemNotifications() === 'granted') {
-          <div class="muted small">Desktop notifications are enabled for this browser.</div>
+          <div class="muted small">{{ 'Desktop notifications are enabled for this browser.' | t }}</div>
         }
       </div>
       @if (systemNotifications() === 'default') {
-        <button class="btn small" type="button" (click)="enableSystem()">Enable desktop notifications</button>
+        <button class="btn small" type="button" (click)="enableSystem()">{{ 'Enable desktop notifications' | t }}</button>
       }
     </div>
   </section>
 
   <section class="panel">
-    <h2>Claude, ChatGPT & API</h2>
+    <h2>{{ 'Claude, ChatGPT & API' | t }}</h2>
     <p class="intro muted">
-      Flowly is an MCP server, so AI assistants can read your day, add and update tasks, comment and track time, with your
-      permissions. Workspaces with an exclusive AI endpoint stay hidden.
+      {{ 'Flowly is an MCP server, so AI assistants can read your day, add and update tasks, comment and track time, with your permissions. Workspaces with an exclusive AI endpoint stay hidden.' | t }}
     </p>
     <div class="connect">
-      <div class="small muted">Server URL</div>
+      <div class="small muted">{{ 'Server URL' | t }}</div>
       <div class="copy-line">
         <code>{{ mcpUrl() }}</code>
-        <button class="btn small" type="button" (click)="copy(mcpUrl())">Copy</button>
+        <button class="btn small" type="button" (click)="copy(mcpUrl())">{{ 'Copy' | t }}</button>
       </div>
       <div class="how">
-        <div><strong>ChatGPT</strong>: Settings → Apps &amp; Connectors → Advanced → Developer mode on, then Create / Add custom connector, paste the URL and choose OAuth. Sign in to Flowly when asked.</div>
-        <div><strong>Claude (claude.ai, Desktop, mobile)</strong>: Settings → Connectors → Add custom connector, paste the URL, then Connect and allow access.</div>
-        <div><strong>Cursor, VS Code, Windsurf and other MCP clients</strong>: add a remote / HTTP server with the URL; they sign in with OAuth, or send a token below as <code>Authorization: Bearer …</code>.</div>
-        <div><strong>Claude Code / scripts</strong>: create a personal token below.</div>
-        <div class="muted">To give an assistant or an automation access to <em>one workspace only</em>, use that workspace's own MCP URL (Integrations → MCP server for this workspace).</div>
+        <div><strong>ChatGPT</strong>: {{ 'Settings → Apps & Connectors → Advanced → Developer mode on, then Create / Add custom connector, paste the URL and choose OAuth. Sign in to Flowly when asked.' | t }}</div>
+        <div><strong>Claude (claude.ai, Desktop, mobile)</strong>: {{ 'Settings → Connectors → Add custom connector, paste the URL, then Connect and allow access.' | t }}</div>
+        <div><strong>{{ 'Cursor, VS Code, Windsurf and other MCP clients' | t }}</strong>: {{ 'add a remote / HTTP server with the URL; they sign in with OAuth, or send a token below as' | t }} <code>Authorization: Bearer …</code>.</div>
+        <div><strong>{{ 'Claude Code / scripts' | t }}</strong>: {{ 'create a personal token below.' | t }}</div>
+        <div class="muted">{{ "To give an assistant or an automation access to one workspace only, use that workspace's own MCP URL (Integrations → MCP server for this workspace)." | t }}</div>
       </div>
     </div>
 
     @if (grants().length) {
-      <h3 class="sub">Connected apps</h3>
+      <h3 class="sub">{{ 'Connected apps' | t }}</h3>
       @for (g of grants(); track g.id) {
         <div class="row">
           <span class="grow">
             <strong>{{ g.client }}</strong>
-            <span class="muted small"> · connected {{ g.created_at | date: 'MMM d, y' }} · {{ g.last_used_at ? 'last used ' + (g.last_used_at | date: 'MMM d, HH:mm') : 'not used yet' }}</span>
+            <span class="muted small"> · {{ 'connected {date}' | t: { date: (g.created_at | ldate: 'MMM d, y') } }} · {{ g.last_used_at ? ('last used {date}' | t: { date: (g.last_used_at | ldate: 'MMM d, HH:mm') }) : ('not used yet' | t) }}</span>
           </span>
-          <button class="btn ghost danger small" type="button" (click)="disconnect(g.id)">Disconnect</button>
+          <button class="btn ghost danger small" type="button" (click)="disconnect(g.id)">{{ 'Disconnect' | t }}</button>
         </div>
       }
     }
 
-    <h3 class="sub">Personal tokens</h3>
+    <h3 class="sub">{{ 'Personal tokens' | t }}</h3>
     <form class="inline-form" (ngSubmit)="createToken()">
-      <input name="tokenName" [(ngModel)]="tokenName" placeholder="Token name, e.g. Claude Code on laptop" aria-label="Token name" />
-      <button class="btn primary" type="submit">Create token</button>
+      <input name="tokenName" [(ngModel)]="tokenName" [placeholder]="'Token name, e.g. Claude Code on laptop' | t" [attr.aria-label]="'Token name' | t" />
+      <button class="btn primary" type="submit">{{ 'Create token' | t }}</button>
     </form>
-    @if (newToken(); as t) {
+    @if (newToken(); as tok) {
       <div class="new-token">
-        <strong>Copy your token now. It won't be shown again.</strong>
+        <strong>{{ "Copy your token now. It won't be shown again." | t }}</strong>
         <div class="copy-line">
-          <code>{{ t.token }}</code>
-          <button class="btn small" type="button" (click)="copy(t.token!)">Copy</button>
+          <code>{{ tok.token }}</code>
+          <button class="btn small" type="button" (click)="copy(tok.token!)">{{ 'Copy' | t }}</button>
         </div>
         <div class="setup">
           <div class="small muted">Claude Code</div>
           <div class="copy-line">
-            <code>{{ claudeCodeCommand(t.token!) }}</code>
-            <button class="btn small" type="button" (click)="copy(claudeCodeCommand(t.token!))">Copy</button>
+            <code>{{ claudeCodeCommand(tok.token!) }}</code>
+            <button class="btn small" type="button" (click)="copy(claudeCodeCommand(tok.token!))">{{ 'Copy' | t }}</button>
           </div>
-          <div class="small muted">Claude Desktop: add to <code>claude_desktop_config.json</code></div>
+          <div class="small muted">{{ 'Claude Desktop: add to' | t }} <code>claude_desktop_config.json</code></div>
           <div class="copy-line">
-            <pre>{{ desktopConfig(t.token!) }}</pre>
-            <button class="btn small" type="button" (click)="copy(desktopConfig(t.token!))">Copy</button>
+            <pre>{{ desktopConfig(tok.token!) }}</pre>
+            <button class="btn small" type="button" (click)="copy(desktopConfig(tok.token!))">{{ 'Copy' | t }}</button>
           </div>
-          <div class="small muted">Any other MCP client: Streamable HTTP at <code>{{ mcpUrl() }}</code> with the header <code>Authorization: Bearer &lt;token&gt;</code>.</div>
+          <div class="small muted">{{ 'Any other MCP client: Streamable HTTP at {url} with the header' | t: { url: mcpUrl() } }} <code>Authorization: Bearer &lt;token&gt;</code>.</div>
         </div>
       </div>
     }
-    @for (t of tokens(); track t.id) {
+    @for (tok of tokens(); track tok.id) {
       <div class="row">
         <span class="grow">
-          <strong>{{ t.name }}</strong> <code class="small">{{ t.hint }}…</code>
-          <span class="muted small"> · created {{ t.created_at | date: 'MMM d, y' }} · {{ t.last_used_at ? 'last used ' + (t.last_used_at | date: 'MMM d, HH:mm') : 'never used' }}</span>
+          <strong>{{ tok.name }}</strong> <code class="small">{{ tok.hint }}…</code>
+          <span class="muted small"> · {{ 'created {date}' | t: { date: (tok.created_at | ldate: 'MMM d, y') } }} · {{ tok.last_used_at ? ('last used {date}' | t: { date: (tok.last_used_at | ldate: 'MMM d, HH:mm') }) : ('never used' | t) }}</span>
         </span>
-        <button class="btn ghost danger small" type="button" (click)="revokeToken(t)">Revoke</button>
+        <button class="btn ghost danger small" type="button" (click)="revokeToken(tok)">{{ 'Revoke' | t }}</button>
       </div>
     }
   </section>
@@ -118,17 +125,16 @@
   @if (state(); as s) {
     <section class="panel concierge">
       <h2>
-        <span class="group-title">Concierge <span class="plan" [class.pro]="s.has_pro">{{ s.has_pro ? 'PRO' : 'FREE' }}</span></span>
+        <span class="group-title">{{ 'Concierge' | t }} <span class="plan" [class.pro]="s.has_pro">{{ s.has_pro ? 'PRO' : 'FREE' }}</span></span>
       </h2>
       <p class="intro muted">
-        Your personal assistant across all workspaces. It sends a morning brief of your day, tells you when something urgent
-        lands on today's plan, and you can ask it to look up, add or move tasks, on Telegram or right here.
+        {{ "Your personal assistant across all workspaces. It sends a morning brief of your day, tells you when something urgent lands on today's plan, and you can ask it to look up, add or move tasks, on Telegram or right here." | t }}
       </p>
 
       @if (!s.has_pro) {
         <div class="callout">
-          <strong>Flowly Pro feature</strong>
-          <p class="muted">The concierge uses an AI model, so it's part of Flowly Pro. Ask an admin to upgrade your account.</p>
+          <strong>{{ 'Flowly Pro feature' | t }}</strong>
+          <p class="muted">{{ "The concierge uses an AI model, so it's part of Flowly Pro. Ask an admin to upgrade your account." | t }}</p>
         </div>
       } @else {
         @if (s.unavailable_reason) {
@@ -139,41 +145,46 @@
           <div class="grow">
             <strong>Telegram</strong>
             @if (!s.telegram.configured) {
-              <div class="muted small">The Telegram bot isn't configured on this server yet.</div>
+              <div class="muted small">{{ "The Telegram bot isn't configured on this server yet." | t }}</div>
             } @else if (s.telegram.linked) {
-              <div class="muted small">Connected{{ s.telegram.username ? ' as @' + s.telegram.username : '' }} to &#64;{{ s.telegram.bot }}.</div>
+              <div class="muted small">
+                @if (s.telegram.username) {
+                  {{ 'Connected as @{user} to @{bot}.' | t: { user: s.telegram.username, bot: s.telegram.bot } }}
+                } @else {
+                  {{ 'Connected to @{bot}.' | t: { bot: s.telegram.bot } }}
+                }
+              </div>
             } @else {
-              <div class="muted small">Connect to get your brief and alerts in Telegram.</div>
+              <div class="muted small">{{ 'Connect to get your brief and alerts in Telegram.' | t }}</div>
             }
           </div>
           @if (s.telegram.configured) {
             @if (s.telegram.linked) {
-              <button class="btn small ghost danger" type="button" (click)="disconnectTelegram()">Disconnect</button>
+              <button class="btn small ghost danger" type="button" (click)="disconnectTelegram()">{{ 'Disconnect' | t }}</button>
             } @else {
-              <button class="btn small primary" type="button" (click)="connectTelegram()">Connect Telegram</button>
+              <button class="btn small primary" type="button" (click)="connectTelegram()">{{ 'Connect Telegram' | t }}</button>
             }
           }
         </div>
         @if (linkUrl()) {
           <div class="row">
             <div class="grow small">
-              Telegram should have opened. If not, open <a [href]="linkUrl()" target="_blank" rel="noopener">this link</a> and tap <strong>Start</strong>.
-              The link is valid for 30 minutes.
+              {{ 'Telegram should have opened. If not, open' | t }} <a [href]="linkUrl()" target="_blank" rel="noopener">{{ 'this link' | t }}</a> {{ 'and tap Start. The link is valid for 30 minutes.' | t }}
             </div>
-            <button class="btn small" type="button" (click)="checkLinked()">I've connected</button>
+            <button class="btn small" type="button" (click)="checkLinked()">{{ "I've connected" | t }}</button>
           </div>
         }
 
         <div class="row settings-grid">
           <label class="grow persona">
-            <span class="small muted">Name</span>
-            <input [value]="s.settings.name" maxlength="40" (change)="update({ name: $any($event.target).value.trim() || 'Flo' })" aria-label="Concierge name" />
+            <span class="small muted">{{ 'Name' | t }}</span>
+            <input [value]="s.settings.name" maxlength="40" (change)="update({ name: $any($event.target).value.trim() || 'Flo' })" [attr.aria-label]="'Concierge name' | t" />
           </label>
           <label class="grow persona">
-            <span class="small muted">Language</span>
-            <select (change)="update({ language: $any($event.target).value })" aria-label="Concierge language">
+            <span class="small muted">{{ 'Language' | t }}</span>
+            <select (change)="update({ language: $any($event.target).value })" [attr.aria-label]="'Concierge language' | t">
               @for (l of s.languages; track l.code) {
-                <option [value]="l.code" [selected]="l.code === s.settings.language">{{ l.label }}</option>
+                <option [value]="l.code" [selected]="l.code === s.settings.language">{{ l.label | t }}</option>
               }
             </select>
           </label>
@@ -182,10 +193,10 @@
         <div class="row settings-grid">
           <label class="check-line">
             <input type="checkbox" [checked]="s.settings.morning_brief" (change)="update({ morning_brief: $any($event.target).checked })" />
-            Morning brief at
+            {{ 'Morning brief at' | t }}
           </label>
-          <input type="time" class="time" [value]="s.settings.brief_time" (change)="update({ brief_time: $any($event.target).value })" aria-label="Brief time" />
-          <select class="tz" [value]="s.settings.timezone" (change)="update({ timezone: $any($event.target).value })" aria-label="Time zone">
+          <input type="time" class="time" [value]="s.settings.brief_time" (change)="update({ brief_time: $any($event.target).value })" [attr.aria-label]="'Brief time' | t" />
+          <select class="tz" [value]="s.settings.timezone" (change)="update({ timezone: $any($event.target).value })" [attr.aria-label]="'Time zone' | t">
             @for (tz of timezones; track tz) {
               <option [value]="tz" [selected]="tz === s.settings.timezone">{{ tz }}</option>
             }
@@ -194,24 +205,24 @@
         <div class="row">
           <label class="check-line">
             <input type="checkbox" [checked]="s.settings.alerts" (change)="update({ alerts: $any($event.target).checked })" />
-            Send urgent changes, assignments and comments to Telegram
+            {{ 'Send urgent changes, assignments and comments to Telegram' | t }}
           </label>
         </div>
         <div class="row">
           <label class="grow">
-            <span class="small muted">AI model</span>
+            <span class="small muted">{{ 'AI model' | t }}</span>
             <select [value]="s.settings.provider ?? ''" (change)="update({ provider: $any($event.target).value ? +$any($event.target).value : null })">
-              <option value="" [selected]="s.settings.provider === null">{{ s.platform_ai ? 'Flowly (included in Pro)' : 'Flowly (not configured)' }}</option>
+              <option value="" [selected]="s.settings.provider === null">{{ (s.platform_ai ? 'Flowly (included in Pro)' : 'Flowly (not configured)') | t }}</option>
               @for (p of s.providers; track p.id) {
                 <option [value]="p.id" [selected]="p.id === s.settings.provider">{{ p.workspace }}: {{ p.name }} ({{ p.model }})</option>
               }
             </select>
-            <span class="small muted">Workspaces can add their own OpenRouter key or OpenAI-compatible endpoint under Integrations. Workspaces marked “exclusive” are only ever shown to their own model.</span>
+            <span class="small muted">{{ 'Workspaces can add their own OpenRouter key or OpenAI-compatible endpoint under Integrations. Workspaces marked “exclusive” are only ever shown to their own model.' | t }}</span>
           </label>
         </div>
         @if (s.settings.provider === null && s.platform_ai) {
           <div class="row">
-            <div class="grow small muted">Today's usage</div>
+            <div class="grow small muted">{{ "Today's usage" | t }}</div>
             <div class="usage"><span [style.width.%]="usagePct(s)"></span></div>
             <span class="small muted">{{ usagePct(s) }}%</span>
           </div>
@@ -222,32 +233,32 @@
             @for (m of chat(); track $index) {
               <div class="bubble" [class.me]="m.role === 'user'">{{ m.text }}</div>
             } @empty {
-              <p class="muted small">Try: “What's on my plate today?” or “Add ‘renew passport’ for Friday in Personal”.</p>
+              <p class="muted small">{{ 'Try: “What’s on my plate today?” or “Add ‘renew passport’ for Friday in Personal”.' | t }}</p>
             }
             @if (busy()) {
               <div class="bubble typing">…</div>
             }
           </div>
           <form class="chat-form" (ngSubmit)="send()">
-            <textarea name="chat" rows="2" [(ngModel)]="chatDraft" placeholder="Ask your concierge…" (keydown)="chatKey($event)"
-              [disabled]="!s.available" aria-label="Message the concierge"></textarea>
+            <textarea name="chat" rows="2" [(ngModel)]="chatDraft" [placeholder]="'Ask your concierge…' | t" (keydown)="chatKey($event)"
+              [disabled]="!s.available" [attr.aria-label]="'Message the concierge' | t"></textarea>
             <div class="chat-actions">
-              <button class="btn small ghost" type="button" [disabled]="busy() || !s.available" (click)="sendBrief()">Brief me now</button>
-              <button class="btn primary small" type="submit" [disabled]="busy() || !s.available || !chatDraft.trim()">Send</button>
+              <button class="btn small ghost" type="button" [disabled]="busy() || !s.available" (click)="sendBrief()">{{ 'Brief me now' | t }}</button>
+              <button class="btn primary small" type="submit" [disabled]="busy() || !s.available || !chatDraft.trim()">{{ 'Send' | t }}</button>
             </div>
           </form>
         </div>
 
         <div class="row">
           <div class="grow">
-            <strong class="small">What it remembers</strong>
-            <div class="memory small muted">{{ s.memory || 'Nothing yet. Tell it things like “I prefer deep work in the morning”.' }}</div>
+            <strong class="small">{{ 'What it remembers' | t }}</strong>
+            <div class="memory small muted">{{ s.memory || ('Nothing yet. Tell it things like “I prefer deep work in the morning”.' | t) }}</div>
           </div>
           @if (confirmForget()) {
-            <button class="btn small danger" type="button" (click)="forget()">Forget everything</button>
-            <button class="btn small ghost" type="button" (click)="confirmForget.set(false)">Cancel</button>
+            <button class="btn small danger" type="button" (click)="forget()">{{ 'Forget everything' | t }}</button>
+            <button class="btn small ghost" type="button" (click)="confirmForget.set(false)">{{ 'Cancel' | t }}</button>
           } @else {
-            <button class="btn small ghost" type="button" (click)="confirmForget.set(true)">Clear memory</button>
+            <button class="btn small ghost" type="button" (click)="confirmForget.set(true)">{{ 'Clear memory' | t }}</button>
           }
         </div>
       }
