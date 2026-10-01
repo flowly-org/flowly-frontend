@@ -22,11 +22,14 @@ The Django API lives in the separate `flowly-backend` repository.
 With Docker (production build served by nginx):
 
 ```bash
-API_URL=http://localhost:8000/api docker compose up -d --build   # http://localhost:8080
+docker compose up -d --build   # http://<host>:8080, listening on 0.0.0.0
 ```
 
-`API_URL` is written to `/config.json` when the container starts, so one image works with any backend.
-`WEB_PORT` changes the host port. Add the frontend's origin to the backend's `CORS_ALLOWED_ORIGINS`.
+nginx serves the app and proxies `/api`, `/admin` and `/static` to `API_UPSTREAM`
+(default `http://host.docker.internal:8000`, i.e. the backend published on the Docker host). The browser
+only talks to one origin, so it works on any IP or domain without CORS. Settings go in `.env`:
+`WEB_PORT`, `WEB_BIND`, `API_UPSTREAM`, and `API_URL` (written to `/config.json`; keep `/api` unless the
+browser should call the API on another origin directly).
 
 Local development (Node 20.19+ / 22+):
 
