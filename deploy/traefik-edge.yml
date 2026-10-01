@@ -1,0 +1,33 @@
+# Swarm stack that exposes Flowly through the server's existing Traefik (docker stack deploy -c traefik-edge.yml flowly-edge).
+version: "3.8"
+
+services:
+  edge:
+    image: nginx:1.27-alpine
+    configs:
+      - source: edge_conf
+        target: /etc/nginx/conf.d/default.conf
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 1
+      placement:
+        # Must run on the node hosting the Flowly containers (other nodes can't reach port 8090).
+        constraints:
+          - node.hostname == runner
+      labels:
+        traefik.enable: "true"
+        traefik.docker.network: traefik-public
+        traefik.http.routers.flowly-web.rule: Host(`flowly.net`) || Host(`www.flowly.net`)
+        traefik.http.routers.flowly-web.entrypoints: websecure
+        traefik.http.routers.flowly-web.tls.certresolver: basic
+        traefik.http.services.flowly-web.loadbalancer.server.port: "80"
+
+configs:
+  edge_conf:
+    file: ./edge.conf
+    name: flowly_edge_conf_v1
+
+networks:
+  traefik-public:
+    external: true
