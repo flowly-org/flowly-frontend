@@ -5,6 +5,8 @@ export interface User {
   id: number;
   email: string;
   full_name: string;
+  github_login?: string;
+  is_staff?: boolean;
 }
 
 export interface AuthResponse {
@@ -102,4 +104,55 @@ export type TaskInput = Partial<Omit<Task, 'id' | 'created_by' | 'created_at' | 
 export const PALETTE = [
   '#4f46e5', '#0ea5e9', '#14b8a6', '#22c55e', '#eab308',
   '#f97316', '#ef4444', '#ec4899', '#a855f7', '#64748b',
+];
+
+export type IntegrationKind = 'github' | 'slack' | 'outgoing_webhook' | 'incoming_webhook' | 'email';
+
+export interface Integration {
+  id: number;
+  kind: IntegrationKind;
+  name: string;
+  /** null = whole workspace. */
+  project: number | null;
+  enabled: boolean;
+  config: Record<string, any>;
+  token: string;
+  secret: string;
+  /** Read-only, kind-specific details (URLs, addresses, GitHub app/install state). */
+  info: Record<string, any>;
+  last_delivery: { status: DeliveryStatus; event: string; created_at: string } | null;
+  created_at: string;
+}
+
+export type DeliveryStatus = 'pending' | 'success' | 'failed' | 'ignored';
+
+export interface Delivery {
+  id: number;
+  direction: 'in' | 'out';
+  event: string;
+  status: DeliveryStatus;
+  attempts: number;
+  task: number | null;
+  payload: Record<string, any>;
+  last_error: string;
+  response_status: number | null;
+  response_body: string;
+  next_attempt_at: string | null;
+  created_at: string;
+  finished_at: string | null;
+}
+
+export interface GitHubAppInfo {
+  configured: boolean;
+  can_setup: boolean;
+  app: { name: string; slug: string; html_url: string; owner: string } | null;
+}
+
+export const TASK_EVENTS = [
+  { key: 'task.created', label: 'Task created' },
+  { key: 'task.updated', label: 'Task updated' },
+  { key: 'task.status_changed', label: 'Status changed' },
+  { key: 'task.completed', label: 'Task completed' },
+  { key: 'task.assigned', label: 'Task assigned' },
+  { key: 'task.deleted', label: 'Task deleted' },
 ];

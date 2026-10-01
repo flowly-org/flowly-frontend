@@ -75,6 +75,8 @@
     <h2>Your profile</h2>
     <form class="inline-form" (ngSubmit)="saveProfile()">
       <input name="profileName" [(ngModel)]="profileName" placeholder="Your name" aria-label="Your name" />
+      <input name="githubLogin" [(ngModel)]="githubLogin" placeholder="GitHub username" aria-label="GitHub username"
+        title="Used to match GitHub issue assignees to you" />
       <button class="btn" type="submit">Save</button>
     </form>
   </section>

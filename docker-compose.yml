@@ -6,6 +6,7 @@ services:
       API_URL: ${API_URL:-/api}
       # Where nginx forwards /api, /admin and /static.
       API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:8000}
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

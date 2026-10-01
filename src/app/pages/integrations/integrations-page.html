@@ -1,0 +1,322 @@
+<div class="page wide">
+  <header>
+    <div>
+      <h1>Integrations</h1>
+      <p class="muted">Connect {{ store.current()?.name }} or a single project to other tools. Incoming connectors create and update tasks; outgoing ones react to task changes.</p>
+    </div>
+    <label class="scope-filter">
+      <span class="muted">Show</span>
+      <select [value]="projectFilter() ?? ''" (change)="setFilter($any($event.target).value)">
+        <option value="">All integrations</option>
+        @for (p of store.projects(); track p.id) {
+          <option [value]="p.id">Project: {{ p.name }}</option>
+        }
+      </select>
+    </label>
+  </header>
+
+  @if (!store.canManage()) {
+    <section class="panel"><p class="empty">Only workspace owners and admins can manage integrations.</p></section>
+  } @else {
+    <section class="kinds" aria-label="Add an integration">
+      @for (k of kinds; track k.kind) {
+        <button type="button" class="kind-card" [class.on]="form()?.kind === k.kind && !form()?.id" (click)="startNew(k.kind)">
+          <span class="kind-icon" [attr.data-kind]="k.kind" aria-hidden="true">{{ k.icon }}</span>
+          <strong>{{ k.label }}</strong>
+          <span class="muted">{{ k.blurb }}</span>
+        </button>
+      }
+    </section>
+
+    <div class="layout" [class.with-editor]="form()">
+      <section class="panel list">
+        <h2>Connected <span class="muted">{{ visible().length }}</span></h2>
+        @for (item of visible(); track item.id) {
+          <div class="row item" [class.selected]="form()?.id === item.id">
+            <span class="kind-icon small" [attr.data-kind]="item.kind" aria-hidden="true">{{ kindInfo(item.kind).icon }}</span>
+            <button class="grow item-main" type="button" (click)="edit(item)">
+              <strong>{{ item.name }}</strong>
+              <span class="muted">{{ kindInfo(item.kind).label }} · {{ projectName(item.project) }}</span>
+            </button>
+            @if (item.last_delivery; as d) {
+              <span class="status-dot" [attr.data-status]="d.status" [title]="d.event + ': ' + d.status + ' · ' + (d.created_at | date: 'short')"></span>
+            }
+            <label class="switch" [title]="item.enabled ? 'Enabled' : 'Disabled'">
+              <input type="checkbox" [checked]="item.enabled" (change)="toggleEnabled(item)" [attr.aria-label]="'Enable ' + item.name" />
+              <span></span>
+            </label>
+          </div>
+        } @empty {
+          <p class="empty">No integrations yet. Pick one above to get started.</p>
+        }
+      </section>
+
+      @if (form(); as f) {
+        <section class="panel editor">
+          <h2>
+            <span class="group-title">
+              <span class="kind-icon small" [attr.data-kind]="f.kind" aria-hidden="true">{{ kindInfo(f.kind).icon }}</span>
+              {{ f.id ? f.name : 'New ' + kindInfo(f.kind).label + ' integration' }}
+            </span>
+            <button class="btn ghost icon" type="button" aria-label="Close" (click)="close()">✕</button>
+          </h2>
+
+          <form class="fields" (ngSubmit)="save()">
+            <div class="grid2">
+              <label>Name <input name="name" [(ngModel)]="f.name" /></label>
+              <label>
+                Applies to
+                <select name="project" [(ngModel)]="f.project">
+                  <option [ngValue]="null">Whole workspace</option>
+                  @for (p of store.projects(); track p.id) {
+                    <option [ngValue]="p.id">Project: {{ p.name }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            @switch (f.kind) {
+              @case ('outgoing_webhook') {
+                <label>Payload URL <input name="url" type="url" [(ngModel)]="f.config['url']" placeholder="https://example.com/flowly-hook" required /></label>
+              }
+              @case ('slack') {
+                <label>
+                  Slack incoming-webhook URL
+                  <input name="webhook_url" type="url" [(ngModel)]="f.config['webhook_url']" placeholder="https://hooks.slack.com/services/…" required />
+                  <small class="muted">In Slack: Apps → Incoming Webhooks → Add to Slack, pick a channel, copy the URL.</small>
+                </label>
+              }
+              @case ('incoming_webhook') {
+                <div class="grid2">
+                  <label>
+                    New tasks go to
+                    <select name="schedule" [(ngModel)]="f.config['schedule']">
+                      <option value="backlog">Backlog</option>
+                      <option value="today">Today</option>
+                    </select>
+                  </label>
+                  <label class="check-line">
+                    <input type="checkbox" name="sig" [(ngModel)]="f.config['require_signature']" />
+                    Require an X-Flowly-Signature header
+                  </label>
+                </div>
+              }
+              @case ('email') {
+                <div class="grid2">
+                  <label>
+                    Accept email from
+                    <select name="senders" [(ngModel)]="f.config['allowed_senders']">
+                      <option value="members">Workspace members only</option>
+                      <option value="anyone">Anyone</option>
+                    </select>
+                  </label>
+                  <label>
+                    New tasks go to
+                    <select name="schedule" [(ngModel)]="f.config['schedule']">
+                      <option value="backlog">Backlog</option>
+                      <option value="today">Today</option>
+                    </select>
+                  </label>
+                </div>
+              }
+              @case ('github') {
+                @if (!githubApp()?.configured) {
+                  <div class="callout">
+                    <strong>GitHub App not set up yet</strong>
+                    @if (githubApp()?.can_setup) {
+                      <p class="muted">Flowly connects through its own GitHub App. Create it once for this Flowly instance. GitHub opens, you confirm, and you come back here.</p>
+                      <div class="grid2">
+                        <label>App name (must be unique on GitHub) <input name="appName" [(ngModel)]="appName" /></label>
+                        <label>Organization (optional) <input name="appOrg" [(ngModel)]="appOrg" placeholder="Leave empty for your personal account" /></label>
+                      </div>
+                      <button class="btn primary" type="button" (click)="createGithubApp()">Create GitHub App</button>
+                    } @else {
+                      <p class="muted">An instance admin has to create Flowly's GitHub App first.</p>
+                    }
+                  </div>
+                } @else if (f.id) {
+                  @if (current()?.info?.['installed']) {
+                    <div class="grid2">
+                      <label>
+                        Repository
+                        @if (repos(); as list) {
+                          <select name="repo" [(ngModel)]="f.config['repo']">
+                            <option value="">Choose…</option>
+                            @for (r of list; track r) {
+                              <option [value]="r">{{ r }}</option>
+                            }
+                          </select>
+                        } @else {
+                          <input name="repo" [(ngModel)]="f.config['repo']" placeholder="owner/repository" />
+                        }
+                      </label>
+                      <label>
+                        New issues go to
+                        <select name="schedule" [(ngModel)]="f.config['schedule']">
+                          <option value="backlog">Backlog</option>
+                          <option value="today">Today</option>
+                        </select>
+                      </label>
+                      <label>
+                        Closed issue → status
+                        <select name="done_status" [(ngModel)]="f.config['done_status']">
+                          <option [ngValue]="null">First "done" status</option>
+                          @for (s of statusTags(); track s.id) {
+                            <option [ngValue]="s.id">{{ s.name }}</option>
+                          }
+                        </select>
+                      </label>
+                      <label>
+                        Reopened issue → status
+                        <select name="open_status" [(ngModel)]="f.config['open_status']">
+                          <option [ngValue]="null">First open status</option>
+                          @for (s of statusTags(); track s.id) {
+                            <option [ngValue]="s.id">{{ s.name }}</option>
+                          }
+                        </select>
+                      </label>
+                    </div>
+                    <div class="checks">
+                      <label class="check-line"><input type="checkbox" name="sync_labels" [(ngModel)]="f.config['sync_labels']" /> Issue labels set matching Flowly tags</label>
+                      <label class="check-line"><input type="checkbox" name="status_labels" [(ngModel)]="f.config['status_labels']" /> Mirror the task status as a "flowly: …" label</label>
+                      <label class="check-line"><input type="checkbox" name="create_issues" [(ngModel)]="f.config['create_issues']" /> Open an issue for tasks created in Flowly{{ f.project ? ' in this project' : '' }}</label>
+                    </div>
+                    <p class="hint muted">
+                      Closing or reopening the issue moves the task. Moving the task into or out of a "done" status closes or reopens the issue.
+                      Assignees are matched by the GitHub username in each member's profile.
+                    </p>
+                    <button class="btn small" type="button" (click)="installGithub()">Change installation…</button>
+                  } @else {
+                    <div class="callout">
+                      <strong>Install {{ githubApp()?.app?.name }} on GitHub</strong>
+                      <p class="muted">Choose the account and repositories Flowly may access. You'll come back here to pick the repository.</p>
+                      <button class="btn primary" type="button" (click)="installGithub()">Install on GitHub</button>
+                    </div>
+                  }
+                } @else {
+                  <p class="muted">Save first, then install the app on your GitHub account and pick a repository.</p>
+                }
+              }
+            }
+
+            @if (f.kind === 'outgoing_webhook' || f.kind === 'slack') {
+              <fieldset class="events">
+                <legend>Send on</legend>
+                @for (e of events; track e.key) {
+                  <label class="check-line">
+                    <input type="checkbox" [checked]="f.events.has(e.key)" (change)="toggleEvent(f, e.key)" />
+                    {{ e.label }}
+                  </label>
+                }
+              </fieldset>
+            }
+
+            <div class="actions">
+              <label class="check-line"><input type="checkbox" name="enabled" [(ngModel)]="f.enabled" /> Enabled</label>
+              <span class="spacer"></span>
+              @if (f.id && (f.kind === 'outgoing_webhook' || f.kind === 'slack' || f.kind === 'github')) {
+                <button class="btn" type="button" [disabled]="busy()" (click)="test()">Send test</button>
+              }
+              <button class="btn primary" type="submit" [disabled]="busy()">{{ f.id ? 'Save' : 'Add integration' }}</button>
+            </div>
+          </form>
+
+          @if (current(); as item) {
+            <div class="details">
+              @if (item.kind === 'incoming_webhook') {
+                <h3>Endpoint</h3>
+                <div class="copy-row">
+                  <input readonly [value]="item.info['url']" (focus)="$any($event.target).select()" aria-label="Webhook URL" />
+                  <button class="btn small" type="button" (click)="copy(item.info['url'], 'URL copied')">Copy</button>
+                </div>
+                <p class="hint muted">POST JSON. Send the same <code>external_id</code> again to update that task. Unknown tag names are ignored, and the assignee is matched by email.</p>
+                <pre>{{ curlExample(item) }}</pre>
+                <details>
+                  <summary>All fields</summary>
+                  <pre>{{ item.info['example'] | json }}</pre>
+                </details>
+              }
+              @if (item.kind === 'email') {
+                <h3>Address</h3>
+                @if (item.info['address']) {
+                  <div class="copy-row">
+                    <input readonly [value]="item.info['address']" (focus)="$any($event.target).select()" aria-label="Email address" />
+                    <button class="btn small" type="button" (click)="copy(item.info['address'], 'Address copied')">Copy</button>
+                  </div>
+                  <p class="hint muted">The subject becomes the title and the body becomes the notes. If the sender is a member, the task is assigned to them.</p>
+                } @else {
+                  <p class="hint muted">
+                    Email-in needs a receiving domain. Set <code>EMAIL_INBOUND_DOMAIN</code> on the server and route that domain's mail to
+                    <code>{{ item.info['endpoint'] }}</code> (Cloudflare Email Workers, Mailgun, SendGrid or Postmark inbound).
+                    Until then, the address is <code>{{ item.token }}&#64;your-inbound-domain</code>.
+                  </p>
+                }
+              }
+              @if (item.kind === 'outgoing_webhook' || item.kind === 'incoming_webhook') {
+                <h3>Signing secret</h3>
+                <div class="copy-row">
+                  <input readonly type="password" [value]="item.secret" aria-label="Signing secret" #secretInput
+                    (focus)="secretInput.type = 'text'; secretInput.select()" (blur)="secretInput.type = 'password'" />
+                  <button class="btn small" type="button" (click)="copy(item.secret, 'Secret copied')">Copy</button>
+                  <button class="btn small ghost" type="button" (click)="rotate()">Regenerate</button>
+                </div>
+                <p class="hint muted">
+                  Signature: <code>X-Flowly-Signature: sha256=&lt;HMAC-SHA256 of the raw body with this secret&gt;</code>
+                </p>
+              }
+
+              <h3>
+                Activity
+                <button class="btn ghost small" type="button" (click)="loadDeliveries()">Refresh</button>
+              </h3>
+              @if (deliveries().length) {
+                <div class="table-wrap">
+                  <table class="deliveries">
+                    <thead><tr><th></th><th>When</th><th>Event</th><th>Result</th><th></th></tr></thead>
+                    <tbody>
+                      @for (d of deliveries(); track d.id) {
+                        <tr [class.open]="expanded() === d.id">
+                          <td><span class="status-dot" [attr.data-status]="d.status" [title]="d.status"></span></td>
+                          <td class="nowrap">{{ d.created_at | date: 'MMM d, HH:mm:ss' }}</td>
+                          <td><span class="dir">{{ d.direction === 'in' ? '↘' : '↗' }}</span> {{ d.event }}</td>
+                          <td class="result">
+                            @if (d.status === 'pending') {
+                              retrying ({{ d.attempts }} tries) · {{ d.last_error }}
+                            } @else {
+                              {{ d.last_error || d.response_body || d.status }}
+                            }
+                          </td>
+                          <td class="nowrap">
+                            <button class="btn ghost small" type="button" (click)="expanded.set(expanded() === d.id ? null : d.id)">Details</button>
+                            @if (d.direction === 'out' && d.status !== 'success') {
+                              <button class="btn small" type="button" (click)="retry(d)">Retry</button>
+                            }
+                          </td>
+                        </tr>
+                        @if (expanded() === d.id) {
+                          <tr class="payload-row"><td colspan="5"><pre>{{ d.payload | json }}</pre></td></tr>
+                        }
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <p class="empty">Nothing yet.</p>
+              }
+
+              <div class="danger-zone">
+                @if (confirmDelete()) {
+                  <span>Remove this integration and its history?</span>
+                  <button class="btn danger small" type="button" (click)="remove()">Remove</button>
+                  <button class="btn ghost small" type="button" (click)="confirmDelete.set(false)">Cancel</button>
+                } @else {
+                  <button class="btn ghost danger small" type="button" (click)="confirmDelete.set(true)">Remove integration</button>
+                }
+              </div>
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>

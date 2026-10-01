@@ -4,6 +4,9 @@ import { Observable, firstValueFrom } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import {
+  Delivery,
+  GitHubAppInfo,
+  Integration,
   Invitation,
   Membership,
   Project,
@@ -127,6 +130,58 @@ export class ApiService {
   myTasks(query: TaskQuery) {
     return this.run(this.http.get<Task[]>(this.url('my/tasks/'), { params: toParams(query) }));
   }
+  // Integrations
+  integrations(wsId: number, project?: number) {
+    const params = project ? new HttpParams().set('project', project) : undefined;
+    return this.run(this.http.get<Integration[]>(this.ws(wsId, 'integrations/'), { params }));
+  }
+  createIntegration(wsId: number, data: Partial<Integration>) {
+    return this.run(this.http.post<Integration>(this.ws(wsId, 'integrations/'), data));
+  }
+  updateIntegration(wsId: number, id: number, data: Partial<Integration>) {
+    return this.run(this.http.patch<Integration>(this.ws(wsId, `integrations/${id}/`), data));
+  }
+  deleteIntegration(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `integrations/${id}/`)));
+  }
+  testIntegration(wsId: number, id: number) {
+    return this.run(this.http.post<Delivery>(this.ws(wsId, `integrations/${id}/test/`), {}));
+  }
+  rotateSecret(wsId: number, id: number) {
+    return this.run(this.http.post<Integration>(this.ws(wsId, `integrations/${id}/rotate-secret/`), {}));
+  }
+  deliveries(wsId: number, id: number) {
+    return this.run(this.http.get<Delivery[]>(this.ws(wsId, `integrations/${id}/deliveries/`)));
+  }
+  retryDelivery(wsId: number, id: number, deliveryId: number) {
+    return this.run(this.http.post<Delivery>(this.ws(wsId, `integrations/${id}/deliveries/${deliveryId}/retry/`), {}));
+  }
+  githubInstallUrl(wsId: number, id: number) {
+    return this.run(this.http.post<{ url: string }>(this.ws(wsId, `integrations/${id}/github/install/`), {}));
+  }
+  githubRepos(wsId: number, id: number) {
+    return this.run(this.http.get<string[]>(this.ws(wsId, `integrations/${id}/github/repos/`)));
+  }
+  githubApp() {
+    return this.run(this.http.get<GitHubAppInfo>(this.url('integrations/github/app/')));
+  }
+  githubManifest(name: string, organization: string) {
+    return this.run(
+      this.http.post<{ action: string; manifest: string }>(this.url('integrations/github/app/manifest/'), { name, organization }),
+    );
+  }
+  githubConvert(code: string, state: string) {
+    return this.run(this.http.post<{ name: string; slug: string; html_url: string }>(this.url('integrations/github/app/convert/'), { code, state }));
+  }
+  githubInstalled(installationId: string, state: string) {
+    return this.run(
+      this.http.post<{ workspace: number; integration: number }>(this.url('integrations/github/installed/'), {
+        installation_id: installationId,
+        state,
+      }),
+    );
+  }
+
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));
   }

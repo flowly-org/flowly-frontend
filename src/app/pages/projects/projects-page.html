@@ -64,6 +64,7 @@
       <button class="btn ghost icon" type="button" [disabled]="first" (click)="move(p, -1)" aria-label="Move up">↑</button>
       <button class="btn ghost icon" type="button" [disabled]="last" (click)="move(p, 1)" aria-label="Move down">↓</button>
     }
+    <a class="btn ghost small" [routerLink]="['../integrations']" [queryParams]="{ project: p.id }">Integrations</a>
     <button class="btn small" type="button" (click)="update(p, { archived: !p.archived })">
       {{ p.archived ? 'Restore' : 'Archive' }}
     </button>

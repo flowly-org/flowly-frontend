@@ -79,10 +79,8 @@ export class AuthService {
     }
   }
 
-  async updateProfile(fullName: string): Promise<void> {
-    const me = await firstValueFrom(
-      this.http.patch<User>(`${this.config.apiUrl}/auth/me/`, { full_name: fullName }),
-    );
+  async updateProfile(data: Partial<Pick<User, 'full_name' | 'github_login'>>): Promise<void> {
+    const me = await firstValueFrom(this.http.patch<User>(`${this.config.apiUrl}/auth/me/`, data));
     this.user.set(me);
   }
 
