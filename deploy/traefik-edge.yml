@@ -18,7 +18,7 @@ services:
       labels:
         traefik.enable: "true"
         traefik.docker.network: traefik-public
-        traefik.http.routers.flowly-web.rule: Host(`flowly.net`) || Host(`www.flowly.net`)
+        traefik.http.routers.flowly-web.rule: Host(`flowly.net`) || Host(`www.flowly.net`) || Host(`app.flowly.net`) || Host(`api.flowly.net`)
         traefik.http.routers.flowly-web.entrypoints: websecure
         traefik.http.routers.flowly-web.tls.certresolver: basic
         traefik.http.services.flowly-web.loadbalancer.server.port: "80"
@@ -26,7 +26,7 @@ services:
 configs:
   edge_conf:
     file: ./edge.conf
-    name: flowly_edge_conf_v1
+    name: flowly_edge_conf_v2
 
 networks:
   traefik-public:

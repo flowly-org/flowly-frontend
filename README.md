@@ -44,6 +44,21 @@ or without a local Node:
 docker run --rm -it -p 4200:4200 -v "$PWD":/app -w /app node:22-alpine sh -c "npm ci && npx ng serve --host 0.0.0.0"
 ```
 
+## Netlify (production)
+
+`netlify.toml` builds the app and proxies `/api`, `/admin` and `/static` to `https://api.flowly.net`, so
+the browser only talks to the Netlify origin. `.github/workflows/deploy.yml` deploys every push to
+`main` to production and every pull request to a preview (`pr-<n>--<site>.netlify.app`, linked in a PR
+comment). It needs two repository secrets:
+
+- `NETLIFY_AUTH_TOKEN`: Netlify → User settings → Applications → Personal access tokens
+- `NETLIFY_SITE_ID`: Netlify → Site configuration → Site details → Site ID
+
+Point `app.flowly.net` at the Netlify site (Netlify → Domain management) and keep `api.flowly.net` on the
+backend server.
+
+Locally, `npm start` proxies `/api` to `http://localhost:8000` (`proxy.conf.json`).
+
 ## Layout
 
 ```
