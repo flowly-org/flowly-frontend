@@ -314,6 +314,22 @@
                     <button class="btn small" type="button" (click)="copy(item.info['address'], 'Address copied to clipboard.')">{{ 'Copy' | t }}</button>
                   </div>
                   <p class="hint muted">{{ 'The subject becomes the title and the body becomes the notes. If the sender is a member, the task is assigned to them.' | t }}</p>
+                  <h3>{{ 'Aliases' | t }}</h3>
+                  <div class="aliases">
+                    @for (a of item.info['aliases'] ?? []; track a) {
+                      <span class="alias-chip">
+                        <button type="button" class="link-like" (click)="copy(a, 'Address copied to clipboard.')" [title]="'Copy' | t">{{ a }}</button>
+                        <button type="button" class="x" [attr.aria-label]="'Remove alias' | t" (click)="removeAlias(item, a)">✕</button>
+                      </span>
+                    }
+                    <form class="alias-form" (ngSubmit)="addAlias(item)">
+                      <input name="alias" [(ngModel)]="aliasDraft[item.id]" [placeholder]="'e.g. ' + (store.current()?.name ?? 'team').toLowerCase().replace(' ', '-')"
+                        [attr.aria-label]="'New alias' | t" maxlength="40" />
+                      <span class="muted small">&#64;{{ item.info['address'].split('@')[1] }}</span>
+                      <button class="btn small" type="submit">{{ 'Add alias' | t }}</button>
+                    </form>
+                  </div>
+                  <p class="hint muted">{{ 'Aliases are easy to remember and share. Because they can be guessed, keep “Accept email from” on members only unless you want anyone to add tasks.' | t }}</p>
                 } @else {
                   <p class="hint muted">
                     {{ 'Email-in needs a receiving domain. Set EMAIL_INBOUND_DOMAIN on the server and route that domain\'s mail to {endpoint} (Cloudflare Email Workers, Mailgun, SendGrid or Postmark inbound).' | t: { endpoint: item.info['endpoint'] } }}

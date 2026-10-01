@@ -198,6 +198,8 @@ export interface Integration {
   config: Record<string, any>;
   token: string;
   secret: string;
+  /** Email in: alias names (name@inbound-domain). */
+  aliases?: string[];
   /** Read-only, kind-specific details (URLs, addresses, GitHub app/install state). */
   info: Record<string, any>;
   last_delivery: { status: DeliveryStatus; event: string; created_at: string } | null;

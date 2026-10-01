@@ -238,6 +238,34 @@ export class IntegrationsPage implements OnInit {
     }
   }
 
+  protected aliasDraft: Record<number, string> = {};
+
+  private aliasNames(item: Integration): string[] {
+    return (item.info['aliases'] ?? []).map((a: string) => a.split('@')[0]);
+  }
+
+  async addAlias(item: Integration) {
+    const name = (this.aliasDraft[item.id] ?? '').trim();
+    if (!name) return;
+    try {
+      await this.api.updateIntegration(this.wsId, item.id, { aliases: [...this.aliasNames(item), name] });
+      this.aliasDraft[item.id] = '';
+      await this.load();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async removeAlias(item: Integration, address: string) {
+    const name = address.split('@')[0];
+    try {
+      await this.api.updateIntegration(this.wsId, item.id, { aliases: this.aliasNames(item).filter((n) => n !== name) });
+      await this.load();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
   async toggleEnabled(item: Integration) {
     try {
       await this.api.updateIntegration(this.wsId, item.id, { enabled: !item.enabled });

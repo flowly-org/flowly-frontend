@@ -2,6 +2,11 @@ import type { Dict } from './index';
 
 export const WORKSPACE: Dict = {
   it: {
+    "Aliases": "Alias",
+    "Remove alias": "Rimuovi alias",
+    "New alias": "Nuovo alias",
+    "Add alias": "Aggiungi alias",
+    "Aliases are easy to remember and share. Because they can be guessed, keep “Accept email from” on members only unless you want anyone to add tasks.": "Gli alias sono facili da ricordare e condividere. Dato che si possono indovinare, lascia «Accetta email da» sui soli membri, a meno che tu voglia che chiunque possa aggiungere attività.",
     "Italian e-invoicing (FatturaPA)": "Fatturazione elettronica (FatturaPA)",
     "needed to download invoices as XML for the SDI": "serve per scaricare le fatture in XML per lo SDI",
     "Partita IVA": "Partita IVA",
@@ -295,6 +300,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} aperte",
   },
   es: {
+    "Aliases": "Alias",
+    "Remove alias": "Quitar alias",
+    "New alias": "Nuevo alias",
+    "Add alias": "Añadir alias",
+    "Aliases are easy to remember and share. Because they can be guessed, keep “Accept email from” on members only unless you want anyone to add tasks.": "Los alias son fáciles de recordar y compartir. Como se pueden adivinar, deja «Aceptar correo de» solo en miembros, salvo que quieras que cualquiera añada tareas.",
     "Italian e-invoicing (FatturaPA)": "Factura electrónica italiana (FatturaPA)",
     "needed to download invoices as XML for the SDI": "necesario para descargar facturas en XML para el SDI",
     "Partita IVA": "Partita IVA",
@@ -588,6 +598,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} abiertas",
   },
   fr: {
+    "Aliases": "Alias",
+    "Remove alias": "Supprimer l'alias",
+    "New alias": "Nouvel alias",
+    "Add alias": "Ajouter un alias",
+    "Aliases are easy to remember and share. Because they can be guessed, keep “Accept email from” on members only unless you want anyone to add tasks.": "Les alias sont faciles à retenir et à partager. Comme on peut les deviner, garde « Accepter les e-mails de » sur les membres seulement, sauf si tu veux que n'importe qui ajoute des tâches.",
     "Italian e-invoicing (FatturaPA)": "Facturation électronique italienne (FatturaPA)",
     "needed to download invoices as XML for the SDI": "nécessaire pour télécharger les factures en XML pour le SDI",
     "Partita IVA": "Partita IVA",
@@ -881,6 +896,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} ouvertes",
   },
   de: {
+    "Aliases": "Aliasse",
+    "Remove alias": "Alias entfernen",
+    "New alias": "Neuer Alias",
+    "Add alias": "Alias hinzufügen",
+    "Aliases are easy to remember and share. Because they can be guessed, keep “Accept email from” on members only unless you want anyone to add tasks.": "Aliasse sind leicht zu merken und zu teilen. Weil man sie erraten kann, lass „E-Mails annehmen von“ auf Mitglieder, außer jeder soll Aufgaben anlegen dürfen.",
     "Italian e-invoicing (FatturaPA)": "Italienische E-Rechnung (FatturaPA)",
     "needed to download invoices as XML for the SDI": "nötig, um Rechnungen als XML für das SDI herunterzuladen",
     "Partita IVA": "Partita IVA",
@@ -1174,6 +1194,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} offen",
   },
   pt: {
+    "Aliases": "Aliases",
+    "Remove alias": "Remover alias",
+    "New alias": "Novo alias",
+    "Add alias": "Adicionar alias",
+    "Aliases are easy to remember and share. Because they can be guessed, keep “Accept email from” on members only unless you want anyone to add tasks.": "Os aliases são fáceis de lembrar e partilhar. Como podem ser adivinhados, mantém «Aceitar email de» só para membros, a não ser que queiras que qualquer pessoa adicione tarefas.",
     "Italian e-invoicing (FatturaPA)": "Faturação eletrónica italiana (FatturaPA)",
     "needed to download invoices as XML for the SDI": "necessário para transferir faturas em XML para o SDI",
     "Partita IVA": "Partita IVA",
