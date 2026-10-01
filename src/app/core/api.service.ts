@@ -219,6 +219,12 @@ export class ApiService {
   updateTask(wsId: number, id: number, data: TaskInput) {
     return this.run(this.http.patch<Task>(this.ws(wsId, `tasks/${id}/`), data));
   }
+  /** Photo of a to-do list → text in the bulk-add format (nothing is created). */
+  tasksFromPhoto(wsId: number, image: Blob) {
+    const form = new FormData();
+    form.append('image', image, 'list.jpg');
+    return this.run(this.http.post<{ text: string; model: string }>(this.ws(wsId, 'tasks/from-photo/'), form));
+  }
   bulkCreateTasks(wsId: number, tasks: TaskInput[]) {
     return this.run(this.http.post<Task[]>(this.ws(wsId, 'tasks/bulk/'), { tasks }));
   }

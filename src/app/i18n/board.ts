@@ -3,6 +3,11 @@ import type { Dict } from './index';
 /** Board, task card, task dialog and its tabs, bulk add. */
 export const BOARD: Dict = {
   it: {
+    "From a photo": "Da una foto",
+    "Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding": "Scatta o scegli la foto di una lista scritta: l'IA la trasforma in attività da controllare prima di aggiungerle",
+    "Reading your list…": "Sto leggendo la lista…",
+    "Read from your photo: check the list, fix anything that was misread, then add.": "Letta dalla tua foto: controlla la lista, correggi ciò che è stato letto male, poi aggiungi.",
+    "Could not read the photo.": "Impossibile leggere la foto.",
     "Calendar": "Calendario",
     "Calendars": "Calendari",
     "Events from your calendars: background, not tasks": "Eventi dai tuoi calendari: sfondo, non attività",
@@ -230,6 +235,11 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} attività",
   },
   es: {
+    "From a photo": "Desde una foto",
+    "Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding": "Toma o elige una foto de una lista escrita; la IA la convierte en tareas que puedes revisar antes de añadirlas",
+    "Reading your list…": "Leyendo tu lista…",
+    "Read from your photo: check the list, fix anything that was misread, then add.": "Leída de tu foto: revisa la lista, corrige lo que se haya leído mal y añade.",
+    "Could not read the photo.": "No se pudo leer la foto.",
     "Calendar": "Calendario",
     "Calendars": "Calendarios",
     "Events from your calendars: background, not tasks": "Eventos de tus calendarios: contexto, no tareas",
@@ -457,6 +467,11 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tareas",
   },
   fr: {
+    "From a photo": "Depuis une photo",
+    "Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding": "Prends ou choisis la photo d'une liste écrite ; l'IA la transforme en tâches à vérifier avant de les ajouter",
+    "Reading your list…": "Lecture de ta liste…",
+    "Read from your photo: check the list, fix anything that was misread, then add.": "Lue depuis ta photo : vérifie la liste, corrige ce qui a été mal lu, puis ajoute.",
+    "Could not read the photo.": "Impossible de lire la photo.",
     "Calendar": "Calendrier",
     "Calendars": "Calendriers",
     "Events from your calendars: background, not tasks": "Événements de tes calendriers : contexte, pas des tâches",
@@ -684,6 +699,11 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tâches",
   },
   de: {
+    "From a photo": "Aus einem Foto",
+    "Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding": "Fotografiere eine geschriebene Liste oder wähle ein Foto; die KI macht daraus Aufgaben, die du vor dem Hinzufügen prüfen kannst",
+    "Reading your list…": "Liste wird gelesen…",
+    "Read from your photo: check the list, fix anything that was misread, then add.": "Aus deinem Foto gelesen: Prüfe die Liste, korrigiere Falschgelesenes und füge dann hinzu.",
+    "Could not read the photo.": "Das Foto konnte nicht gelesen werden.",
     "Calendar": "Kalender",
     "Calendars": "Kalender",
     "Events from your calendars: background, not tasks": "Termine aus deinen Kalendern: Hintergrund, keine Aufgaben",
@@ -911,6 +931,11 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} Aufgaben",
   },
   pt: {
+    "From a photo": "A partir de uma foto",
+    "Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding": "Tira ou escolhe uma foto de uma lista escrita; a IA transforma-a em tarefas que podes rever antes de adicionar",
+    "Reading your list…": "A ler a tua lista…",
+    "Read from your photo: check the list, fix anything that was misread, then add.": "Lida da tua foto: revê a lista, corrige o que foi mal lido e depois adiciona.",
+    "Could not read the photo.": "Não foi possível ler a foto.",
     "Calendar": "Calendário",
     "Calendars": "Calendários",
     "Events from your calendars: background, not tasks": "Eventos dos teus calendários: contexto, não tarefas",

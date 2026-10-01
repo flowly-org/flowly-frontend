@@ -38,6 +38,9 @@ export class BulkAdd implements OnInit {
   protected assignToMe = signal(true);
   protected text = signal('');
   protected busy = signal(false);
+  /** Reading a photo: its preview URL while the model works. */
+  protected reading = signal<string | null>(null);
+  protected fromPhoto = signal(false);
   protected error = signal<string | null>(null);
 
   protected ctx = computed(() => this.data.ctx(this.wsId()));
@@ -59,6 +62,28 @@ export class BulkAdd implements OnInit {
   protected changeWorkspace(id: number) {
     this.wsId.set(id);
     this.projectId.set(null);
+  }
+
+  protected async onPhoto(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.error.set(null);
+    const preview = URL.createObjectURL(file);
+    this.reading.set(preview);
+    try {
+      const image = await shrink(file);
+      const { text } = await this.api.tasksFromPhoto(this.wsId(), image);
+      const current = this.text().trim();
+      this.text.set(current ? `${current}\n${text}` : text);
+      this.fromPhoto.set(true);
+    } catch (err) {
+      this.error.set(errorMessage(err, this.i18n.t('Could not read the photo.')));
+    } finally {
+      URL.revokeObjectURL(preview);
+      this.reading.set(null);
+    }
   }
 
   async create() {
@@ -87,5 +112,25 @@ export class BulkAdd implements OnInit {
     } finally {
       this.busy.set(false);
     }
+  }
+}
+
+/** Downscale to at most 2000 px on the long side, as JPEG: phone photos are large and the model doesn't need more. */
+async function shrink(file: File, max = 2000): Promise<Blob> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not read the photo.'))), 'image/jpeg', 0.85),
+    );
+  } finally {
+    URL.revokeObjectURL(url);
   }
 }

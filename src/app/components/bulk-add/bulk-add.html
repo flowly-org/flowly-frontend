@@ -44,8 +44,23 @@
     </div>
 
     <div class="split">
-      <label class="editor">
-        <span class="muted">{{ 'One task per line. Paste a bulleted list, or type:' | t }}</span>
+      <div class="editor">
+        <span class="editor-head">
+          <span class="muted">{{ 'One task per line. Paste a bulleted list, or type:' | t }}</span>
+          <label class="btn small photo-btn" [class.disabled]="reading()" [title]="'Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding' | t">
+            📷 {{ 'From a photo' | t }}
+            <input type="file" accept="image/*" (change)="onPhoto($event)" [disabled]="!!reading()" hidden />
+          </label>
+        </span>
+        @if (reading(); as src) {
+          <span class="reading" role="status">
+            <img [src]="src" alt="" />
+            <span class="spinner" aria-hidden="true"></span>
+            {{ 'Reading your list…' | t }}
+          </span>
+        } @else if (fromPhoto()) {
+          <span class="photo-note">{{ 'Read from your photo: check the list, fix anything that was misread, then add.' | t }}</span>
+        }
         <textarea
           [ngModel]="text()"
           (ngModelChange)="text.set($event)"
@@ -58,7 +73,7 @@
           <code>!high</code> {{ 'priority' | t }} · <code>#tag</code> · <code>+Project</code> · <code>&#64;tomorrow</code> <code>&#64;fri</code> <code>&#64;2026-10-05</code> <code>&#64;backlog</code> ·
           <code>[x]</code> {{ 'done' | t }} · {{ 'indented lines become notes' | t }}
         </span>
-      </label>
+      </div>
 
       <div class="preview" aria-live="polite">
         <div class="preview-head muted">{{ (drafts().length === 1 ? '1 task' : '{n} tasks') | t: { n: drafts().length } }}</div>
