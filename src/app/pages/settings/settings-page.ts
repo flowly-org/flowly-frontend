@@ -97,10 +97,10 @@ export class SettingsPage implements OnInit {
     return new Intl.NumberFormat(this.i18n.lang(), { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
   }
 
-  async upgrade(interval: 'month' | 'year') {
+  async upgrade(interval: 'month' | 'year', plan: 'pro' | 'pro_plus' = 'pro') {
     this.busy.set(true);
     try {
-      window.location.href = (await this.api.billingCheckout(interval)).url;
+      window.location.href = (await this.api.billingCheckout(interval, plan)).url;
     } catch (err) {
       this.toast.error(errorMessage(err));
       this.busy.set(false);

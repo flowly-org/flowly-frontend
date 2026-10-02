@@ -21,7 +21,7 @@
     @if (plan(); as p) {
       <div class="plan-box">
         @if (p.has_pro) {
-          <p><strong>Flowly Pro</strong>
+          <p><strong>{{ p.has_pro_plus ? 'Flowly Pro Plus' : 'Flowly Pro' }}</strong>
             @if (p.subscription; as sub) {
               <span class="muted small"> · {{ (sub.interval === 'year' ? '{amount} / year' : '{amount} / month') | t: { amount: money(sub.amount, sub.currency) } }}
                 · {{ (sub.cancel_at_period_end ? 'ends {date}' : 'renews {date}') | t: { date: (sub.current_period_end | ldate: 'mediumDate') } }}
@@ -35,17 +35,36 @@
             <button class="btn" type="button" (click)="manageSubscription()">{{ 'Manage subscription' | t }}</button>
             <span class="muted small"> {{ 'Card, invoices, billing details or cancel, on Stripe.' | t }}</span>
           }
-        } @else {
-          <p>{{ 'Pro adds the Telegram concierge, AI photo import, invoices with e-invoices and pay links.' | t }}</p>
-          @if (p.stripe && p.prices; as prices) {
-            <div class="plan-buttons">
-              <button class="btn primary" type="button" [disabled]="busy()" (click)="upgrade('month')">{{ 'Upgrade · {amount} / month' | t: { amount: money(prices.month.amount, prices.month.currency) } }}</button>
-              <button class="btn" type="button" [disabled]="busy()" (click)="upgrade('year')">{{ '{amount} / year (2 months free)' | t: { amount: money(prices.year.amount, prices.year.currency) } }}</button>
+        }
+        @if (!p.has_pro_plus) {
+          @if (p.stripe && p.plans; as plans) {
+            <div class="plan-cards">
+              @if (!p.has_pro && plans.pro; as pro) {
+                <div class="plan-card">
+                  <strong>Pro</strong>
+                  <span class="muted small">{{ 'Telegram concierge, AI photo import, invoices with e-invoices and pay links.' | t }}</span>
+                  <div class="plan-buttons">
+                    <button class="btn primary" type="button" [disabled]="busy()" (click)="upgrade('month', 'pro')">{{ '{amount} / month' | t: { amount: money(pro.month.amount, pro.month.currency) } }}</button>
+                    <button class="btn" type="button" [disabled]="busy()" (click)="upgrade('year', 'pro')">{{ '{amount} / year' | t: { amount: money(pro.year.amount, pro.year.currency) } }}</button>
+                  </div>
+                </div>
+              }
+              @if (plans.pro_plus; as plus) {
+                <div class="plan-card featured">
+                  <strong>Pro Plus</strong>
+                  <span class="muted small">{{ 'Everything in Pro, plus 60 tasks a month delegated to Flo: research, drafts and plans, reported on the task.' | t }}</span>
+                  <div class="plan-buttons">
+                    <button class="btn primary" type="button" [disabled]="busy()" (click)="upgrade('month', 'pro_plus')">{{ '{amount} / month' | t: { amount: money(plus.month.amount, plus.month.currency) } }}</button>
+                    <button class="btn" type="button" [disabled]="busy()" (click)="upgrade('year', 'pro_plus')">{{ '{amount} / year' | t: { amount: money(plus.year.amount, plus.year.currency) } }}</button>
+                  </div>
+                  @if (p.has_pro && p.subscription) {
+                    <span class="muted small">{{ 'Your Pro subscription ends when Pro Plus starts; the unused part is credited.' | t }}</span>
+                  }
+                </div>
+              }
             </div>
-            @if (prices.month.tax === 'exclusive') {
-              <p class="muted small">{{ 'Prices exclude VAT, added at checkout where it applies. Cancel anytime.' | t }}</p>
-            }
-          } @else {
+            <p class="muted small">{{ 'Prices exclude VAT, added at checkout where it applies. Yearly plans include two months free. Cancel anytime.' | t }}</p>
+          } @else if (!p.has_pro) {
             <p class="muted small">{{ 'Online payments are not available on this server yet: ask your administrator.' | t }}</p>
           }
         }

@@ -1,0 +1,103 @@
+.delegate {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  display: grid;
+  gap: 6px;
+
+  &.locked {
+    border-style: dashed;
+    background: var(--surface-2);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.spark {
+  color: var(--accent);
+}
+
+.quota {
+  margin-left: auto;
+  font-size: 0.78rem;
+}
+
+.badge {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.pulse {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.verdict {
+  font-weight: 600;
+
+  &.no {
+    color: var(--muted);
+  }
+  &.ok {
+    color: var(--ok);
+  }
+}
+
+.plan,
+.left {
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.small {
+  font-size: 0.85rem;
+}

@@ -26,6 +26,8 @@
     "@capacitor/ios": "^8.5.2",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
+    "dompurify": "^3.4.16",
+    "marked": "^15.0.12",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.16.0"

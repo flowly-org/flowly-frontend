@@ -1,0 +1,57 @@
+@if (state(); as s) {
+  <section class="delegate" [class.locked]="!s.available">
+    <header>
+      <span class="spark" aria-hidden="true">✦</span>
+      <strong>{{ 'Delegate to Flo' | t }}</strong>
+      @if (s.available) {
+        <span class="quota muted">{{ '{used}/{limit} this month' | t: { used: s.quota.used, limit: s.quota.limit } }}</span>
+      } @else {
+        <span class="badge">Pro Plus</span>
+      }
+    </header>
+
+    @if (!s.available) {
+      <p class="muted small">{{ 'With Pro Plus, Flo can research, draft or plan tasks like this one and report back here.' | t }}
+        <a routerLink="/settings" fragment="plan">{{ 'See plans' | t }}</a></p>
+    } @else {
+      @if (d(); as d) {
+        @switch (d.status) {
+          @case ('queued') { <p class="state"><span class="dot pulse"></span>{{ 'Waiting to start…' | t }}</p> }
+          @case ('assessing') { <p class="state"><span class="dot pulse"></span>{{ 'Checking what Flo can do…' | t }}</p> }
+          @case ('running') {
+            <p class="state"><span class="dot pulse"></span>{{ 'Flo is working on it' | t }}@if (d.steps) { · {{ 'step {n}' | t: { n: d.steps } }} }</p>
+            @if (d.plan) { <p class="plan">{{ d.plan }}</p> }
+          }
+          @case ('assessed') {
+            <p class="verdict" [class.no]="d.verdict === 'no'">
+              {{ (d.verdict === 'full' ? 'Flo can do this.' : d.verdict === 'partial' ? 'Flo can do part of this.' : 'Not a task for Flo.') | t }}
+            </p>
+            <p class="plan">{{ d.verdict === 'no' ? d.reason : d.plan }}</p>
+          }
+          @case ('declined') { <p class="verdict no">{{ 'Not a task for Flo.' | t }}</p><p class="plan">{{ d.reason }}</p> }
+          @case ('failed') { <p class="verdict no">{{ 'Something went wrong. Try again.' | t }}</p> }
+          @default {
+            <p class="verdict ok">{{ (d.status === 'done' ? 'Done' : 'Partly done') | t }} · <button type="button" class="link-btn" (click)="openDiscussion.emit()">{{ 'see the discussion' | t }}</button></p>
+            <p class="plan">{{ d.summary }}</p>
+            @if (d.left_for_you) { <p class="left"><strong>{{ 'Left for you' | t }}:</strong> {{ d.left_for_you }}</p> }
+          }
+        }
+      } @else {
+        <p class="muted small">{{ 'Flo can research, draft, summarise or plan this, then report here. It never sends, books or buys anything.' | t }}</p>
+      }
+      @if (!active()) {
+        <div class="actions">
+          @if (!d() || d()!.status === 'failed') {
+            <button type="button" class="btn ghost small" [disabled]="busy()" (click)="act('assess')">{{ 'Can Flo do it?' | t }}</button>
+          }
+          @if (d()?.verdict !== 'no' || d()?.status !== 'assessed') {
+            <button type="button" class="btn primary small" [disabled]="busy() || s.quota.used >= s.quota.limit" (click)="act('run')">
+              ✦ {{ ((d()?.status === 'done' || d()?.status === 'partial') ? 'Delegate again' : 'Delegate') | t }}
+            </button>
+          }
+        </div>
+      }
+      @if (error()) { <p class="form-error">{{ error() }}</p> }
+    }
+  </section>
+}

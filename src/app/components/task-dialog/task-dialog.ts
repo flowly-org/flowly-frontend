@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, input, output, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 
 import { TaskAttachments } from '../task-attachments/task-attachments';
+import { TaskDelegate } from '../task-delegate/task-delegate';
 import { TaskDiscussion } from '../task-discussion/task-discussion';
 import { TaskShare } from '../task-share/task-share';
 import { TaskTime } from '../task-time/task-time';
@@ -28,7 +29,7 @@ interface FormModel {
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TranslatePipe],
+  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TaskDelegate, TranslatePipe],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   host: { '(document:keydown.escape)': 'close()' },

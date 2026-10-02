@@ -9,8 +9,9 @@ export interface User {
   language?: string;
   home_location?: string;
   is_staff?: boolean;
-  plan?: 'free' | 'pro';
+  plan?: 'free' | 'pro' | 'pro_plus';
   has_pro?: boolean;
+  has_pro_plus?: boolean;
   is_bot?: boolean;
 }
 
@@ -161,7 +162,7 @@ export interface Comment {
   task: number;
   author: User | null;
   body: string;
-  source: 'flowly' | 'github';
+  source: 'flowly' | 'github' | 'ai';
   external_author: string;
   external_url: string;
   created_at: string;
@@ -349,7 +350,7 @@ export interface AdminUser {
   id: number;
   email: string;
   full_name: string;
-  plan: 'free' | 'pro';
+  plan: 'free' | 'pro' | 'pro_plus';
   plan_expires_at: string | null;
   is_staff: boolean;
   is_active: boolean;
@@ -584,10 +585,38 @@ export interface StripeSub {
   cancel_at_period_end: boolean;
 }
 
+export interface PlanPrices {
+  month: { amount: number; currency: string; tax: string };
+  year: { amount: number; currency: string; tax: string };
+}
+
+export interface Delegation {
+  id: number;
+  run: boolean;
+  status: 'queued' | 'assessing' | 'assessed' | 'running' | 'done' | 'partial' | 'declined' | 'failed';
+  verdict: '' | 'full' | 'partial' | 'no';
+  plan: string;
+  reason: string;
+  summary: string;
+  left_for_you: string;
+  steps: number;
+  created_at: string;
+  finished_at: string | null;
+  error: boolean;
+}
+
+export interface DelegationState {
+  delegation: Delegation | null;
+  quota: { used: number; limit: number };
+  available: boolean;
+}
+
 export interface PlanInfo {
   stripe: boolean;
+  plans: { pro?: PlanPrices; pro_plus?: PlanPrices } | null;
+  has_pro_plus: boolean;
   prices: { month: { amount: number; currency: string; tax: string }; year: { amount: number; currency: string; tax: string } } | null;
-  plan: 'free' | 'pro';
+  plan: 'free' | 'pro' | 'pro_plus';
   has_pro: boolean;
   source: 'manual' | 'stripe';
   expires_at: string | null;

@@ -69,6 +69,9 @@
           <dt>{{ 'Visibility' | t }}</dt>
           <dd><button type="button" class="link-btn" (click)="tab.set('share')">{{ v.visibility.icon }} {{ v.visibility.label | t }}</button></dd>
         </dl>
+        @if (!v.status?.is_done) {
+          <app-task-delegate [task]="t" (finished)="touched.emit(t.id)" (openDiscussion)="tab.set('discussion')" />
+        }
       </div>
     }
     @if (tab() === 'discussion') {

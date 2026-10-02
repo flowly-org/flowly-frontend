@@ -19,6 +19,7 @@ import {
   AdminUser,
   AdminWorkspace,
   PlanInfo,
+  DelegationState,
   StripeSub,
   CalendarEvent,
   EInvoiceFormat,
@@ -324,8 +325,14 @@ export class ApiService {
   billingPlan() {
     return this.run(this.http.get<PlanInfo>(this.url('billing/plan/')));
   }
-  billingCheckout(interval: 'month' | 'year') {
-    return this.run(this.http.post<{ url: string }>(this.url('billing/checkout/'), { interval }));
+  billingCheckout(interval: 'month' | 'year', plan: 'pro' | 'pro_plus' = 'pro') {
+    return this.run(this.http.post<{ url: string }>(this.url('billing/checkout/'), { interval, plan }));
+  }
+  delegation(wsId: number, taskId: number) {
+    return this.run(this.http.get<DelegationState>(this.ws(wsId, `tasks/${taskId}/delegation/`)));
+  }
+  delegate(wsId: number, taskId: number, action: 'assess' | 'run') {
+    return this.run(this.http.post<DelegationState>(this.ws(wsId, `tasks/${taskId}/delegation/`), { action }));
   }
   billingPortal() {
     return this.run(this.http.post<{ url: string }>(this.url('billing/portal/'), {}));

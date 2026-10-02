@@ -5,6 +5,7 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
+import { renderMarkdown } from '../../core/markdown';
 import { Comment } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
@@ -14,11 +15,14 @@ import { ToastService } from '../../core/toast.service';
   template: `
     <div class="thread">
       @for (c of comments(); track c.id) {
-        <article class="comment">
-          <span class="avatar">{{ initials(c) }}</span>
+        <article class="comment" [class.ai]="c.source === 'ai'">
+          <span class="avatar">{{ c.source === 'ai' ? '✦' : initials(c) }}</span>
           <div class="bubble">
             <header>
               <strong>{{ authorName(c) }}</strong>
+              @if (c.source === 'ai') {
+                <span class="via">{{ 'AI delegation' | t }}</span>
+              }
               @if (c.source === 'github') {
                 <a class="via" [href]="c.external_url" target="_blank" rel="noopener" [title]="'Synced with GitHub' | t">{{ 'via GitHub' | t }}</a>
               }
@@ -39,6 +43,8 @@ import { ToastService } from '../../core/toast.service';
                 <button class="btn small primary" type="button" (click)="saveEdit(c)">{{ 'Save' | t }}</button>
                 <button class="btn small ghost" type="button" (click)="editing.set(null)">{{ 'Cancel' | t }}</button>
               </div>
+            } @else if (c.source === 'ai') {
+              <div class="body md" [innerHTML]="markdown(c.body)"></div>
             } @else {
               <p class="body">{{ c.body }}</p>
             }
@@ -86,8 +92,20 @@ export class TaskDiscussion implements OnInit {
     }
   }
 
+  private mdCache = new Map<string, string>();
+
+  protected markdown(text: string): string {
+    let html = this.mdCache.get(text);
+    if (html === undefined) {
+      html = renderMarkdown(text);
+      this.mdCache.set(text, html);
+    }
+    return html;
+  }
+
   protected authorName(c: Comment): string {
     if (c.author) return c.author.full_name || c.author.email;
+    if (c.source === 'ai') return c.external_author.replace(/\s*\(AI\)$/, '') || 'Flo';
     return c.external_author ? `@${c.external_author}` : this.i18n.t('Someone');
   }
 

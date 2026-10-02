@@ -100,3 +100,52 @@ button.link {
   font-size: 0.9rem;
   margin: 0;
 }
+
+.comment.ai .avatar {
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--accent);
+}
+
+.body.md {
+  white-space: normal;
+}
+
+/* Rendered Markdown is inserted as HTML, outside Angular's style scoping. */
+:host ::ng-deep .md {
+  overflow-x: auto;
+
+  :is(h1, h2, h3, h4) {
+    font-size: 1rem;
+    margin: 10px 0 4px;
+  }
+  p {
+    margin: 4px 0;
+  }
+  ul,
+  ol {
+    margin: 4px 0;
+    padding-left: 20px;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 0.85rem;
+  }
+  th,
+  td {
+    border: 1px solid var(--line);
+    padding: 4px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+  }
+  a {
+    color: var(--accent);
+    overflow-wrap: anywhere;
+  }
+  code {
+    font-size: 0.85em;
+  }
+}

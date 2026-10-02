@@ -62,10 +62,11 @@
                   <select [value]="u.plan" (change)="updateUser(u, { plan: $any($event.target).value })" [attr.aria-label]="'Plan of {email}' | t: { email: u.email }">
                     <option value="free" [selected]="u.plan === 'free'">{{ 'Free' | t }}</option>
                     <option value="pro" [selected]="u.plan === 'pro'">Pro</option>
+                    <option value="pro_plus" [selected]="u.plan === 'pro_plus'">Pro Plus</option>
                   </select>
                 </td>
                 <td>
-                  <input type="date" [value]="u.plan_expires_at ? u.plan_expires_at.slice(0, 10) : ''" [disabled]="u.plan !== 'pro'"
+                  <input type="date" [value]="u.plan_expires_at ? u.plan_expires_at.slice(0, 10) : ''" [disabled]="u.plan === 'free'"
                     (change)="updateUser(u, { plan_expires_at: $any($event.target).value ? $any($event.target).value + 'T23:59:59Z' : null })"
                     [attr.aria-label]="'Pro expiry of {email}' | t: { email: u.email }" [title]="'Empty = no expiry' | t" />
                 </td>

@@ -309,3 +309,22 @@ label.grow {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.plan-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.plan-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  &.featured {
+    border: 2px solid var(--accent);
+  }
+}
