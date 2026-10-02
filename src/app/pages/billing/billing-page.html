@@ -88,6 +88,8 @@
                       <label class="wide">{{ 'Client details on invoices' | t }} <textarea name="client_details" rows="2" [(ngModel)]="client.client_details"></textarea></label>
                       <label>{{ 'Partita IVA' | t }} <input name="client_vat" [(ngModel)]="client.client_vat" maxlength="28" /></label>
                       <label>{{ 'Codice fiscale' | t }} <input name="client_tax_code" [(ngModel)]="client.client_tax_code" maxlength="16" /></label>
+                      <label>{{ 'E-invoice email' | t }} <input name="client_email" type="email" [(ngModel)]="client.client_email" [title]="'Where the client receives e-invoices (XRechnung, Factur-X)' | t" /></label>
+                      <label>{{ 'Buyer reference' | t }} <input name="client_reference" [(ngModel)]="client.client_reference" maxlength="100" [title]="'Order number, or Leitweg-ID for German public bodies' | t" /></label>
                       <label>{{ 'Codice destinatario (SDI)' | t }} <input name="client_sdi_code" [(ngModel)]="client.client_sdi_code" maxlength="7" placeholder="0000000" /></label>
                       <label>{{ 'PEC' | t }} <input name="client_pec" type="email" [(ngModel)]="client.client_pec" /></label>
                       <label class="wide">{{ 'Address' | t }} <input name="client_address" [(ngModel)]="client.client_address" maxlength="60" /></label>

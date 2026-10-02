@@ -88,6 +88,18 @@ export class SettingsPage implements OnInit {
     } catch {}
   }
 
+  protected vatLabel() {
+    return { IT: 'Partita IVA', DE: 'USt-IdNr.', FR: 'VAT number (numéro de TVA)' }[this.countryCode()] ?? 'VAT number';
+  }
+
+  protected vatPlaceholder() {
+    return { IT: '01234567890', DE: 'DE123456789', FR: 'FR32123456789' }[this.countryCode()] ?? '';
+  }
+
+  protected taxLabel() {
+    return { IT: 'Codice fiscale', DE: 'Steuernummer', FR: 'SIREN / SIRET' }[this.countryCode()] ?? 'Tax code';
+  }
+
   protected countryChanged() {
     this.countryCode.set(this.invoicing()?.profile.country ?? 'IT');
   }

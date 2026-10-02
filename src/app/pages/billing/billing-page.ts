@@ -94,9 +94,9 @@ export class BillingPage implements OnInit {
       return;
     }
     const { client_details, client_vat, client_vat_country, client_tax_code, client_address, client_zip, client_city,
-      client_province, client_country, client_sdi_code, client_pec } = row;
+      client_province, client_country, client_sdi_code, client_pec, client_email, client_reference } = row;
     this.client = { client_details, client_vat, client_vat_country, client_tax_code, client_address, client_zip, client_city,
-      client_province, client_country, client_sdi_code, client_pec };
+      client_province, client_country, client_sdi_code, client_pec, client_email, client_reference };
     this.clientOpen.set(row.project);
   }
 

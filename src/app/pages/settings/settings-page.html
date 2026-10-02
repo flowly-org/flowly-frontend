@@ -119,14 +119,15 @@
             }
           </select>
         </label>
-        <label>{{ 'VAT number' | t }} <input name="inv_vat" [(ngModel)]="inv.profile.vat_id" maxlength="28" [placeholder]="inv.profile.country === 'IT' ? '01234567890' : ''" /></label>
-        <label>{{ 'Tax code' | t }} <input name="inv_tax" [(ngModel)]="inv.profile.tax_code" maxlength="20" [placeholder]="inv.profile.country === 'IT' ? ('Codice fiscale' | t) : ''" /></label>
+        <label>{{ vatLabel() | t }} <input name="inv_vat" [(ngModel)]="inv.profile.vat_id" maxlength="28" [placeholder]="vatPlaceholder()" /></label>
+        <label>{{ taxLabel() | t }} <input name="inv_tax" [(ngModel)]="inv.profile.tax_code" maxlength="20" /></label>
         <label>{{ 'IBAN' | t }} <input name="inv_iban" [(ngModel)]="inv.profile.iban" maxlength="40" /></label>
         <label class="wide">{{ 'Address' | t }} <input name="inv_address" [(ngModel)]="inv.profile.address" maxlength="120" [placeholder]="'Street and number' | t" /></label>
         <label>{{ 'Postcode' | t }} <input name="inv_zip" [(ngModel)]="inv.profile.zip" maxlength="12" /></label>
         <label>{{ 'City' | t }} <input name="inv_city" [(ngModel)]="inv.profile.city" maxlength="80" /></label>
         <label>{{ 'Province / region' | t }} <input name="inv_province" [(ngModel)]="inv.profile.province" maxlength="40" /></label>
         <label>{{ 'Billing email' | t }} <input name="inv_email" type="email" [(ngModel)]="inv.profile.email" /></label>
+        <label>{{ 'Phone' | t }} <input name="inv_phone" type="tel" [(ngModel)]="inv.profile.phone" maxlength="40" /></label>
         <label class="wide">
           {{ 'Extra text under your name' | t }}
           <textarea name="inv_details" rows="2" [(ngModel)]="inv.profile.details" [placeholder]="'Optional; when empty, address, VAT number and IBAN are printed' | t"></textarea>
@@ -151,7 +152,7 @@
                   </select>
                 </label>
               } @else {
-                <label>{{ f.label | t }} <input [name]="'fmt_' + f.key" [ngModel]="fmtValue(fmt.key, f)" (ngModelChange)="setFmt(fmt.key, f.key, $event)" /></label>
+                <label class="wide-fmt">{{ f.label | t }} <textarea rows="2" [name]="'fmt_' + f.key" [ngModel]="fmtValue(fmt.key, f)" (ngModelChange)="setFmt(fmt.key, f.key, $event)"></textarea></label>
               }
             }
           </fieldset>

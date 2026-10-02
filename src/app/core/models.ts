@@ -392,6 +392,7 @@ export interface InvoicingProfile {
   province: string;
   iban: string;
   email: string;
+  phone: string;
   format_settings: Record<string, Record<string, any>>;
 }
 
@@ -430,6 +431,8 @@ export interface ProjectBillingRow {
   client_country: string;
   client_sdi_code: string;
   client_pec: string;
+  client_email: string;
+  client_reference: string;
   budget_hours: string | null;
   effective_rate: string | null;
   unbilled_hours: number;
