@@ -39,6 +39,7 @@ export class ManagePage implements OnInit {
   protected users = signal<AdminUser[]>([]);
   protected workspaces = signal<AdminWorkspace[]>([]);
   protected workspaceQuery = '';
+  protected billing = signal<EnterpriseBillingForm | null>(null);
   protected slack = signal<{ manifest: Record<string, any>; configured: boolean } | null>(null);
   protected userQuery = '';
   /** Unsaved edits per setting key. */
@@ -224,6 +225,46 @@ export class ManagePage implements OnInit {
     }
   }
 
+  protected money(cents: number) {
+    return new Intl.NumberFormat(this.i18n.lang(), { style: 'currency', currency: 'EUR' }).format(cents / 100);
+  }
+
+  async stripeSetup() {
+    try {
+      const res = await this.api.adminStripeSetup();
+      const made = Object.keys(res.created);
+      this.toast.show(made.length ? this.i18n.t('Stripe set up: {items}.', { items: made.join(', ') }) : this.i18n.t('Stripe was already set up.'));
+      await this.loadSettings();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async subscribeEnterprise() {
+    const b = this.billing();
+    if (!b) return;
+    try {
+      await this.api.adminEnterpriseSubscribe(b.id, {
+        amount: String(b.amount), interval: b.interval, email: b.email, name: b.company, vat_id: b.vat_id,
+        line1: b.line1, postal_code: b.postal_code, city: b.city, country: b.country,
+      });
+      this.billing.set(null);
+      this.toast.show(this.i18n.t('Enterprise subscription started: Stripe will email the first invoice.'));
+      await this.loadWorkspaces();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async cancelEnterprise(w: AdminWorkspace) {
+    try {
+      await this.api.adminEnterpriseCancel(w.id);
+      await this.loadWorkspaces();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
   protected copyManifest() {
     const text = JSON.stringify(this.slack()?.manifest ?? {}, null, 2);
     navigator.clipboard?.writeText(text).then(() => this.toast.show(this.i18n.t('Copied.')));
@@ -240,4 +281,18 @@ export class ManagePage implements OnInit {
       await this.loadUsers();
     }
   }
+}
+
+interface EnterpriseBillingForm {
+  id: number;
+  name: string;
+  amount: string;
+  interval: string;
+  email: string;
+  company: string;
+  line1: string;
+  postal_code: string;
+  city: string;
+  country: string;
+  vat_id: string;
 }

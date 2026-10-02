@@ -31,6 +31,7 @@ export class InvoicePage implements OnInit {
   protected edit: Partial<Invoice> = {};
   protected missing = signal<string[]>([]);
   protected xmlBusy = signal(false);
+  protected payBusy = signal(false);
 
   private get wsId() {
     return this.store.currentId()!;
@@ -40,6 +41,11 @@ export class InvoicePage implements OnInit {
     try {
       const inv = await this.api.invoice(this.wsId, +this.invoiceId());
       this.invoice.set(inv);
+      if (inv.payment && !inv.payment.paid_at) {
+        this.api.invoicePaymentState(this.wsId, inv.id).then((st) => {
+          if (st.paid_at) this.invoice.set({ ...inv, status: 'paid', payment: { url: st.url, paid_at: st.paid_at } });
+        }).catch(() => {});
+      }
       this.edit = { client_name: inv.client_name, client_details: inv.client_details, notes: inv.notes, due_date: inv.due_date };
     } catch (err) {
       this.toast.error(errorMessage(err, this.i18n.t('Invoice not found.')));
@@ -78,6 +84,25 @@ export class InvoicePage implements OnInit {
     a.download = `${inv.number}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async createPayLink() {
+    const inv = this.invoice();
+    if (!inv) return;
+    this.payBusy.set(true);
+    try {
+      const pay = await this.api.invoicePaymentLink(this.wsId, inv.id);
+      this.invoice.set({ ...inv, payment: pay });
+      this.copy(pay.url);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.payBusy.set(false);
+    }
+  }
+
+  protected copy(url: string) {
+    navigator.clipboard?.writeText(url).then(() => this.toast.show(this.i18n.t('Pay link copied: send it to your client.')));
   }
 
   async downloadXml() {

@@ -6,7 +6,7 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService, LANGUAGES } from '../../core/i18n.service';
-import { ApiTokenRow, CalendarOverview, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile } from '../../core/models';
+import { ApiTokenRow, CalendarOverview, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile, PlanInfo } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
@@ -36,6 +36,8 @@ export class SettingsPage implements OnInit {
   protected home = this.auth.user()?.home_location ?? '';
   protected calendars = signal<CalendarOverview | null>(null);
   protected calBusy = signal(false);
+  protected plan = signal<PlanInfo | null>(null);
+  protected stripeKey = '';
   protected invoicing = signal<{ profile: InvoicingProfile; formats: EInvoiceFormat[] } | null>(null);
   private countryCode = signal('IT');
   protected readonly currentFormat = computed(() => {
@@ -68,7 +70,12 @@ export class SettingsPage implements OnInit {
   ];
 
   async ngOnInit() {
-    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing()]);
+    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing(), this.loadPlan()]);
+    const pro = this.route.snapshot.queryParamMap.get('pro');
+    if (pro === 'success') {
+      this.toast.show(this.i18n.t('Welcome to Flowly Pro! It may take a few seconds to switch on.'));
+      setTimeout(() => this.loadPlan().then(() => this.auth.loadMe()), 4000);
+    }
     const result = this.route.snapshot.queryParamMap.get('calendar');
     if (result === 'connected') this.toast.show(this.i18n.t('Google Calendar connected.'));
     if (result === 'error') this.toast.error(this.i18n.t('Could not connect Google Calendar. Please try again.'));
@@ -78,6 +85,43 @@ export class SettingsPage implements OnInit {
       const cfg = await this.api.publicConfig();
       this.mcpUrl.set(cfg.mcp_url.startsWith('http') ? cfg.mcp_url : `${window.location.origin}/api/mcp/`);
     } catch {}
+  }
+
+  private async loadPlan() {
+    try {
+      this.plan.set(await this.api.billingPlan());
+    } catch {}
+  }
+
+  protected money(cents: number, currency: string) {
+    return new Intl.NumberFormat(this.i18n.lang(), { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
+  }
+
+  async upgrade(interval: 'month' | 'year') {
+    this.busy.set(true);
+    try {
+      window.location.href = (await this.api.billingCheckout(interval)).url;
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+      this.busy.set(false);
+    }
+  }
+
+  async manageSubscription() {
+    try {
+      window.location.href = (await this.api.billingPortal()).url;
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async disconnectStripe() {
+    try {
+      const res = await this.api.updateMyInvoicing({ stripe_key: '' });
+      this.invoicing.set({ profile: res.profile, formats: res.formats });
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
   }
 
   private async loadInvoicing() {
@@ -120,7 +164,10 @@ export class SettingsPage implements OnInit {
     const inv = this.invoicing();
     if (!inv) return;
     try {
-      const res = await this.api.updateMyInvoicing(inv.profile);
+      const data: Partial<InvoicingProfile> = { ...inv.profile };
+      if (this.stripeKey.trim()) data.stripe_key = this.stripeKey.trim();
+      const res = await this.api.updateMyInvoicing(data);
+      this.stripeKey = '';
       this.invoicing.set({ profile: res.profile, formats: res.formats });
       this.toast.show(this.i18n.t('Invoicing details saved.'));
     } catch (err) {

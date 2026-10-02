@@ -43,6 +43,8 @@ export interface AdminWorkspace {
   is_enterprise: boolean;
   members: number;
   owner: string | null;
+  plan_source?: string;
+  subscription?: StripeSub | null;
   created_at: string;
 }
 
@@ -410,6 +412,10 @@ export interface InvoicingProfile {
   iban: string;
   email: string;
   phone: string;
+  stripe_connected?: boolean;
+  stripe_account?: string;
+  /** Write-only. */
+  stripe_key?: string;
   format_settings: Record<string, Record<string, any>>;
 }
 
@@ -485,6 +491,7 @@ export interface Invoice {
   client_details: string;
   notes: string;
   lines: InvoiceLine[];
+  payment?: { url: string; paid_at: string | null } | null;
   entry_count: number;
   created_at: string;
 }
@@ -566,4 +573,24 @@ export interface CalendarEvent {
   confirmed: boolean;
   tasks: CalendarTaskRef[];
   suggested?: CalendarTaskRef[];
+}
+
+export interface StripeSub {
+  status: string;
+  interval: string;
+  amount: number;
+  currency: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+}
+
+export interface PlanInfo {
+  stripe: boolean;
+  prices: { month: { amount: number; currency: string; tax: string }; year: { amount: number; currency: string; tax: string } } | null;
+  plan: 'free' | 'pro';
+  has_pro: boolean;
+  source: 'manual' | 'stripe';
+  expires_at: string | null;
+  subscription: StripeSub | null;
+  can_manage: boolean;
 }

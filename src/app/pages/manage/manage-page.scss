@@ -273,3 +273,37 @@
   color: var(--danger);
   margin-left: 6px;
 }
+
+.stripe-setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bill-row td {
+  background: var(--surface-2);
+}
+
+.bill-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px 12px;
+
+  label {
+    display: grid;
+    gap: 3px;
+    font-size: 0.8rem;
+  }
+  .wide {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+}
+
+.bill-actions {
+  display: flex;
+  gap: 6px;
+  align-items: end;
+}

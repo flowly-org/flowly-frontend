@@ -16,6 +16,43 @@
     </form>
   </section>
 
+  <section class="panel" id="plan">
+    <h2>{{ 'Plan' | t }}</h2>
+    @if (plan(); as p) {
+      <div class="plan-box">
+        @if (p.has_pro) {
+          <p><strong>Flowly Pro</strong>
+            @if (p.subscription; as sub) {
+              <span class="muted small"> · {{ (sub.interval === 'year' ? '{amount} / year' : '{amount} / month') | t: { amount: money(sub.amount, sub.currency) } }}
+                · {{ (sub.cancel_at_period_end ? 'ends {date}' : 'renews {date}') | t: { date: (sub.current_period_end | ldate: 'mediumDate') } }}
+                @if (sub.status === 'past_due') { · <span class="danger-text">{{ 'payment failed: update your card' | t }}</span> }
+              </span>
+            } @else if (p.source === 'manual') {
+              <span class="muted small"> · {{ 'granted by an administrator' | t }}@if (p.expires_at) { · {{ 'until {date}' | t: { date: (p.expires_at | ldate: 'mediumDate') } }} }</span>
+            }
+          </p>
+          @if (p.can_manage) {
+            <button class="btn" type="button" (click)="manageSubscription()">{{ 'Manage subscription' | t }}</button>
+            <span class="muted small"> {{ 'Card, invoices, billing details or cancel, on Stripe.' | t }}</span>
+          }
+        } @else {
+          <p>{{ 'Pro adds the Telegram concierge, AI photo import, invoices with e-invoices and pay links.' | t }}</p>
+          @if (p.stripe && p.prices; as prices) {
+            <div class="plan-buttons">
+              <button class="btn primary" type="button" [disabled]="busy()" (click)="upgrade('month')">{{ 'Upgrade · {amount} / month' | t: { amount: money(prices.month.amount, prices.month.currency) } }}</button>
+              <button class="btn" type="button" [disabled]="busy()" (click)="upgrade('year')">{{ '{amount} / year (2 months free)' | t: { amount: money(prices.year.amount, prices.year.currency) } }}</button>
+            </div>
+            @if (prices.month.tax === 'exclusive') {
+              <p class="muted small">{{ 'Prices exclude VAT, added at checkout where it applies. Cancel anytime.' | t }}</p>
+            }
+          } @else {
+            <p class="muted small">{{ 'Online payments are not available on this server yet: ask your administrator.' | t }}</p>
+          }
+        }
+      </div>
+    }
+  </section>
+
   <section class="panel">
     <h2>{{ 'Appearance' | t }}</h2>
     <div class="inline-form">
@@ -132,6 +169,20 @@
           {{ 'Extra text under your name' | t }}
           <textarea name="inv_details" rows="2" [(ngModel)]="inv.profile.details" [placeholder]="'Optional; when empty, address, VAT number and IBAN are printed' | t"></textarea>
         </label>
+
+        <fieldset class="wide fmt">
+          <legend>{{ 'Online payments from your clients (Stripe)' | t }}</legend>
+          @if (inv.profile.stripe_connected) {
+            <p class="check-line">✅ {{ 'Connected: {account}' | t: { account: inv.profile.stripe_account || 'Stripe' } }}
+              <button class="btn ghost small" type="button" (click)="disconnectStripe()">{{ 'Disconnect' | t }}</button></p>
+          } @else {
+            <label class="wide-fmt">
+              {{ 'Your Stripe key' | t }}
+              <input type="password" name="inv_stripe" [(ngModel)]="stripeKey" autocomplete="off" placeholder="rk_live_…" />
+              <small class="muted">{{ 'A restricted key with write access to Payment Links, Prices and Products, and read access to Checkout Sessions. Payments go straight to your Stripe account; invoices are marked paid automatically.' | t }}</small>
+            </label>
+          }
+        </fieldset>
 
         @if (currentFormat(); as fmt) {
           <fieldset class="wide fmt">

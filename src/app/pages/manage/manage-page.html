@@ -84,6 +84,11 @@
 
   @if (tab() === 'workspaces') {
     <section class="panel">
+      <div class="pad stripe-setup">
+        <strong>Stripe</strong>
+        <span class="muted small">{{ 'Paste the secret key in Settings → Stripe, then create the Pro prices (€6/month, €60/year), the Enterprise product, the customer portal and the webhook in one go.' | t }}</span>
+        <button class="btn small" type="button" (click)="stripeSetup()">{{ 'Set up Stripe' | t }}</button>
+      </div>
       <p class="muted small pad">{{ 'Enterprise workspaces get the Telegram group bot, the Slack app and their own AI provider (own OpenRouter key or an on-premises OpenAI-compatible endpoint).' | t }}</p>
       <form class="inline-form" (ngSubmit)="loadWorkspaces()">
         <input name="wq" [(ngModel)]="workspaceQuery" [placeholder]="'Search by name or member email' | t" [attr.aria-label]="'Search workspaces' | t" />
@@ -92,7 +97,7 @@
       <div class="table-wrap">
         <table class="users">
           <thead>
-            <tr><th>{{ 'Workspace' | t }}</th><th>{{ 'Owner' | t }}</th><th>{{ 'Members' | t }}</th><th>{{ 'Plan' | t }}</th><th>{{ 'Until' | t }}</th></tr>
+            <tr><th>{{ 'Workspace' | t }}</th><th>{{ 'Owner' | t }}</th><th>{{ 'Members' | t }}</th><th>{{ 'Plan' | t }}</th><th>{{ 'Until' | t }}</th><th>{{ 'Billing' | t }}</th></tr>
           </thead>
           <tbody>
             @for (w of workspaces(); track w.id) {
@@ -114,7 +119,44 @@
                     (change)="updateWorkspace(w, { plan_expires_at: $any($event.target).value ? $any($event.target).value + 'T23:59:59Z' : null })"
                     [attr.aria-label]="'Enterprise expiry of {name}' | t: { name: w.name }" [title]="'Empty = no expiry' | t" />
                 </td>
+                <td>
+                  @if (w.subscription && w.subscription.status !== 'canceled') {
+                    <span class="small">{{ money(w.subscription.amount) }} / {{ w.subscription.interval }} · {{ w.subscription.status }}
+                      @if (w.subscription.cancel_at_period_end) { · {{ 'ends {date}' | t: { date: (w.subscription.current_period_end | ldate: 'mediumDate') } }} }</span>
+                    @if (!w.subscription.cancel_at_period_end) {
+                      <button class="btn ghost small" type="button" (click)="cancelEnterprise(w)">{{ 'Cancel' | t }}</button>
+                    }
+                  } @else {
+                    <button class="btn ghost small" type="button" (click)="billing.set({ id: w.id, name: w.name, amount: '', interval: 'year', email: w.owner ?? '', company: w.name, line1: '', postal_code: '', city: '', country: 'IT', vat_id: '' })">{{ 'Bill via Stripe' | t }}</button>
+                  }
+                </td>
               </tr>
+              @if (billing()?.id === w.id) {
+                <tr class="bill-row">
+                  <td colspan="6">
+                    @if (billing(); as b) {
+                      <form class="bill-form" (ngSubmit)="subscribeEnterprise()">
+                        <label>{{ 'Price (EUR, excl. VAT)' | t }} <input name="amount" type="number" min="1" step="0.01" [(ngModel)]="b.amount" required /></label>
+                        <label>{{ 'Every' | t }}
+                          <select name="interval" [(ngModel)]="b.interval"><option value="month">{{ 'month' | t }}</option><option value="year">{{ 'year' | t }}</option></select>
+                        </label>
+                        <label>{{ 'Invoice email' | t }} <input name="email" type="email" [(ngModel)]="b.email" required /></label>
+                        <label>{{ 'Company' | t }} <input name="company" [(ngModel)]="b.company" /></label>
+                        <label>{{ 'VAT number' | t }} <input name="vat" [(ngModel)]="b.vat_id" placeholder="IT01234567890" /></label>
+                        <label>{{ 'Address' | t }} <input name="line1" [(ngModel)]="b.line1" /></label>
+                        <label>{{ 'Postcode' | t }} <input name="pc" [(ngModel)]="b.postal_code" /></label>
+                        <label>{{ 'City' | t }} <input name="city" [(ngModel)]="b.city" /></label>
+                        <label>{{ 'Country' | t }} <input name="country" [(ngModel)]="b.country" maxlength="2" /></label>
+                        <div class="bill-actions">
+                          <button class="btn ghost small" type="button" (click)="billing.set(null)">{{ 'Cancel' | t }}</button>
+                          <button class="btn primary small" type="submit">{{ 'Start subscription' | t }}</button>
+                        </div>
+                        <p class="muted small wide">{{ 'Stripe emails an invoice each period (due in 30 days). The workspace stays Enterprise while the subscription is active.' | t }}</p>
+                      </form>
+                    }
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>

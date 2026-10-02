@@ -295,3 +295,17 @@ label.grow {
     grid-column: 1 / -1;
   }
 }
+
+.plan-box {
+  padding: 8px 16px 16px;
+
+  p {
+    margin: 4px 0 10px;
+  }
+}
+
+.plan-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -18,6 +18,8 @@ import {
   TaskShareEntry,
   AdminUser,
   AdminWorkspace,
+  PlanInfo,
+  StripeSub,
   CalendarEvent,
   EInvoiceFormat,
   InvoicingProfile,
@@ -316,6 +318,32 @@ export class ApiService {
   }
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
+  }
+
+  // Plans & Stripe
+  billingPlan() {
+    return this.run(this.http.get<PlanInfo>(this.url('billing/plan/')));
+  }
+  billingCheckout(interval: 'month' | 'year') {
+    return this.run(this.http.post<{ url: string }>(this.url('billing/checkout/'), { interval }));
+  }
+  billingPortal() {
+    return this.run(this.http.post<{ url: string }>(this.url('billing/portal/'), {}));
+  }
+  adminStripeSetup() {
+    return this.run(this.http.post<{ created: Record<string, string>; enabled: boolean }>(this.url('admin/stripe/setup/'), {}));
+  }
+  adminEnterpriseSubscribe(id: number, data: Record<string, string>) {
+    return this.run(this.http.post<StripeSub>(this.url(`admin/workspaces/${id}/stripe/`), data));
+  }
+  adminEnterpriseCancel(id: number) {
+    return this.run(this.http.delete<StripeSub>(this.url(`admin/workspaces/${id}/stripe/`)));
+  }
+  invoicePaymentLink(wsId: number, id: number) {
+    return this.run(this.http.post<{ url: string; paid_at: string | null }>(this.url(`workspaces/${wsId}/invoices/${id}/payment-link/`), {}));
+  }
+  invoicePaymentState(wsId: number, id: number) {
+    return this.run(this.http.get<{ url: string; paid_at: string | null; invoice_status: string }>(this.url(`workspaces/${wsId}/invoices/${id}/payment-link/`)));
   }
 
   // Getting-started guide
