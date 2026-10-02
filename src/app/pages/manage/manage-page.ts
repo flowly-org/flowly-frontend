@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, JsonPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -6,7 +6,7 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
-import { AdminUser, InstanceSettingRow } from '../../core/models';
+import { AdminUser, AdminWorkspace, InstanceSettingRow } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
 const GROUP_CHECKS: Record<string, { service: string; label: string }> = {
@@ -17,7 +17,7 @@ const GROUP_CHECKS: Record<string, { service: string; label: string }> = {
 
 @Component({
   selector: 'app-manage-page',
-  imports: [FormsModule, DecimalPipe, TranslatePipe, LocalDatePipe],
+  imports: [FormsModule, DecimalPipe, JsonPipe, TranslatePipe, LocalDatePipe],
   templateUrl: './manage-page.html',
   styleUrl: './manage-page.scss',
 })
@@ -27,7 +27,7 @@ export class ManagePage implements OnInit {
   protected auth = inject(AuthService);
   private i18n = inject(I18nService);
 
-  protected tab = signal<'overview' | 'users' | 'settings' | 'github'>('overview');
+  protected tab = signal<'overview' | 'users' | 'workspaces' | 'settings' | 'github'>('overview');
   protected gh = signal<Record<string, any> | null>(null);
   protected ghForm: Record<string, string> = {};
   protected ghManual = signal(false);
@@ -37,6 +37,9 @@ export class ManagePage implements OnInit {
   protected overview = signal<Record<string, any> | null>(null);
   protected rows = signal<InstanceSettingRow[]>([]);
   protected users = signal<AdminUser[]>([]);
+  protected workspaces = signal<AdminWorkspace[]>([]);
+  protected workspaceQuery = '';
+  protected slack = signal<{ manifest: Record<string, any>; configured: boolean } | null>(null);
   protected userQuery = '';
   /** Unsaved edits per setting key. */
   protected drafts: Record<string, any> = {};
@@ -198,6 +201,32 @@ export class ManagePage implements OnInit {
 
   protected telegramMode(): string {
     return String(this.rows().find((r) => r.key === 'TELEGRAM_MODE')?.value ?? 'polling');
+  }
+
+  async loadWorkspaces() {
+    try {
+      const [list, slack] = await Promise.all([this.api.adminWorkspaces(this.workspaceQuery.trim()), this.api.slackManifest()]);
+      this.workspaces.set(list);
+      this.slack.set(slack);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async updateWorkspace(w: AdminWorkspace, data: Partial<AdminWorkspace>) {
+    try {
+      const fresh = await this.api.updateAdminWorkspace(w.id, data);
+      this.workspaces.update((list) => list.map((x) => (x.id === w.id ? fresh : x)));
+      this.toast.show(this.i18n.t('{name} updated.', { name: w.name }));
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+      await this.loadWorkspaces();
+    }
+  }
+
+  protected copyManifest() {
+    const text = JSON.stringify(this.slack()?.manifest ?? {}, null, 2);
+    navigator.clipboard?.writeText(text).then(() => this.toast.show(this.i18n.t('Copied.')));
   }
 
   async updateUser(u: AdminUser, data: Partial<AdminUser>) {

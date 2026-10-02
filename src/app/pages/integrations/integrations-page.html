@@ -66,9 +66,11 @@
 
     <section class="kinds" [attr.aria-label]="'Add an integration' | t">
       @for (k of kinds; track k.kind) {
-        <button type="button" class="kind-card" [class.on]="form()?.kind === k.kind && !form()?.id" (click)="startNew(k.kind)">
+        <button type="button" class="kind-card" [class.on]="form()?.kind === k.kind && !form()?.id" [class.locked]="k.enterprise && !enterprise()"
+          [disabled]="k.enterprise && !enterprise()" (click)="startNew(k.kind)"
+          [title]="(k.enterprise && !enterprise() ? 'Available with the Enterprise plan: ask your Flowly administrator.' : '') | t">
           <span class="kind-icon" [attr.data-kind]="k.kind" aria-hidden="true">{{ k.icon }}</span>
-          <strong>{{ k.label | t }}</strong>
+          <strong>{{ k.label | t }} @if (k.enterprise) {<span class="ent-badge">Enterprise</span>}</strong>
           <span class="muted">{{ k.blurb | t }}</span>
         </button>
       }
@@ -122,6 +124,21 @@
             </div>
 
             @switch (f.kind) {
+              @case ('slack_bot') {
+                <label>
+                  {{ 'Channel for the brief and updates' | t }}
+                  @if (slackChannels(); as channels) {
+                    <select name="channel" [ngModel]="f.config['channel']" (ngModelChange)="pickChannel(f, $event)">
+                      <option value="">{{ '— none: only answer questions —' | t }}</option>
+                      @for (c of channels; track c.id) {
+                        <option [value]="c.id">#{{ c.name }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <span class="muted small">{{ 'Loading channels…' | t }}</span>
+                  }
+                </label>
+              }
               @case ('outgoing_webhook') {
                 <label>{{ 'Payload URL' | t }} <input name="url" type="url" [(ngModel)]="f.config['url']" placeholder="https://example.com/flowly-hook" required /></label>
               }
@@ -269,7 +286,19 @@
               }
             }
 
-            @if (f.kind === 'outgoing_webhook' || f.kind === 'slack') {
+            @if (teamKinds.includes(f.kind)) {
+              <fieldset class="events">
+                <legend>{{ 'Morning brief' | t }}</legend>
+                <label class="check-line"><input type="checkbox" name="brief" [(ngModel)]="f.config['brief']" /> {{ "Post the team's plan every morning" | t }}</label>
+                <div class="grid2">
+                  <label>{{ 'At' | t }} <input type="time" name="brief_time" [(ngModel)]="f.config['brief_time']" /></label>
+                  <label>{{ 'Time zone' | t }} <input name="timezone" [(ngModel)]="f.config['timezone']" placeholder="Europe/Rome" /></label>
+                </div>
+                <label class="check-line"><input type="checkbox" name="weekends" [(ngModel)]="f.config['weekends']" /> {{ 'Also on weekends' | t }}</label>
+              </fieldset>
+            }
+
+            @if (eventKinds.includes(f.kind)) {
               <fieldset class="events">
                 <legend>{{ 'Send on' | t }}</legend>
                 @for (e of events; track e.key) {
@@ -284,7 +313,7 @@
             <div class="actions">
               <label class="check-line"><input type="checkbox" name="enabled" [(ngModel)]="f.enabled" /> {{ 'Enabled' | t }}</label>
               <span class="spacer"></span>
-              @if (f.id && (f.kind === 'outgoing_webhook' || f.kind === 'slack' || f.kind === 'github' || isAi(f.kind))) {
+              @if (f.id && (eventKinds.includes(f.kind) || f.kind === 'github' || isAi(f.kind))) {
                 <button class="btn" type="button" [disabled]="busy()" (click)="test()">{{ 'Send test' | t }}</button>
               }
               <button class="btn primary" type="submit" [disabled]="busy()">{{ (f.id ? 'Save' : 'Add integration') | t }}</button>
@@ -293,6 +322,30 @@
 
           @if (current(); as item) {
             <div class="details">
+              @if (item.kind === 'telegram_group') {
+                @if (item.info['linked']) {
+                  <p class="linked-ok">✅ {{ 'Linked to the Telegram group “{title}”.' | t: { title: item.info['title'] || '…' } }}</p>
+                  <p class="hint muted">{{ 'To move it to another group, send /unlink there (owners and admins), then delete and add the integration again.' | t }}</p>
+                } @else {
+                  <h3>{{ 'Link your group' | t }}</h3>
+                  <ol class="steps">
+                    <li>{{ 'Add the bot to your Telegram group:' | t }} <strong>&#64;{{ item.info['bot'] || 'FlowlyBot' }}</strong></li>
+                    <li>{{ 'Send this command in the group:' | t }}</li>
+                  </ol>
+                  @if (item.info['link_command']) {
+                    <div class="copy-row">
+                      <input readonly [value]="item.info['link_command']" (focus)="$any($event.target).select()" [attr.aria-label]="'Link command' | t" />
+                      <button class="btn small" type="button" (click)="copy(item.info['link_command'], 'Copied.')">{{ 'Copy' | t }}</button>
+                    </div>
+                  }
+                }
+                <p class="hint muted">{{ 'In the group: /today, /mine, /ask …, or reply to the bot. Send a photo of a written list with the caption /tasks. People who linked Flowly with the bot in a private chat can change tasks; everyone else can only read. Private tasks never show in the group.' | t }}</p>
+              }
+              @if (item.kind === 'slack_bot') {
+                <p class="linked-ok">✅ {{ 'Connected to the Slack workspace “{team}”.' | t: { team: item.info['team'] || '…' } }}</p>
+                <p class="hint muted">{{ 'In Slack: mention @Flowly, send it a direct message, or use /flowly today, /flowly mine. People are recognised by their Slack email: members of this Flowly workspace can change tasks, others can only read. Private tasks never show.' | t }}</p>
+                <button class="btn small" type="button" (click)="reconnectSlack()">{{ 'Reconnect Slack' | t }}</button>
+              }
               @if (item.kind === 'incoming_webhook') {
                 <h3>{{ 'Endpoint' | t }}</h3>
                 <div class="copy-row">

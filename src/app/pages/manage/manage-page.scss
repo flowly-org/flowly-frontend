@@ -244,3 +244,32 @@
     justify-content: flex-end;
   }
 }
+
+.pad {
+  padding: 8px 16px;
+}
+
+.steps {
+  padding-left: 20px;
+  display: grid;
+  gap: 4px;
+}
+
+.manifest {
+  max-height: 260px;
+  overflow: auto;
+  font-size: 0.75rem;
+  flex: 1;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.expired {
+  color: var(--danger);
+  margin-left: 6px;
+}

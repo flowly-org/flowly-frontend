@@ -15,6 +15,8 @@ interface KindInfo {
   label: string;
   icon: string;
   blurb: string;
+  /** Needs the Enterprise plan for the workspace. */
+  enterprise?: boolean;
 }
 
 export const KINDS: KindInfo[] = [
@@ -23,8 +25,12 @@ export const KINDS: KindInfo[] = [
   { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: '↗', blurb: 'POST signed JSON to your URL when tasks change.' },
   { kind: 'incoming_webhook', label: 'Incoming webhook', icon: '↘', blurb: 'A secret URL any system can call to create or update tasks.' },
   { kind: 'email', label: 'Email in', icon: '✉', blurb: 'Email an address to create a task.' },
-  { kind: 'openrouter', label: 'OpenRouter', icon: '✦', blurb: "Use the workspace's own OpenRouter key and model for AI features." },
-  { kind: 'openai_compatible', label: 'Custom AI endpoint', icon: '⚙', blurb: 'Any OpenAI-compatible API, e.g. a local model server.' },
+  { kind: 'telegram_group', label: 'Telegram group', icon: '✈', enterprise: true,
+    blurb: "Flowly in your team's Telegram group: today's plan, updates, questions and photos of lists." },
+  { kind: 'slack_bot', label: 'Slack app', icon: '◆', enterprise: true,
+    blurb: 'Flowly in your Slack: @Flowly questions, /flowly, a morning brief and updates in a channel.' },
+  { kind: 'openrouter', label: 'OpenRouter', icon: '✦', enterprise: true, blurb: "Use the workspace's own OpenRouter key and model for AI features." },
+  { kind: 'openai_compatible', label: 'Custom AI endpoint', icon: '⚙', enterprise: true, blurb: 'Any OpenAI-compatible API, e.g. an on-premises model server.' },
 ];
 
 interface Form {
@@ -41,7 +47,12 @@ interface Form {
 const DEFAULT_EVENTS: Partial<Record<IntegrationKind, string[]>> = {
   outgoing_webhook: TASK_EVENTS.map((e) => e.key),
   slack: ['task.created', 'task.completed', 'task.assigned'],
+  telegram_group: ['task.created', 'task.completed', 'task.assigned'],
+  slack_bot: ['task.created', 'task.completed', 'task.assigned'],
 };
+/** Kinds that post task events and take an "events" list. */
+export const EVENT_KINDS: IntegrationKind[] = ['outgoing_webhook', 'slack', 'telegram_group', 'slack_bot'];
+const TEAM_KINDS: IntegrationKind[] = ['telegram_group', 'slack_bot'];
 
 @Component({
   selector: 'app-integrations-page',
@@ -73,6 +84,10 @@ export class IntegrationsPage implements OnInit {
   protected mcpNew = signal<WorkspaceMcp['tokens'][number] | null>(null);
   protected mcpTokenName = this.i18n.t('Automation');
   protected appOrg = '';
+  protected readonly eventKinds = EVENT_KINDS;
+  protected readonly teamKinds = TEAM_KINDS;
+  protected slackChannels = signal<{ id: string; name: string }[] | null>(null);
+  protected readonly enterprise = computed(() => !!this.store.current()?.is_enterprise);
 
   protected readonly current = computed(() => {
     const f = this.form();
@@ -96,6 +111,13 @@ export class IntegrationsPage implements OnInit {
     if (project) this.projectFilter.set(project);
     if (!this.store.canManage()) return;
     await Promise.all([this.load(), this.loadGithubApp(), this.loadMcp()]);
+    const slack = qp.get('slack');
+    if (slack === 'connected') this.toast.show(this.i18n.t('Slack connected. Pick a channel for the brief and updates.'));
+    if (slack === 'error') this.toast.error(this.i18n.t('Could not connect Slack. Please try again.'));
+    if (slack === 'connected') {
+      const bot = this.items().find((i) => i.kind === 'slack_bot');
+      if (bot) this.edit(bot);
+    }
     const open = Number(qp.get('open'));
     const item = this.items().find((i) => i.id === open);
     if (item) this.edit(item);
@@ -154,8 +176,18 @@ export class IntegrationsPage implements OnInit {
     this.router.navigate([], { relativeTo: this.route, queryParams: { project: id }, replaceUrl: true });
   }
 
-  protected startNew(kind: IntegrationKind) {
-    const config: Record<string, any> =
+  protected async startNew(kind: IntegrationKind) {
+    if (this.kindInfo(kind).enterprise && !this.enterprise()) return;
+    if (kind === 'slack_bot') {
+      try {
+        window.location.href = (await this.api.slackInstall(this.wsId)).url;
+      } catch (err) {
+        this.toast.error(errorMessage(err));
+      }
+      return;
+    }
+    const team = { brief: true, brief_time: '08:30', weekends: false, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Rome' };
+    const config: Record<string, any> = kind === 'telegram_group' ? team :
       kind === 'github'
         ? { sync_labels: true, status_labels: false, create_issues: false, schedule: 'backlog', repo: '' }
         : kind === 'email'
@@ -182,6 +214,28 @@ export class IntegrationsPage implements OnInit {
     this.confirmDelete.set(false);
   }
 
+  private async loadSlackChannels(item: Integration) {
+    try {
+      this.slackChannels.set(await this.api.slackChannels(this.wsId, item.id));
+    } catch (err) {
+      this.slackChannels.set([]);
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected pickChannel(f: { config: Record<string, any> }, id: string) {
+    f.config['channel'] = id;
+    f.config['channel_name'] = this.slackChannels()?.find((c) => c.id === id)?.name ?? '';
+  }
+
+  protected async reconnectSlack() {
+    try {
+      window.location.href = (await this.api.slackInstall(this.wsId)).url;
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
   protected edit(item: Integration) {
     this.form.set({
       id: item.id,
@@ -197,6 +251,8 @@ export class IntegrationsPage implements OnInit {
     this.repos.set(null);
     this.loadDeliveries();
     if (item.kind === 'github' && item.info['installed']) this.loadRepos();
+    this.slackChannels.set(null);
+    if (item.kind === 'slack_bot') this.loadSlackChannels(item);
   }
 
   protected close() {
@@ -212,7 +268,7 @@ export class IntegrationsPage implements OnInit {
     const f = this.form();
     if (!f) return;
     const config = { ...f.config };
-    if (f.kind === 'outgoing_webhook' || f.kind === 'slack') config['events'] = [...f.events];
+    if (EVENT_KINDS.includes(f.kind)) config['events'] = [...f.events];
     const payload: Partial<Integration> & { api_key?: string } = {
       kind: f.kind,
       name: f.name.trim() || this.i18n.t(this.kindInfo(f.kind).label),

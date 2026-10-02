@@ -17,6 +17,7 @@ import {
   TaskLinkView,
   TaskShareEntry,
   AdminUser,
+  AdminWorkspace,
   CalendarEvent,
   EInvoiceFormat,
   InvoicingProfile,
@@ -385,6 +386,22 @@ export class ApiService {
   }
   updateAdminUser(id: number, data: Partial<AdminUser>) {
     return this.run(this.http.patch<AdminUser>(this.url(`admin/users/${id}/`), data));
+  }
+  adminWorkspaces(q = '') {
+    const params = q ? new HttpParams().set('q', q) : undefined;
+    return this.run(this.http.get<AdminWorkspace[]>(this.url('admin/workspaces/'), { params }));
+  }
+  updateAdminWorkspace(id: number, data: Partial<AdminWorkspace>) {
+    return this.run(this.http.patch<AdminWorkspace>(this.url(`admin/workspaces/${id}/`), data));
+  }
+  slackManifest() {
+    return this.run(this.http.get<{ manifest: Record<string, any>; configured: boolean }>(this.url('integrations/slack/manifest/')));
+  }
+  slackInstall(workspace: number) {
+    return this.run(this.http.post<{ url: string }>(this.url('integrations/slack/install/'), { workspace }));
+  }
+  slackChannels(wsId: number, id: number) {
+    return this.run(this.http.get<{ id: string; name: string }[]>(this.url(`workspaces/${wsId}/integrations/${id}/slack-channels/`)));
   }
 
   // Time tracking & billing

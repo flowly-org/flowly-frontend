@@ -26,9 +26,24 @@ export interface Workspace {
   color: string;
   time_tracking: boolean;
   billing_enabled: boolean;
+  plan?: 'standard' | 'enterprise';
+  is_enterprise?: boolean;
+  plan_expires_at?: string | null;
   created_at: string;
   my_role: Role;
   member_count: number;
+}
+
+export interface AdminWorkspace {
+  id: number;
+  name: string;
+  color: string;
+  plan: 'standard' | 'enterprise';
+  plan_expires_at: string | null;
+  is_enterprise: boolean;
+  members: number;
+  owner: string | null;
+  created_at: string;
 }
 
 export interface Membership {
@@ -180,6 +195,8 @@ export const PALETTE = [
 ];
 
 export type IntegrationKind =
+  | 'telegram_group'
+  | 'slack_bot'
   | 'github'
   | 'slack'
   | 'outgoing_webhook'

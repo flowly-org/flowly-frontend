@@ -9,6 +9,7 @@
   <nav class="tabs" role="tablist">
     <button type="button" role="tab" [class.on]="tab() === 'overview'" (click)="tab.set('overview')">{{ 'Overview' | t }}</button>
     <button type="button" role="tab" [class.on]="tab() === 'users'" (click)="tab.set('users')">{{ 'Users & plans' | t }}</button>
+    <button type="button" role="tab" [class.on]="tab() === 'workspaces'" (click)="tab.set('workspaces'); loadWorkspaces()">{{ 'Workspaces & Enterprise' | t }}</button>
     <button type="button" role="tab" [class.on]="tab() === 'settings'" (click)="tab.set('settings')">{{ 'Settings' | t }}</button>
     <button type="button" role="tab" [class.on]="tab() === 'github'" (click)="tab.set('github')">{{ 'GitHub App' | t }}</button>
   </nav>
@@ -77,6 +78,65 @@
             }
           </tbody>
         </table>
+      </div>
+    </section>
+  }
+
+  @if (tab() === 'workspaces') {
+    <section class="panel">
+      <p class="muted small pad">{{ 'Enterprise workspaces get the Telegram group bot, the Slack app and their own AI provider (own OpenRouter key or an on-premises OpenAI-compatible endpoint).' | t }}</p>
+      <form class="inline-form" (ngSubmit)="loadWorkspaces()">
+        <input name="wq" [(ngModel)]="workspaceQuery" [placeholder]="'Search by name or member email' | t" [attr.aria-label]="'Search workspaces' | t" />
+        <button class="btn" type="submit">{{ 'Search' | t }}</button>
+      </form>
+      <div class="table-wrap">
+        <table class="users">
+          <thead>
+            <tr><th>{{ 'Workspace' | t }}</th><th>{{ 'Owner' | t }}</th><th>{{ 'Members' | t }}</th><th>{{ 'Plan' | t }}</th><th>{{ 'Until' | t }}</th></tr>
+          </thead>
+          <tbody>
+            @for (w of workspaces(); track w.id) {
+              <tr>
+                <td><span class="dot" [style.background]="w.color"></span> <strong>{{ w.name }}</strong></td>
+                <td class="muted small">{{ w.owner ?? '—' }}</td>
+                <td>{{ w.members }}</td>
+                <td>
+                  <select [value]="w.plan" (change)="updateWorkspace(w, { plan: $any($event.target).value })" [attr.aria-label]="'Plan of {name}' | t: { name: w.name }">
+                    <option value="standard" [selected]="w.plan === 'standard'">{{ 'Standard' | t }}</option>
+                    <option value="enterprise" [selected]="w.plan === 'enterprise'">Enterprise</option>
+                  </select>
+                  @if (w.plan === 'enterprise' && !w.is_enterprise) {
+                    <span class="expired small">{{ 'expired' | t }}</span>
+                  }
+                </td>
+                <td>
+                  <input type="date" [value]="w.plan_expires_at ? w.plan_expires_at.slice(0, 10) : ''" [disabled]="w.plan !== 'enterprise'"
+                    (change)="updateWorkspace(w, { plan_expires_at: $any($event.target).value ? $any($event.target).value + 'T23:59:59Z' : null })"
+                    [attr.aria-label]="'Enterprise expiry of {name}' | t: { name: w.name }" [title]="'Empty = no expiry' | t" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>{{ 'Slack app' | t }}</h2>
+      <div class="pad">
+        <ol class="small steps">
+          <li>{{ 'Open api.slack.com/apps → Create New App → From a manifest, pick a Slack workspace (any: the app is installed per Flowly workspace later) and paste this manifest.' | t }}</li>
+          <li>{{ 'Under Basic Information copy the Client ID, Client Secret and Signing Secret into Settings → Slack app.' | t }}</li>
+          <li>{{ 'Under Manage Distribution, activate public distribution so other Slack workspaces can install it (no App Directory listing needed).' | t }}</li>
+          <li>{{ 'Enterprise workspaces then use Integrations → Slack app → Add to Slack.' | t }}</li>
+        </ol>
+        @if (slack(); as sl) {
+          <p class="small">{{ (sl.configured ? 'Slack app credentials are set.' : 'Slack app credentials are not set yet.') | t }}</p>
+          <div class="copy-line">
+            <pre class="manifest">{{ sl.manifest | json }}</pre>
+            <button class="btn small" type="button" (click)="copyManifest()">{{ 'Copy' | t }}</button>
+          </div>
+        }
       </div>
     </section>
   }
