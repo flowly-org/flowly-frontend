@@ -22,13 +22,24 @@ jobs:
       - run: npm ci
       - run: npm run build:mobile
       - run: npx cap sync android
-      - name: Build APK (debug, unsigned for store)
+      - name: Build signed APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          FLOWLY_VERSION_CODE: ${{ github.run_number }}
+          FLOWLY_VERSION_NAME: 0.2.${{ github.run_number }}
+        run: |
+          echo "$ANDROID_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/flowly.jks"
+          export ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/flowly.jks"
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/Flowly-Android.apk"
+          rm -f "$RUNNER_TEMP/flowly.jks"
       - uses: actions/upload-artifact@v4
         with:
           name: flowly-android-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: Flowly-Android.apk
 
   ios:
     runs-on: macos-latest
