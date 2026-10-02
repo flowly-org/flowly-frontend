@@ -105,6 +105,64 @@
     }
   </section>
 
+  <section class="panel" id="invoicing">
+    <h2>{{ 'Invoicing' | t }}</h2>
+    <p class="intro muted">{{ 'Who issues your invoices. These details are yours and apply to every invoice you create, in any workspace.' | t }}</p>
+    @if (invoicing(); as inv) {
+      <form class="inv-grid" (ngSubmit)="saveInvoicing()">
+        <label class="wide">{{ 'Name or business name' | t }} <input name="inv_name" [(ngModel)]="inv.profile.name" maxlength="200" /></label>
+        <label>
+          {{ 'Country' | t }}
+          <select name="inv_country" [(ngModel)]="inv.profile.country" (ngModelChange)="countryChanged()">
+            @for (c of countries(); track c.code) {
+              <option [value]="c.code">{{ c.name }}</option>
+            }
+          </select>
+        </label>
+        <label>{{ 'VAT number' | t }} <input name="inv_vat" [(ngModel)]="inv.profile.vat_id" maxlength="28" [placeholder]="inv.profile.country === 'IT' ? '01234567890' : ''" /></label>
+        <label>{{ 'Tax code' | t }} <input name="inv_tax" [(ngModel)]="inv.profile.tax_code" maxlength="20" [placeholder]="inv.profile.country === 'IT' ? ('Codice fiscale' | t) : ''" /></label>
+        <label>{{ 'IBAN' | t }} <input name="inv_iban" [(ngModel)]="inv.profile.iban" maxlength="40" /></label>
+        <label class="wide">{{ 'Address' | t }} <input name="inv_address" [(ngModel)]="inv.profile.address" maxlength="120" [placeholder]="'Street and number' | t" /></label>
+        <label>{{ 'Postcode' | t }} <input name="inv_zip" [(ngModel)]="inv.profile.zip" maxlength="12" /></label>
+        <label>{{ 'City' | t }} <input name="inv_city" [(ngModel)]="inv.profile.city" maxlength="80" /></label>
+        <label>{{ 'Province / region' | t }} <input name="inv_province" [(ngModel)]="inv.profile.province" maxlength="40" /></label>
+        <label>{{ 'Billing email' | t }} <input name="inv_email" type="email" [(ngModel)]="inv.profile.email" /></label>
+        <label class="wide">
+          {{ 'Extra text under your name' | t }}
+          <textarea name="inv_details" rows="2" [(ngModel)]="inv.profile.details" [placeholder]="'Optional; when empty, address, VAT number and IBAN are printed' | t"></textarea>
+        </label>
+
+        @if (currentFormat(); as fmt) {
+          <fieldset class="wide fmt">
+            <legend>{{ 'E-invoice' | t }}: {{ fmt.label }}</legend>
+            @for (f of fmt.settings; track f.key) {
+              @if (f.type === 'bool') {
+                <label class="check-line">
+                  <input type="checkbox" [name]="'fmt_' + f.key" [ngModel]="fmtValue(fmt.key, f)" (ngModelChange)="setFmt(fmt.key, f.key, $event)" />
+                  {{ f.label | t }}
+                </label>
+              } @else if (f.type === 'choice') {
+                <label>
+                  {{ f.label | t }}
+                  <select [name]="'fmt_' + f.key" [ngModel]="fmtValue(fmt.key, f)" (ngModelChange)="setFmt(fmt.key, f.key, $event)" [title]="(f.help ?? '') | t">
+                    @for (c of f.choices ?? []; track c[0]) {
+                      <option [value]="c[0]">{{ c[1] | t }}</option>
+                    }
+                  </select>
+                </label>
+              } @else {
+                <label>{{ f.label | t }} <input [name]="'fmt_' + f.key" [ngModel]="fmtValue(fmt.key, f)" (ngModelChange)="setFmt(fmt.key, f.key, $event)" /></label>
+              }
+            }
+          </fieldset>
+        } @else {
+          <p class="wide small muted">{{ 'No national e-invoice format for this country yet: PDF and CSV invoices work as usual.' | t }}</p>
+        }
+        <div class="wide"><button class="btn primary" type="submit">{{ 'Save invoicing details' | t }}</button></div>
+      </form>
+    }
+  </section>
+
   <section class="panel" id="assistants">
     <h2>{{ 'Claude, ChatGPT & API' | t }}</h2>
     <p class="intro muted">

@@ -17,7 +17,7 @@
         <button class="btn small primary" type="button" (click)="save({ status: 'paid' })">{{ 'Mark as paid' | t }}</button>
       }
       <button class="btn small" type="button" (click)="downloadCsv()">CSV</button>
-      <button class="btn small" type="button" (click)="downloadXml()" [disabled]="xmlBusy()" [title]="'Italian e-invoice (FatturaPA) to upload to the SDI or your intermediary' | t">{{ 'E-invoice XML' | t }}</button>
+      <button class="btn small" type="button" (click)="downloadXml()" [disabled]="xmlBusy()" [title]="'National e-invoice for your country (e.g. FatturaPA in Italy), to send to the tax authority or your intermediary' | t">{{ 'E-invoice' | t }}</button>
       <button class="btn small" type="button" (click)="print()">{{ 'Print / PDF' | t }}</button>
     </div>
 
@@ -30,7 +30,8 @@
           }
         </ul>
         <p class="small muted">
-          {{ 'Your details are in Billing settings; the client’s are under the project, in the Projects table (…).' | t }}
+          {{ 'Your details are in Settings → Invoicing; the client’s are under the project, in the Billing page’s Projects table (…).' | t }}
+          <a routerLink="/settings" fragment="invoicing">{{ 'Settings → Invoicing' | t }}</a> ·
           <a routerLink="../..">{{ 'Open billing' | t }}</a>
         </p>
       </section>

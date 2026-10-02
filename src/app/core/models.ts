@@ -376,22 +376,39 @@ export interface BillingSettings {
   invoice_prefix: string;
   next_invoice_number: number;
   payment_terms_days: number;
-  issuer_name: string;
-  issuer_details: string;
   invoice_notes: string;
-  // Italian e-invoicing (FatturaPA)
-  issuer_vat: string;
-  issuer_vat_country: string;
-  issuer_tax_code: string;
-  issuer_regime: string;
-  issuer_address: string;
-  issuer_zip: string;
-  issuer_city: string;
-  issuer_province: string;
-  issuer_country: string;
-  issuer_iban: string;
-  vat_nature: string;
-  stamp_duty: boolean;
+}
+
+/** The user's invoicing identity (Settings → Invoicing), used on every invoice they issue. */
+export interface InvoicingProfile {
+  name: string;
+  details: string;
+  country: string;
+  vat_id: string;
+  tax_code: string;
+  address: string;
+  zip: string;
+  city: string;
+  province: string;
+  iban: string;
+  email: string;
+  format_settings: Record<string, Record<string, any>>;
+}
+
+export interface EInvoiceSetting {
+  key: string;
+  label: string;
+  type: 'choice' | 'bool' | 'text';
+  default?: any;
+  help?: string;
+  choices?: [string, string][];
+}
+
+export interface EInvoiceFormat {
+  key: string;
+  label: string;
+  countries: string[];
+  settings: EInvoiceSetting[];
 }
 
 export interface ProjectBillingRow {

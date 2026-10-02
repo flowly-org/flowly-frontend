@@ -155,20 +155,6 @@
   font-size: 0.8rem;
 }
 
-.einvoice {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
-
-  summary {
-    cursor: pointer;
-    font-weight: 600;
-  }
-  .inner {
-    margin-top: 10px;
-  }
-}
-
 .client-cell {
   display: flex;
   gap: 4px;

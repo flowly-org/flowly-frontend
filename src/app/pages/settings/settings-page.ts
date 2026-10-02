@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -6,7 +6,7 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService, LANGUAGES } from '../../core/i18n.service';
-import { ApiTokenRow, CalendarOverview, ConciergeState } from '../../core/models';
+import { ApiTokenRow, CalendarOverview, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
@@ -36,6 +36,17 @@ export class SettingsPage implements OnInit {
   protected home = this.auth.user()?.home_location ?? '';
   protected calendars = signal<CalendarOverview | null>(null);
   protected calBusy = signal(false);
+  protected invoicing = signal<{ profile: InvoicingProfile; formats: EInvoiceFormat[] } | null>(null);
+  private countryCode = signal('IT');
+  protected readonly currentFormat = computed(() => {
+    const inv = this.invoicing();
+    const code = this.countryCode();
+    return inv?.formats.find((f) => f.countries.includes(code)) ?? null;
+  });
+  protected readonly countries = computed(() => {
+    const names = new Intl.DisplayNames([this.i18n.lang()], { type: 'region' });
+    return COUNTRIES.map((code) => ({ code, name: names.of(code) ?? code })).sort((a, b) => a.name.localeCompare(b.name));
+  });
   private route = inject(ActivatedRoute);
   protected state = signal<ConciergeState | null>(null);
   protected linkUrl = signal<string | null>(null);
@@ -57,7 +68,7 @@ export class SettingsPage implements OnInit {
   ];
 
   async ngOnInit() {
-    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars()]);
+    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing()]);
     const result = this.route.snapshot.queryParamMap.get('calendar');
     if (result === 'connected') this.toast.show(this.i18n.t('Google Calendar connected.'));
     if (result === 'error') this.toast.error(this.i18n.t('Could not connect Google Calendar. Please try again.'));
@@ -67,6 +78,42 @@ export class SettingsPage implements OnInit {
       const cfg = await this.api.publicConfig();
       this.mcpUrl.set(cfg.mcp_url.startsWith('http') ? cfg.mcp_url : `${window.location.origin}/api/mcp/`);
     } catch {}
+  }
+
+  private async loadInvoicing() {
+    try {
+      const res = await this.api.myInvoicing();
+      this.invoicing.set({ profile: res.profile, formats: res.formats });
+      this.countryCode.set(res.profile.country);
+    } catch {}
+  }
+
+  protected countryChanged() {
+    this.countryCode.set(this.invoicing()?.profile.country ?? 'IT');
+  }
+
+  protected fmtValue(format: string, field: EInvoiceSetting) {
+    return this.invoicing()?.profile.format_settings?.[format]?.[field.key] ?? field.default;
+  }
+
+  protected setFmt(format: string, key: string, value: any) {
+    const inv = this.invoicing();
+    if (!inv) return;
+    const all = { ...(inv.profile.format_settings ?? {}) };
+    all[format] = { ...(all[format] ?? {}), [key]: value };
+    inv.profile.format_settings = all;
+  }
+
+  async saveInvoicing() {
+    const inv = this.invoicing();
+    if (!inv) return;
+    try {
+      const res = await this.api.updateMyInvoicing(inv.profile);
+      this.invoicing.set({ profile: res.profile, formats: res.formats });
+      this.toast.show(this.i18n.t('Invoicing details saved.'));
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
   }
 
   private async loadCalendars() {
@@ -280,3 +327,9 @@ export class SettingsPage implements OnInit {
     return Math.min(100, Math.round((s.usage_today / Math.max(1, s.daily_limit)) * 100));
   }
 }
+
+/** Countries offered for the invoicing profile (EU, EEA and a few common others). */
+const COUNTRIES = [
+  'IT', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'LV', 'LT', 'LU', 'MT', 'NL',
+  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'NO', 'IS', 'LI', 'CH', 'GB', 'US', 'CA', 'AU', 'SM', 'VA', 'MC',
+];

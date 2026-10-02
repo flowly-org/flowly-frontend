@@ -18,6 +18,8 @@ import {
   TaskShareEntry,
   AdminUser,
   CalendarEvent,
+  EInvoiceFormat,
+  InvoicingProfile,
   CalendarOverview,
   CalendarAccount,
   AppNotification,
@@ -444,11 +446,17 @@ export class ApiService {
   deleteInvoice(wsId: number, id: number) {
     return this.run(this.http.delete<void>(this.ws(wsId, `invoices/${id}/`)));
   }
+  myInvoicing() {
+    return this.run(this.http.get<{ profile: InvoicingProfile; format: string | null; formats: EInvoiceFormat[] }>(this.url('my/invoicing/')));
+  }
+  updateMyInvoicing(data: Partial<InvoicingProfile>) {
+    return this.run(this.http.patch<{ profile: InvoicingProfile; format: string | null; formats: EInvoiceFormat[] }>(this.url('my/invoicing/'), data));
+  }
   einvoiceCheck(wsId: number, id: number) {
-    return this.run(this.http.get<{ ok: boolean; missing: string[]; filename: string }>(this.ws(wsId, `invoices/${id}/fatturapa/`), { params: { check: 1 } }));
+    return this.run(this.http.get<{ ok: boolean; missing: string[]; filename: string | null; format: string | null; label: string | null }>(this.ws(wsId, `invoices/${id}/einvoice/`), { params: { check: 1 } }));
   }
   einvoiceXml(wsId: number, id: number) {
-    return this.run(this.http.get(this.ws(wsId, `invoices/${id}/fatturapa/`), { responseType: 'blob' }));
+    return this.run(this.http.get(this.ws(wsId, `invoices/${id}/einvoice/`), { responseType: 'blob' }));
   }
   invoiceCsv(wsId: number, id: number) {
     return this.run(this.http.get(this.ws(wsId, `invoices/${id}/csv/`), { responseType: 'text' }));
