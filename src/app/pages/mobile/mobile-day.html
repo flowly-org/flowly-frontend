@@ -5,6 +5,9 @@
     <button type="button" class="day" (click)="date.set(today())" [disabled]="isToday()">{{ title() }}</button>
     <button type="button" class="nav" [attr.aria-label]="'Next day' | t" (click)="shift(1)">›</button>
     <span class="spacer"></span>
+    @if (todo().length) {
+      <button type="button" class="swipe-btn" (click)="swiping.set(true)" [title]="'Swipe through your tasks' | t">🃏 {{ 'Swipe' | t }}</button>
+    }
     <button type="button" class="nav" [attr.aria-label]="'Refresh' | t" (click)="refresh()" [class.spin]="loading()">↻</button>
     <button type="button" class="avatar" [attr.aria-label]="'Menu' | t" (click)="menu.set(!menu())">☰</button>
     @if (menu()) {
@@ -98,6 +101,10 @@
     </label>
     <button type="button" class="dock-btn" (click)="sheet.set({ kind: 'add', text: '' })">＋ {{ 'Add' | t }}</button>
   </nav>
+
+  @if (swiping()) {
+    <app-swipe-deck [tasks]="todo()" [labels]="swipeLabels" (decided)="swiped($event)" (undone)="unswiped($event)" (closed)="swiping.set(false)" />
+  }
 
   @if (sheet(); as s) {
     <div class="scrim" (click)="sheet.set(null)"></div>

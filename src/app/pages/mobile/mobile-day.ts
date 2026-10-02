@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { parseList } from '../../components/bulk-add/bulk-parse';
 import { Logo } from '../../components/logo/logo';
+import { SwipeDeck, SwipeLabels } from '../../components/swipe-deck/swipe-deck';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
@@ -25,7 +26,7 @@ type Sheet = { kind: 'add'; text: string } | { kind: 'photo'; text: string } | n
  */
 @Component({
   selector: 'app-mobile-day',
-  imports: [FormsModule, Logo, TranslatePipe],
+  imports: [FormsModule, Logo, SwipeDeck, TranslatePipe],
   providers: [BoardData],
   templateUrl: './mobile-day.html',
   styleUrl: './mobile-day.scss',
@@ -54,6 +55,12 @@ export class MobileDay {
   protected reading = signal(false);
   protected busy = signal(false);
   protected targetWs = signal<number | null>(null);
+  protected swiping = signal(false);
+  protected readonly swipeLabels: SwipeLabels = {
+    where: (t) => this.where(t),
+    color: (t) => this.color(t),
+    carried: (t) => this.carried(t),
+  };
 
   protected readonly isToday = computed(() => this.date() === today());
   protected readonly title = computed(() => {
@@ -153,6 +160,29 @@ export class MobileDay {
     } catch (err) {
       this.tasks.set(before);
       this.toast.error(errorMessage(err));
+    }
+  }
+
+  /** Swipe right: done. Left: nothing changes (it stays to do). */
+  protected async swiped(e: { task: Task; verdict: 'done' | 'keep' }) {
+    if (e.verdict === 'done') await this.setDone(e.task, true);
+  }
+
+  protected async unswiped(e: { task: Task; verdict: 'done' | 'keep' }) {
+    if (e.verdict === 'done') await this.setDone(e.task, false);
+  }
+
+  private async setDone(task: Task, done: boolean) {
+    const statuses = this.data.statuses(task.workspace);
+    const target = done ? statuses.find((s) => s.is_done) : statuses.find((s) => !s.is_done);
+    if (!target) return;
+    this.tasks.update((list) => list.map((t) => (t.id === task.id ? { ...t, status: target.id } : t)));
+    try {
+      await this.api.updateTask(task.workspace, task.id, { status: target.id });
+      if (done && this.timer.isRunningOn(task.id)) await this.timer.stop();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+      this.load(this.date());
     }
   }
 

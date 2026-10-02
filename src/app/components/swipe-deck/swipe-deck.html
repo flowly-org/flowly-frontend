@@ -1,0 +1,50 @@
+<div class="deck-screen" role="dialog" aria-modal="true" [attr.aria-label]="'Swipe through your tasks' | t">
+  <header>
+    <button type="button" class="icon-btn" [attr.aria-label]="'Close' | t" (click)="closed.emit()">✕</button>
+    <span class="progress">{{ (finished() ? total() : index() + 1) }} / {{ total() }}</span>
+    <button type="button" class="icon-btn" [attr.aria-label]="'Undo' | t" [disabled]="!history().length" (click)="undo()">↶</button>
+  </header>
+
+  <div class="stage">
+    @if (!finished()) {
+      @for (task of cards(); track task.id; let i = $index) {
+        @if (i === 0) {
+          <article #top class="card top" [class.dragging]="dragging()" [class.leaving]="!!leaving()" [style.transform]="transform()"
+            [style.--c]="labels().color(task)" (pointerdown)="down($event)" (pointermove)="move($event)" (pointerup)="up($event)"
+            (pointercancel)="up($event)">
+            <span class="stamp done" [style.opacity]="leaving() === 'done' ? 1 : lean() > 0 ? lean() : 0">{{ 'DONE' | t }}</span>
+            <span class="stamp keep" [style.opacity]="leaving() === 'keep' ? 1 : lean() < 0 ? -lean() : 0">{{ 'TO DO' | t }}</span>
+            <div class="where">{{ labels().where(task) }}</div>
+            <h2>{{ task.title }}</h2>
+            @if (labels().carried(task)) {
+              <div class="carried">{{ 'carried over' | t }}</div>
+            }
+            @if (task.description) {
+              <p class="notes">{{ task.description }}</p>
+            }
+          </article>
+        } @else {
+          <article class="card under" [style.--c]="labels().color(task)" [style.--i]="i" aria-hidden="true">
+            <div class="where">{{ labels().where(task) }}</div>
+            <h2>{{ task.title }}</h2>
+          </article>
+        }
+      }
+    } @else {
+      <div class="summary">
+        <div class="big">{{ doneCount() ? '🎉' : '👍' }}</div>
+        <h2>{{ 'All reviewed' | t }}</h2>
+        <p>{{ '{done} done · {kept} still to do' | t: { done: doneCount(), kept: keptCount() } }}</p>
+        <button type="button" class="btn-pill primary" (click)="closed.emit()">{{ 'Back to my day' | t }}</button>
+      </div>
+    }
+  </div>
+
+  @if (!finished()) {
+    <footer>
+      <button type="button" class="round keep" [attr.aria-label]="'Keep to do' | t" (click)="decide('keep')">✕</button>
+      <span class="hint">{{ '← to do · done →' | t }}</span>
+      <button type="button" class="round done" [attr.aria-label]="'Mark done' | t" (click)="decide('done')">✓</button>
+    </footer>
+  }
+</div>
