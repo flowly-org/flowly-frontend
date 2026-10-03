@@ -326,9 +326,11 @@ export interface ConciergeState {
   platform_ai: boolean;
   telegram: { configured: boolean; bot: string; linked: boolean; username: string };
   languages: { code: string; label: string }[];
-  settings: { enabled: boolean; name: string; language: string; timezone: string; brief_time: string; morning_brief: boolean; alerts: boolean; provider: number | null };
+  settings: { enabled: boolean; name: string; language: string; timezone: string; brief_time: string; morning_brief: boolean; alerts: boolean; provider: number | null; personality: string; learn: boolean };
   providers: { id: number; name: string; workspace: string; kind: string; model: string }[];
+  personalities: { key: string; label: string; blurb: string; sample: string }[];
   memory: string;
+  memory_updated_at: string | null;
   usage_today: number;
   daily_limit: number;
 }

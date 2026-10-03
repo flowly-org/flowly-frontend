@@ -37,6 +37,7 @@ export class SettingsPage implements OnInit {
   protected calendars = signal<CalendarOverview | null>(null);
   protected calBusy = signal(false);
   protected plan = signal<PlanInfo | null>(null);
+  protected memoryDraft: string | null = null;
   protected stripeKey = '';
   protected invoicing = signal<{ profile: InvoicingProfile; formats: EInvoiceFormat[] } | null>(null);
   private countryCode = signal('IT');
@@ -369,9 +370,17 @@ export class SettingsPage implements OnInit {
     }
   }
 
+  async saveMemory() {
+    if (this.memoryDraft === null) return;
+    await this.update({ memory: this.memoryDraft } as any);
+    this.memoryDraft = null;
+    this.toast.show(this.i18n.t('Memory saved.'));
+  }
+
   async forget() {
     this.confirmForget.set(false);
     await this.api.forgetConcierge();
+    this.memoryDraft = null;
     this.chat.set([]);
     await this.load();
     this.toast.show(this.i18n.t('Memory and chat history cleared.'));

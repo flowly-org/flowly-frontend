@@ -373,6 +373,20 @@
           </label>
         </div>
 
+        <div class="personalities" role="radiogroup" [attr.aria-label]="'Personality' | t">
+          <span class="small muted">{{ 'Personality' | t }}</span>
+          <div class="persona-grid">
+            @for (p of s.personalities; track p.key) {
+              <button type="button" role="radio" class="persona-card" [class.on]="p.key === s.settings.personality"
+                [attr.aria-checked]="p.key === s.settings.personality" (click)="update({ personality: p.key })">
+                <strong>{{ p.label | t }}</strong>
+                <span class="muted small">{{ p.blurb | t }}</span>
+                <span class="sample">“{{ p.sample | t }}”</span>
+              </button>
+            }
+          </div>
+        </div>
+
         <div class="row settings-grid">
           <label class="check-line">
             <input type="checkbox" [checked]="s.settings.morning_brief" (change)="update({ morning_brief: $any($event.target).checked })" />
@@ -432,17 +446,34 @@
           </form>
         </div>
 
-        <div class="row">
-          <div class="grow">
-            <strong class="small">{{ 'What it remembers' | t }}</strong>
-            <div class="memory small muted">{{ s.memory || ('Nothing yet. Tell it things like “I prefer deep work in the morning”.' | t) }}</div>
+        <div class="memory-box">
+          <div class="memory-head">
+            <strong class="small">{{ 'What {name} remembers about you' | t: { name: s.settings.name } }}</strong>
+            @if (s.memory_updated_at) {
+              <span class="muted small">· {{ 'learned {date}' | t: { date: (s.memory_updated_at | ldate: 'MMM d') } }}</span>
+            }
+            <span class="spacer"></span>
+            <label class="check-line small">
+              <input type="checkbox" [checked]="s.settings.learn" (change)="update({ learn: $any($event.target).checked })" />
+              {{ 'Learn from our conversations' | t }}
+            </label>
           </div>
-          @if (confirmForget()) {
-            <button class="btn small danger" type="button" (click)="forget()">{{ 'Forget everything' | t }}</button>
-            <button class="btn small ghost" type="button" (click)="confirmForget.set(false)">{{ 'Cancel' | t }}</button>
-          } @else {
-            <button class="btn small ghost" type="button" (click)="confirmForget.set(true)">{{ 'Clear memory' | t }}</button>
-          }
+          <textarea rows="5" [value]="memoryDraft ?? s.memory" (input)="memoryDraft = $any($event.target).value"
+            [placeholder]="'Nothing yet. Tell it things like “I prefer deep work in the morning”, or write them here, one per line.' | t"
+            [attr.aria-label]="'What it remembers' | t"></textarea>
+          <div class="memory-actions">
+            <span class="muted small">{{ 'It also adapts to your habits (when you start, where you add tasks) and never stores sensitive data.' | t }}</span>
+            <span class="spacer"></span>
+            @if (memoryDraft !== null && memoryDraft !== s.memory) {
+              <button class="btn small primary" type="button" (click)="saveMemory()">{{ 'Save' | t }}</button>
+            }
+            @if (confirmForget()) {
+              <button class="btn small danger" type="button" (click)="forget()">{{ 'Forget everything' | t }}</button>
+              <button class="btn small ghost" type="button" (click)="confirmForget.set(false)">{{ 'Cancel' | t }}</button>
+            } @else {
+              <button class="btn small ghost" type="button" (click)="confirmForget.set(true)">{{ 'Clear memory' | t }}</button>
+            }
+          </div>
         </div>
       }
     </section>
