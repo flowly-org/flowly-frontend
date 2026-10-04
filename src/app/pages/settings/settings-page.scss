@@ -396,6 +396,7 @@ label.grow {
 }
 .block { display: block; margin-top: 2px; }
 .focus-grid {
+  padding: 0 16px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px 16px;
@@ -403,4 +404,8 @@ label.grow {
   label { display: flex; flex-direction: column; gap: 4px; }
   label.radio { flex-direction: row; align-items: center; gap: 8px; }
   input[type='number'] { max-width: 120px; }
+}
+
+#focus > p.muted {
+  padding: 0 16px 12px;
 }
