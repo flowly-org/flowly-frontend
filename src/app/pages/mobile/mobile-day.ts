@@ -8,6 +8,7 @@ import { SwipeDeck, SwipeLabels } from '../../components/swipe-deck/swipe-deck';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
+import { FocusService } from '../../core/focus.service';
 import { addDays, formatLong, formatShort, today } from '../../core/dates';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
@@ -39,6 +40,7 @@ export class MobileDay {
   protected auth = inject(AuthService);
   protected data = inject(BoardData);
   protected timer = inject(TimerService);
+  protected focus = inject(FocusService);
   protected i18n = inject(I18nService);
   protected readonly formatDuration = formatDuration;
   protected readonly today = today;
@@ -70,7 +72,15 @@ export class MobileDay {
     if (d === addDays(today(), 1)) return this.i18n.t('Tomorrow');
     return formatLong(d);
   });
-  protected readonly todo = computed(() => this.tasks().filter((t) => !this.data.isDone(t)).sort(byOrder));
+  protected readonly todo = computed(() =>
+    this.focus.on()
+      ? this.focus.queue(this.tasks(), this.data, this.timer, this.date()).concat(
+          this.tasks().filter((t) => !this.data.isDone(t) && t.assignee !== this.auth.user()?.id && t.assignee !== null).sort(byOrder))
+      : this.tasks().filter((t) => !this.data.isDone(t)).sort(byOrder));
+  /** ADHD mode: only the first few tasks show until you ask for the rest. */
+  protected showAll = signal(false);
+  protected readonly shown = computed(() =>
+    this.focus.on() && !this.showAll() ? this.todo().slice(0, this.focus.opts().today_limit) : this.todo());
   protected readonly done = computed(() => this.tasks().filter((t) => this.data.isDone(t)));
   protected readonly ws = computed(() => this.targetWs() ?? this.personal() ?? this.data.contexts()[0]?.id ?? null);
   protected readonly drafts = computed(() => {
@@ -153,6 +163,7 @@ export class MobileDay {
     const status = this.data.toggledStatus(task);
     if (status === null) return;
     const before = this.tasks();
+    if (!this.data.isDone(task)) this.focus.celebrate();
     this.tasks.update((list) => list.map((t) => (t.id === task.id ? { ...t, status } : t)));
     try {
       await this.api.updateTask(task.workspace, task.id, { status });
@@ -165,7 +176,10 @@ export class MobileDay {
 
   /** Swipe right: done. Left: nothing changes (it stays to do). */
   protected async swiped(e: { task: Task; verdict: 'done' | 'keep' }) {
-    if (e.verdict === 'done') await this.setDone(e.task, true);
+    if (e.verdict === 'done') {
+      this.focus.celebrate();
+      await this.setDone(e.task, true);
+    }
   }
 
   protected async unswiped(e: { task: Task; verdict: 'done' | 'keep' }) {

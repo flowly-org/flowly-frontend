@@ -83,7 +83,7 @@ export class AuthService {
     }
   }
 
-  async updateProfile(data: Partial<Pick<User, 'full_name' | 'github_login' | 'language' | 'home_location'>>): Promise<void> {
+  async updateProfile(data: Partial<Pick<User, 'full_name' | 'github_login' | 'language' | 'home_location' | 'adhd_mode' | 'focus'>>): Promise<void> {
     const me = await firstValueFrom(this.http.patch<User>(`${this.config.apiUrl}/auth/me/`, data));
     this.user.set(me);
   }

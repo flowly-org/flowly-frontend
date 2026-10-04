@@ -13,6 +13,18 @@ export interface User {
   has_pro?: boolean;
   has_pro_plus?: boolean;
   is_bot?: boolean;
+  /** Opt-in ADHD mode. */
+  adhd_mode?: boolean;
+  focus?: Partial<FocusOptions>;
+}
+
+export interface FocusOptions {
+  today_limit: number;
+  check_in_minutes: number;
+  hyperfocus_minutes: number;
+  heads_up_minutes: number;
+  celebrate: boolean;
+  calm: boolean;
 }
 
 export interface AuthResponse {
@@ -198,6 +210,7 @@ export const PALETTE = [
 ];
 
 export type IntegrationKind =
+  | 'wiki'
   | 'telegram_group'
   | 'slack_bot'
   | 'github'

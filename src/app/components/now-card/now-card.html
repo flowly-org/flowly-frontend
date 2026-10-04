@@ -1,0 +1,42 @@
+<section class="now" [attr.aria-label]="'Now' | t">
+  @if (current(); as task) {
+    <div class="head">
+      <span class="eyebrow">{{ 'Now' | t }}</span>
+      @if (running()) {
+        <span class="clock" role="timer">⏱ {{ formatDuration(timer.elapsed()) }}</span>
+      }
+    </div>
+    <button type="button" class="title" (click)="open.emit(task)">{{ task.title }}</button>
+    @if (where(task); as w) {
+      <span class="where">{{ w }}</span>
+    }
+    <div class="actions">
+      @if (data.canTrack(task)) {
+        <button type="button" class="btn primary" (click)="start(task)">
+          {{ running() ? ('■ Stop' | t) : ('▶ Focus for {n} min' | t: { n: focus.opts().check_in_minutes || 25 }) }}
+        </button>
+      }
+      <button type="button" class="btn" (click)="done.emit(task)">✓ {{ 'Done' | t }}</button>
+      <button type="button" class="btn" [disabled]="splitting()" (click)="breakDown(task)"
+        [title]="(flo() ? 'Flo splits it into tiny steps' : 'Open the task to split it into steps') | t">
+        {{ splitting() ? ('Splitting…' | t) : ('🪓 Break it down' | t) }}
+      </button>
+      @if (queue().length > 1) {
+        <button type="button" class="btn ghost" (click)="notNow(task)">{{ 'Not now' | t }}</button>
+      }
+    </div>
+    @if (next().length) {
+      <p class="then">
+        <span class="muted">{{ 'Then:' | t }}</span>
+        @for (t of next(); track t.id) {
+          <button type="button" class="chip" (click)="open.emit(t)">{{ t.title }}</button>
+        }
+        @if (more()) {
+          <span class="muted">{{ '+{n} more can wait' | t: { n: more() } }}</span>
+        }
+      </p>
+    }
+  } @else {
+    <p class="clear">🎉 {{ 'All clear for today. Nothing else needs you right now.' | t }}</p>
+  }
+</section>

@@ -6,11 +6,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { BulkAdd } from '../../components/bulk-add/bulk-add';
 import { CalendarStrip } from '../../components/calendar-strip/calendar-strip';
+import { NowCard } from '../../components/now-card/now-card';
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskDialog } from '../../components/task-dialog/task-dialog';
 import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
+import { FocusService } from '../../core/focus.service';
 import { NotificationService } from '../../core/notification.service';
 import { addDays, formatLong, isValidIsoDate, today } from '../../core/dates';
 import { CalendarTaskRef, Task, TaskInput } from '../../core/models';
@@ -52,7 +54,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, TranslatePipe],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -60,6 +62,7 @@ interface Prefs {
 export class DayBoard {
   private store = inject(WorkspaceStore);
   protected data = inject(BoardData);
+  protected focus = inject(FocusService);
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private toast = inject(ToastService);
@@ -328,6 +331,7 @@ export class DayBoard {
       this.toast.error(this.i18n.t('This workspace has no "done" status. Mark one on the Tags page.'));
       return;
     }
+    if (!this.data.isDone(task)) this.focus.celebrate();
     this.patch(task, { status });
   }
 

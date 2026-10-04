@@ -29,7 +29,10 @@
   }
 
   <main class="list" (click)="menu.set(false)">
-    @for (task of todo(); track task.id) {
+    @if (focus.on() && todo().length) {
+      <p class="focus-head">{{ "Today's {n}" | t: { n: shown().length } }}</p>
+    }
+    @for (task of shown(); track task.id) {
       <div class="row" [class.open]="open() === task.id" [class.running]="timer.isRunningOn(task.id)" [style.--c]="color(task)">
         <button type="button" class="check" [attr.aria-label]="'Mark done' | t" (click)="toggleDone(task)"></button>
         <button type="button" class="body" (click)="open.set(open() === task.id ? null : task.id)">
@@ -67,12 +70,16 @@
         }
       </div>
     } @empty {
-      @if (!loading()) {
+      @if (!loading() && !todo().length) {
         <div class="empty">
           <p>{{ 'Nothing planned.' | t }}</p>
           <p class="muted small">{{ 'Snap a photo of your written list, or add tasks below.' | t }}</p>
         </div>
       }
+    }
+
+    @if (todo().length > shown().length) {
+      <button type="button" class="done-toggle" (click)="showAll.set(true)">▸ {{ '+{n} more can wait' | t: { n: todo().length - shown().length } }}</button>
     }
 
     @if (done().length) {

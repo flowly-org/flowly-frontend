@@ -387,3 +387,20 @@ label.grow {
 .spacer {
   flex: 1;
 }
+
+.toggle-row {
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  input { margin-top: 4px; }
+}
+.block { display: block; margin-top: 2px; }
+.focus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px 16px;
+  margin: 12px 0 6px;
+  label { display: flex; flex-direction: column; gap: 4px; }
+  label.radio { flex-direction: row; align-items: center; gap: 8px; }
+  input[type='number'] { max-width: 120px; }
+}

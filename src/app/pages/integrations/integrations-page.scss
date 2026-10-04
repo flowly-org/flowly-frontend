@@ -438,3 +438,8 @@ code {
   display: grid;
   gap: 4px;
 }
+
+.danger-text {
+  color: var(--danger, #dc2626);
+  overflow-wrap: anywhere;
+}

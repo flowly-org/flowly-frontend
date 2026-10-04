@@ -92,6 +92,46 @@
     </div>
   </section>
 
+  <section class="panel" id="focus">
+    <h2>{{ 'ADHD mode' | t }}</h2>
+    <label class="row toggle-row">
+      <input type="checkbox" [checked]="focus.on()" (change)="setFocus({ adhd_mode: $any($event.target).checked })" />
+      <span class="grow">
+        <strong>{{ 'Turn on ADHD mode' | t }}</strong>
+        <span class="muted small block">{{ 'One thing at a time: a “Now” card with the next task, only a few tasks on your phone, a small celebration when you finish one. Flo gets shorter and more concrete, offers to split big tasks into tiny steps, checks in while your timer runs and gives you a heads-up before events.' | t }}</span>
+      </span>
+    </label>
+    @if (focus.on()) {
+      <div class="focus-grid">
+        <label>
+          <span class="small muted">{{ 'Tasks shown at once' | t }}</span>
+          <input type="number" min="1" max="10" [value]="focus.opts().today_limit" (change)="setOpt('today_limit', $event)" />
+        </label>
+        <label>
+          <span class="small muted">{{ 'Check in after (min, 0 = off)' | t }}</span>
+          <input type="number" min="0" max="240" [value]="focus.opts().check_in_minutes" (change)="setOpt('check_in_minutes', $event)" />
+        </label>
+        <label>
+          <span class="small muted">{{ 'Break reminder after (min, 0 = off)' | t }}</span>
+          <input type="number" min="0" max="600" [value]="focus.opts().hyperfocus_minutes" (change)="setOpt('hyperfocus_minutes', $event)" />
+        </label>
+        <label>
+          <span class="small muted">{{ 'Heads-up before events (min, 0 = off)' | t }}</span>
+          <input type="number" min="0" max="120" [value]="focus.opts().heads_up_minutes" (change)="setOpt('heads_up_minutes', $event)" />
+        </label>
+        <label class="radio">
+          <input type="checkbox" [checked]="focus.opts().celebrate" (change)="setFocus({ focus: { celebrate: $any($event.target).checked } })" />
+          {{ 'Celebrate finished tasks' | t }}
+        </label>
+        <label class="radio">
+          <input type="checkbox" [checked]="focus.opts().calm" (change)="setFocus({ focus: { calm: $any($event.target).checked } })" />
+          {{ 'Calm: no animations' | t }}
+        </label>
+      </div>
+      <p class="muted small">{{ 'Check-ins, break reminders and heads-ups arrive under the bell, and on Telegram if Flo is connected.' | t }}</p>
+    }
+  </section>
+
   <section class="panel">
     <h2>{{ 'Notifications' | t }}</h2>
     <div class="row">

@@ -182,6 +182,35 @@
                   </label>
                 </div>
               }
+              @case ('wiki') {
+                <div class="grid2">
+                  <label>
+                    {{ 'Source' | t }}
+                    <select name="source" [(ngModel)]="f.config['source']">
+                      <option value="github_wiki">{{ 'GitHub wiki' | t }}</option>
+                      <option value="github_repo">{{ 'Folder of a GitHub repository' | t }}</option>
+                      <option value="git">{{ 'Any git repository (https)' | t }}</option>
+                    </select>
+                  </label>
+                  @if (f.config['source'] === 'git') {
+                    <label>{{ 'Clone URL' | t }} <input name="url" [(ngModel)]="f.config['url']" placeholder="https://git.example.org/team/handbook.git" required /></label>
+                  } @else {
+                    <label>{{ 'Repository' | t }} <input name="repo" [(ngModel)]="f.config['repo']" placeholder="owner/repository" required /></label>
+                  }
+                </div>
+                @if (f.config['source'] !== 'github_wiki') {
+                  <div class="grid2">
+                    <label>{{ 'Folder (optional)' | t }} <input name="path" [(ngModel)]="f.config['path']" placeholder="docs" /></label>
+                    <label>{{ 'Branch (optional)' | t }} <input name="branch" [(ngModel)]="f.config['branch']" placeholder="main" /></label>
+                  </div>
+                }
+                <label>
+                  {{ 'Access token (only for private repositories)' | t }}
+                  <input name="apiKey" type="password" [(ngModel)]="f.apiKey" autocomplete="off"
+                    [placeholder]="current()?.info?.['api_key'] ? ('Saved ({hint}); type to replace' | t: { hint: current()?.info?.['api_key'] }) : 'github_pat_…'" />
+                </label>
+                <p class="hint muted">{{ 'Text pages (Markdown and other wiki formats) are copied every few hours. Flo can search them when you ask, and tasks delegated to the AI agent get the relevant pages as context. A wiki for a project only applies to that project\'s tasks. For a private repository, use a fine-grained token with read-only access to its contents; it is stored encrypted.' | t }}</p>
+              }
               @case ('openrouter') {
                 <div class="grid2">
                   <label>{{ 'Model' | t }} <input name="model" [(ngModel)]="f.config['model']" [placeholder]="'e.g. {example}' | t: { example: 'mistralai/mistral-small-3.2-24b-instruct' }" required /></label>
@@ -316,12 +345,27 @@
               @if (f.id && (eventKinds.includes(f.kind) || f.kind === 'github' || isAi(f.kind))) {
                 <button class="btn" type="button" [disabled]="busy()" (click)="test()">{{ 'Send test' | t }}</button>
               }
+              @if (f.id && f.kind === 'wiki') {
+                <button class="btn" type="button" [disabled]="busy()" (click)="test()">{{ (busy() ? 'Syncing…' : 'Sync now') | t }}</button>
+              }
               <button class="btn primary" type="submit" [disabled]="busy()">{{ (f.id ? 'Save' : 'Add integration') | t }}</button>
             </div>
           </form>
 
           @if (current(); as item) {
             <div class="details">
+              @if (item.kind === 'wiki') {
+                @if (item.info['error']) {
+                  <p class="danger-text">⚠ {{ item.info['error'] }}</p>
+                } @else if (item.info['synced_at']) {
+                  <p class="linked-ok">✅ {{ '{n} pages, synced {when}.' | t: { n: item.info['pages'], when: (item.info['synced_at'] | ldate: 'MMM d, HH:mm') } }}</p>
+                } @else {
+                  <p class="muted">{{ 'Not synced yet: it will be within a few minutes, or press “Sync now”.' | t }}</p>
+                }
+                @if (item.info['web_url']) {
+                  <p><a [href]="item.info['web_url']" target="_blank" rel="noopener">{{ 'Open the wiki' | t }} ↗</a></p>
+                }
+              }
               @if (item.kind === 'telegram_group') {
                 @if (item.info['linked']) {
                   <p class="linked-ok">✅ {{ 'Linked to the Telegram group “{title}”.' | t: { title: item.info['title'] || '…' } }}</p>

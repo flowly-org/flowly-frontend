@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { FocusService } from '../../core/focus.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService, LANGUAGES } from '../../core/i18n.service';
-import { ApiTokenRow, CalendarOverview, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile, PlanInfo } from '../../core/models';
+import { ApiTokenRow, CalendarOverview, FocusOptions, User, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile, PlanInfo } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
@@ -25,6 +26,7 @@ interface ChatLine {
 export class SettingsPage implements OnInit {
   protected auth = inject(AuthService);
   protected theme = inject(ThemeService);
+  protected focus = inject(FocusService);
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private notifications = inject(NotificationService);
@@ -288,6 +290,19 @@ export class SettingsPage implements OnInit {
     } catch (err) {
       this.toast.error(errorMessage(err, this.i18n.t('Could not load concierge settings.')));
     }
+  }
+
+  async setFocus(data: Partial<Pick<User, 'adhd_mode' | 'focus'>>) {
+    try {
+      await this.auth.updateProfile(data);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  setOpt(key: keyof FocusOptions, event: Event) {
+    const value = Number((event.target as HTMLInputElement).value);
+    if (Number.isFinite(value)) this.setFocus({ focus: { [key]: value } });
   }
 
   async saveProfile() {

@@ -60,6 +60,10 @@
   </div>
 </div>
 
+@if (focus.on() && isToday()) {
+  <app-now-card class="now-card" [tasks]="tasks()" [day]="date()" (done)="toggleDone($event)" (open)="openTask($event)" (changed)="refreshTask($event)" />
+}
+
 <app-calendar-strip
   [date]="date()"
   [workspaces]="contexts()"
