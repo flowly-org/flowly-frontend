@@ -7,7 +7,7 @@ import { AuthService } from '../../core/auth.service';
 import { FocusService } from '../../core/focus.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService, LANGUAGES } from '../../core/i18n.service';
-import { ApiTokenRow, CalendarOverview, FocusOptions, User, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile, PlanInfo } from '../../core/models';
+import { ApiTokenRow, CalendarOverview, DonetickAccount, FocusOptions, User, WorkspaceContext, ConciergeState, EInvoiceFormat, EInvoiceSetting, InvoicingProfile, PlanInfo } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
@@ -72,8 +72,111 @@ export class SettingsPage implements OnInit {
     { value: 'auto', label: 'Auto (system)' },
   ];
 
+  // --- Donetick (personal) ---------------------------------------------------
+  protected donetick = signal<DonetickAccount[]>([]);
+  protected contexts = signal<WorkspaceContext[]>([]);
+  protected dtNew = { base_url: '', token: '' };
+  protected dtEdit = signal<(DonetickAccount & { token?: string }) | null>(null);
+  protected dtBusy = signal(false);
+
+  private async loadDonetick() {
+    try {
+      const [accounts, contexts] = await Promise.all([this.api.donetickAccounts(), this.api.myContext()]);
+      this.donetick.set(accounts);
+      this.contexts.set(contexts);
+    } catch {}
+  }
+
+  protected projectsOf(wsId: number | null) {
+    return this.contexts().find((c) => c.id === wsId)?.projects.filter((p) => !p.archived) ?? [];
+  }
+
+  async connectDonetick() {
+    this.dtBusy.set(true);
+    try {
+      const account = await this.api.createDonetick({ base_url: this.dtNew.base_url.trim(), token: this.dtNew.token.trim() });
+      this.donetick.update((list) => [...list, account]);
+      this.dtNew = { base_url: '', token: '' };
+      this.editDonetick(account);
+      if (account.info.error) this.toast.error(account.info.error);
+      else this.toast.show(this.i18n.t('Connected. Now choose where each label goes.'));
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.dtBusy.set(false);
+    }
+  }
+
+  editDonetick(account: DonetickAccount) {
+    this.dtEdit.set({ ...structuredClone(account), token: '' });
+  }
+
+  addRoute() {
+    const e = this.dtEdit();
+    if (!e) return;
+    this.dtEdit.set({ ...e, routes: [...e.routes, { label: '', workspace: this.contexts()[0]?.id ?? 0, project: null }] });
+  }
+
+  removeRoute(i: number) {
+    const e = this.dtEdit();
+    if (e) this.dtEdit.set({ ...e, routes: e.routes.filter((_, j) => j !== i) });
+  }
+
+  async saveDonetick() {
+    const e = this.dtEdit();
+    if (!e) return;
+    this.dtBusy.set(true);
+    try {
+      const { info, created_at, id, token, ...data } = e;
+      const payload = { ...data, routes: e.routes.filter((r) => r.label.trim() && r.workspace), ...(token?.trim() ? { token: token.trim() } : {}) };
+      const saved = await this.api.updateDonetick(id, payload);
+      const synced = await this.api.syncDonetick(id).catch((err) => {
+        this.toast.error(errorMessage(err));
+        return null;
+      });
+      const fresh = synced?.account ?? saved;
+      this.donetick.update((list) => list.map((a) => (a.id === id ? fresh : a)));
+      this.dtEdit.set(null);
+      if (synced) this.toast.show(synced.detail);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.dtBusy.set(false);
+    }
+  }
+
+  async syncDonetick(account: DonetickAccount) {
+    this.dtBusy.set(true);
+    try {
+      const res = await this.api.syncDonetick(account.id);
+      this.donetick.update((list) => list.map((a) => (a.id === account.id ? res.account : a)));
+      this.toast.show(res.detail);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.dtBusy.set(false);
+    }
+  }
+
+  async removeDonetick(account: DonetickAccount) {
+    try {
+      await this.api.deleteDonetick(account.id);
+      this.donetick.update((list) => list.filter((a) => a.id !== account.id));
+      if (this.dtEdit()?.id === account.id) this.dtEdit.set(null);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async copyText(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.toast.show(this.i18n.t('Copied to clipboard.'));
+    } catch {}
+  }
+
   async ngOnInit() {
-    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing(), this.loadPlan()]);
+    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing(), this.loadPlan(), this.loadDonetick()]);
     const pro = this.route.snapshot.queryParamMap.get('pro');
     if (pro === 'success') {
       this.toast.show(this.i18n.t('Welcome to Flowly Pro! It may take a few seconds to switch on.'));

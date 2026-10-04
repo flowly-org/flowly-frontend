@@ -182,6 +182,61 @@
                   </label>
                 </div>
               }
+              @case ('donetick') {
+                <div class="grid2">
+                  <label>{{ 'Donetick address' | t }} <input name="base_url" [(ngModel)]="f.config['base_url']" placeholder="https://chores.example.org" required /></label>
+                  <label>
+                    {{ 'Access token' | t }}
+                    <input name="apiKey" type="password" [(ngModel)]="f.apiKey" autocomplete="off"
+                      [placeholder]="current()?.info?.['api_key'] ? ('Saved ({hint}); type to replace' | t: { hint: current()?.info?.['api_key'] }) : ('Donetick → Settings → Access tokens' | t)" />
+                  </label>
+                </div>
+                <label>
+                  {{ 'Only chores with these labels (comma-separated, empty = all)' | t }}
+                  <input name="labels" [(ngModel)]="f.config['_labels']" placeholder="home, garden" />
+                </label>
+                <fieldset class="events">
+                  <legend>{{ 'Labels that go to a project' | t }}</legend>
+                  @for (row of f.config['_rows']; track $index; let i = $index) {
+                    <div class="map-row">
+                      <input [name]="'lbl' + i" [(ngModel)]="row.label" list="dt-labels" [placeholder]="'Label' | t" />
+                      <select [name]="'prj' + i" [(ngModel)]="row.project">
+                        <option [ngValue]="null">{{ '— project —' | t }}</option>
+                        @for (p of store.activeProjects(); track p.id) {
+                          <option [ngValue]="p.id">{{ p.name }}</option>
+                        }
+                      </select>
+                      <button class="btn ghost icon" type="button" [attr.aria-label]="'Remove' | t" (click)="removeLabelRow(f, i)">✕</button>
+                    </div>
+                  }
+                  <datalist id="dt-labels">
+                    @for (l of current()?.info?.['labels'] ?? []; track l) {
+                      <option [value]="l"></option>
+                    }
+                  </datalist>
+                  <button class="btn small" type="button" (click)="addLabelRow(f)">＋ {{ 'Map a label' | t }}</button>
+                  <small class="muted">{{ 'Other chores go to {where}.' | t: { where: projectName(f.project) } }}</small>
+                </fieldset>
+                @if (current()?.info?.['members']?.length) {
+                  <fieldset class="events">
+                    <legend>{{ 'Donetick people' | t }}</legend>
+                    @for (m of current()?.info?.['members']; track m.userId) {
+                      <div class="map-row">
+                        <span class="grow">{{ m.displayName || m.username }} <span class="muted small">@{{ m.username }}</span></span>
+                        <select [name]="'mem' + m.userId" [ngModel]="f.config['members']?.[m.userId] ?? ''" (ngModelChange)="setMember(f, m.userId, $event)">
+                          <option value="">{{ 'Match by name' | t }}</option>
+                          @for (mem of store.members(); track mem.user.id) {
+                            <option [value]="mem.user.id">{{ mem.user.full_name || mem.user.email }}</option>
+                          }
+                        </select>
+                      </div>
+                    }
+                  </fieldset>
+                }
+                <label class="check-line"><input type="checkbox" name="write_back" [(ngModel)]="f.config['write_back']" /> {{ 'Completing, renaming or rescheduling a task updates the chore' | t }}</label>
+                <label class="check-line"><input type="checkbox" name="create_chores" [(ngModel)]="f.config['create_chores']" /> {{ 'New tasks here also become chores in Donetick' | t }}</label>
+                <p class="hint muted">{{ 'Flowly must be able to reach your Donetick: use a public address (reverse proxy, Cloudflare Tunnel, Tailscale Funnel). Each occurrence of a recurring chore becomes its own task.' | t }}</p>
+              }
               @case ('wiki') {
                 <div class="grid2">
                   <label>
@@ -345,7 +400,7 @@
               @if (f.id && (eventKinds.includes(f.kind) || f.kind === 'github' || isAi(f.kind))) {
                 <button class="btn" type="button" [disabled]="busy()" (click)="test()">{{ 'Send test' | t }}</button>
               }
-              @if (f.id && f.kind === 'wiki') {
+              @if (f.id && (f.kind === 'wiki' || f.kind === 'donetick')) {
                 <button class="btn" type="button" [disabled]="busy()" (click)="test()">{{ (busy() ? 'Syncing…' : 'Sync now') | t }}</button>
               }
               <button class="btn primary" type="submit" [disabled]="busy()">{{ (f.id ? 'Save' : 'Add integration') | t }}</button>
@@ -354,6 +409,19 @@
 
           @if (current(); as item) {
             <div class="details">
+              @if (item.kind === 'donetick') {
+                @if (item.info['error']) {
+                  <p class="danger-text">⚠ {{ item.info['error'] }}</p>
+                } @else if (item.info['synced_at']) {
+                  <p class="linked-ok">✅ {{ '{n} chores, synced {when}.' | t: { n: item.info['chores'], when: (item.info['synced_at'] | ldate: 'MMM d, HH:mm') } }}</p>
+                }
+                <h3>{{ 'Instant updates' | t }}</h3>
+                <p class="hint muted">{{ 'In Donetick, open Settings → Webhook (circle admins) and paste this address. Without it, changes still arrive within 10 minutes.' | t }}</p>
+                <div class="copy-row">
+                  <input readonly [value]="item.info['webhook_url']" (focus)="$any($event.target).select()" [attr.aria-label]="'Webhook URL' | t" />
+                  <button class="btn small" type="button" (click)="copy(item.info['webhook_url'], 'Webhook URL copied.')">{{ 'Copy' | t }}</button>
+                </div>
+              }
               @if (item.kind === 'wiki') {
                 @if (item.info['error']) {
                   <p class="danger-text">⚠ {{ item.info['error'] }}</p>

@@ -201,6 +201,106 @@
     }
   </section>
 
+  <section class="panel" id="donetick">
+    <h2>{{ 'Donetick' | t }}</h2>
+    <p class="muted small pad-x">{{ 'Bring your chores from a self-hosted Donetick into Flowly. Each chore\'s labels decide the workspace and project it lands in; done in one is done in the other. (Workspace admins can also connect Donetick to a whole workspace or project under Integrations.)' | t }}</p>
+    @for (a of donetick(); track a.id) {
+      <div class="row">
+        <span class="grow">
+          <strong>{{ a.name }}</strong> <span class="muted small">{{ a.base_url }}</span>
+          <span class="block small" [class.danger-text]="a.info.error" [class.muted]="!a.info.error">
+            @if (a.info.error) { ⚠ {{ a.info.error }} }
+            @else if (a.info.synced_at) { {{ '{n} chores, synced {when}.' | t: { n: a.info.chores, when: (a.info.synced_at | ldate: 'MMM d, HH:mm') } }} }
+          </span>
+        </span>
+        <button class="btn small" type="button" [disabled]="dtBusy()" (click)="syncDonetick(a)">{{ 'Sync now' | t }}</button>
+        <button class="btn small" type="button" (click)="editDonetick(a)">{{ 'Edit' | t }}</button>
+        <button class="btn ghost danger small" type="button" (click)="removeDonetick(a)">{{ 'Disconnect' | t }}</button>
+      </div>
+    }
+    @if (dtEdit(); as e) {
+      <div class="dt-edit">
+        <div class="dt-grid">
+          <label>
+            <span class="small muted">{{ 'You in Donetick' | t }}</span>
+            <select [(ngModel)]="e.donetick_user_id">
+              <option [ngValue]="null">{{ '— choose —' | t }}</option>
+              @for (m of e.info.members; track m.userId) {
+                <option [ngValue]="m.userId">{{ m.displayName || m.username }} (@{{ m.username }})</option>
+              }
+            </select>
+          </label>
+          <label class="radio"><input type="checkbox" [(ngModel)]="e.only_mine" /> {{ 'Only chores assigned to me' | t }}</label>
+        </div>
+        <h3>{{ 'Where chores go' | t }}</h3>
+        @for (r of e.routes; track $index; let i = $index) {
+          <div class="dt-route">
+            <input [(ngModel)]="r.label" list="dt-my-labels" [placeholder]="'Label' | t" [attr.aria-label]="'Label' | t" />
+            <span aria-hidden="true">→</span>
+            <select [(ngModel)]="r.workspace" (ngModelChange)="r.project = null" [attr.aria-label]="'Workspace' | t">
+              @for (c of contexts(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+            <select [(ngModel)]="r.project" [attr.aria-label]="'Project' | t">
+              <option [ngValue]="null">{{ '— no project —' | t }}</option>
+              @for (p of projectsOf(r.workspace); track p.id) {
+                <option [ngValue]="p.id">{{ p.name }}</option>
+              }
+            </select>
+            <button class="btn ghost icon" type="button" [attr.aria-label]="'Remove' | t" (click)="removeRoute(i)">✕</button>
+          </div>
+        }
+        <datalist id="dt-my-labels">
+          @for (l of e.info.labels; track l) {
+            <option [value]="l"></option>
+          }
+        </datalist>
+        <button class="btn small" type="button" (click)="addRoute()">＋ {{ 'Map a label' | t }}</button>
+        <div class="dt-route">
+          <span class="small muted">{{ 'Other chores' | t }} →</span>
+          <select [(ngModel)]="e.default_workspace" (ngModelChange)="e.default_project = null" [attr.aria-label]="'Workspace' | t">
+            <option [ngValue]="null">{{ 'Skip them' | t }}</option>
+            @for (c of contexts(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+          @if (e.default_workspace) {
+            <select [(ngModel)]="e.default_project" [attr.aria-label]="'Project' | t">
+              <option [ngValue]="null">{{ '— no project —' | t }}</option>
+              @for (p of projectsOf(e.default_workspace); track p.id) {
+                <option [ngValue]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          }
+        </div>
+        <div class="dt-grid">
+          <label class="radio"><input type="checkbox" [(ngModel)]="e.private" /> {{ 'New tasks are private (only you see them)' | t }}</label>
+          <label class="radio"><input type="checkbox" [(ngModel)]="e.write_back" /> {{ 'Completing, renaming or rescheduling a task updates the chore' | t }}</label>
+          <label class="radio"><input type="checkbox" [(ngModel)]="e.enabled" /> {{ 'Enabled' | t }}</label>
+          <label>
+            <span class="small muted">{{ 'Access token' | t }}</span>
+            <input type="password" [(ngModel)]="e.token" autocomplete="off" [placeholder]="e.info.token ? ('Saved ({hint}); type to replace' | t: { hint: e.info.token }) : ''" />
+          </label>
+        </div>
+        <p class="small muted">{{ 'For instant updates, paste this address in Donetick → Settings → Webhook (otherwise changes arrive within 10 minutes):' | t }}</p>
+        <div class="copy-row">
+          <input readonly [value]="e.info.webhook_url" (focus)="$any($event.target).select()" [attr.aria-label]="'Webhook URL' | t" />
+          <button class="btn small" type="button" (click)="copyText(e.info.webhook_url)">{{ 'Copy' | t }}</button>
+        </div>
+        <div class="dt-actions">
+          <button class="btn" type="button" (click)="dtEdit.set(null)">{{ 'Cancel' | t }}</button>
+          <button class="btn primary" type="button" [disabled]="dtBusy()" (click)="saveDonetick()">{{ 'Save and sync' | t }}</button>
+        </div>
+      </div>
+    }
+    <form class="inline-form" (ngSubmit)="connectDonetick()">
+      <input name="dtUrl" [(ngModel)]="dtNew.base_url" placeholder="https://chores.example.org" [attr.aria-label]="'Donetick address' | t" />
+      <input name="dtToken" type="password" [(ngModel)]="dtNew.token" autocomplete="off" [placeholder]="'Access token' | t" [attr.aria-label]="'Access token' | t" />
+      <button class="btn" type="submit" [disabled]="dtBusy() || !dtNew.base_url || !dtNew.token">{{ 'Connect Donetick' | t }}</button>
+    </form>
+  </section>
+
   <section class="panel" id="invoicing">
     <h2>{{ 'Invoicing' | t }}</h2>
     <p class="intro muted">{{ 'Who issues your invoices. These details are yours and apply to every invoice you create, in any workspace.' | t }}</p>

@@ -443,3 +443,12 @@ code {
   color: var(--danger, #dc2626);
   overflow-wrap: anywhere;
 }
+
+.map-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  input, select { flex: 1; min-width: 0; }
+  .grow { flex: 1; }
+}

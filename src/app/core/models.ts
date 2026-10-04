@@ -211,6 +211,7 @@ export const PALETTE = [
 
 export type IntegrationKind =
   | 'wiki'
+  | 'donetick'
   | 'telegram_group'
   | 'slack_bot'
   | 'github'
@@ -637,4 +638,41 @@ export interface PlanInfo {
   expires_at: string | null;
   subscription: StripeSub | null;
   can_manage: boolean;
+}
+
+export interface DonetickMember {
+  userId: number;
+  username: string;
+  displayName: string;
+}
+
+export interface DonetickRoute {
+  label: string;
+  workspace: number;
+  project: number | null;
+}
+
+/** A personal Donetick connection (chores routed to workspaces and projects by label). */
+export interface DonetickAccount {
+  id: number;
+  name: string;
+  base_url: string;
+  enabled: boolean;
+  donetick_user_id: number | null;
+  only_mine: boolean;
+  default_workspace: number | null;
+  default_project: number | null;
+  private: boolean;
+  write_back: boolean;
+  routes: DonetickRoute[];
+  info: {
+    webhook_url: string;
+    token: string | null;
+    synced_at: string | null;
+    error: string;
+    chores: number;
+    members: DonetickMember[];
+    labels: string[];
+  };
+  created_at: string;
 }

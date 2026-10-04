@@ -6,6 +6,7 @@ import { DICTIONARIES } from '../i18n';
 import { ConfigService } from './config.service';
 import {
   WorkspaceMcp,
+  DonetickAccount,
   ApiTokenRow,
   BillingSettings,
   Invoice,
@@ -216,6 +217,21 @@ export class ApiService {
     );
   }
 
+  donetickAccounts() {
+    return this.run(this.http.get<DonetickAccount[]>(this.url('my/donetick/')));
+  }
+  createDonetick(data: Partial<DonetickAccount> & { token: string }) {
+    return this.run(this.http.post<DonetickAccount>(this.url('my/donetick/'), data));
+  }
+  updateDonetick(id: number, data: Partial<DonetickAccount> & { token?: string }) {
+    return this.run(this.http.patch<DonetickAccount>(this.url(`my/donetick/${id}/`), data));
+  }
+  deleteDonetick(id: number) {
+    return this.run(this.http.delete<void>(this.url(`my/donetick/${id}/`)));
+  }
+  syncDonetick(id: number) {
+    return this.run(this.http.post<{ detail: string; account: DonetickAccount }>(this.url(`my/donetick/${id}/sync/`), {}));
+  }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));
   }

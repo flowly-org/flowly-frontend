@@ -409,3 +409,32 @@ label.grow {
 #focus > p.muted {
   padding: 0 16px 12px;
 }
+
+#donetick {
+  .pad-x { padding: 0 16px; }
+  .dt-edit {
+    margin: 8px 16px 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    h3 { font-size: 14px; margin: 12px 0 6px; }
+  }
+  .dt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px 16px;
+    margin: 8px 0;
+    label { display: flex; flex-direction: column; gap: 4px; }
+    label.radio { flex-direction: row; align-items: center; gap: 8px; }
+  }
+  .dt-route {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+    input, select { flex: 1 1 140px; min-width: 0; }
+  }
+  .copy-row { display: flex; gap: 8px; input { flex: 1; min-width: 0; } }
+  .dt-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+}

@@ -25,6 +25,7 @@ export const KINDS: KindInfo[] = [
   { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: '↗', blurb: 'POST signed JSON to your URL when tasks change.' },
   { kind: 'incoming_webhook', label: 'Incoming webhook', icon: '↘', blurb: 'A secret URL any system can call to create or update tasks.' },
   { kind: 'email', label: 'Email in', icon: '✉', blurb: 'Email an address to create a task.' },
+  { kind: 'donetick', label: 'Donetick', icon: '✔', blurb: 'Two-way sync with your self-hosted Donetick: chores become tasks, done is done in both.' },
   { kind: 'wiki', label: 'Wiki', icon: '📖', blurb: 'Link a GitHub wiki or docs folder: Flo and the AI agent use it as team knowledge.' },
   { kind: 'telegram_group', label: 'Telegram group', icon: '✈', enterprise: true,
     blurb: "Flowly in your team's Telegram group: today's plan, updates, questions and photos of lists." },
@@ -201,7 +202,9 @@ export class IntegrationsPage implements OnInit {
                 ? { base_url: '', model: '', exclusive: true }
                 : kind === 'wiki'
                   ? { source: 'github_wiki', repo: '', path: '', branch: '' }
-                  : {};
+                  : kind === 'donetick'
+                    ? prepDonetick({ base_url: '', labels: [], label_projects: {}, members: {}, write_back: true, create_chores: false })
+                    : {};
     this.form.set({
       id: null,
       kind,
@@ -246,7 +249,7 @@ export class IntegrationsPage implements OnInit {
       name: item.name,
       project: item.project,
       enabled: item.enabled,
-      config: structuredClone(item.config),
+      config: item.kind === 'donetick' ? prepDonetick(structuredClone(item.config)) : structuredClone(item.config),
       events: new Set(item.config['events']?.length ? item.config['events'] : (DEFAULT_EVENTS[item.kind] ?? [])),
       apiKey: '',
     });
@@ -272,6 +275,13 @@ export class IntegrationsPage implements OnInit {
     if (!f) return;
     const config = { ...f.config };
     if (EVENT_KINDS.includes(f.kind)) config['events'] = [...f.events];
+    if (f.kind === 'donetick') {
+      const rows: { label: string; project: number | null }[] = config['_rows'] ?? [];
+      config['label_projects'] = Object.fromEntries(rows.filter((r) => r.label.trim() && r.project).map((r) => [r.label.trim(), r.project]));
+      config['labels'] = String(config['_labels'] ?? '').split(',').map((x: string) => x.trim()).filter(Boolean);
+      delete config['_rows'];
+      delete config['_labels'];
+    }
     const payload: Partial<Integration> & { api_key?: string } = {
       kind: f.kind,
       name: f.name.trim() || this.i18n.t(this.kindInfo(f.kind).label),
@@ -353,7 +363,7 @@ export class IntegrationsPage implements OnInit {
     this.busy.set(true);
     try {
       const d = await this.api.testIntegration(this.wsId, f.id);
-      if (d.status === 'success' && f.kind === 'wiki') this.toast.show(d.response_body);
+      if (d.status === 'success' && (f.kind === 'wiki' || f.kind === 'donetick')) this.toast.show(d.response_body);
       else if (d.status === 'success')
         this.toast.show(
           d.response_body
@@ -485,6 +495,21 @@ export class IntegrationsPage implements OnInit {
     return ({ pending: 'Pending', success: 'Success', failed: 'Failed', ignored: 'Ignored' } as Record<string, string>)[status] ?? status;
   }
 
+  protected addLabelRow(f: Form) {
+    f.config['_rows'] = [...(f.config['_rows'] ?? []), { label: '', project: null }];
+  }
+
+  protected removeLabelRow(f: Form, i: number) {
+    f.config['_rows'] = (f.config['_rows'] ?? []).filter((_: unknown, j: number) => j !== i);
+  }
+
+  protected setMember(f: Form, donetickId: number, flowlyId: string) {
+    const members = { ...(f.config['members'] ?? {}) };
+    if (flowlyId) members[donetickId] = Number(flowlyId);
+    else delete members[donetickId];
+    f.config['members'] = members;
+  }
+
   protected isAi(kind: IntegrationKind): boolean {
     return kind === 'openrouter' || kind === 'openai_compatible';
   }
@@ -492,4 +517,13 @@ export class IntegrationsPage implements OnInit {
   protected curlExample(item: Integration): string {
     return `curl -X POST '${item.info['url']}' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"external_id": "TICKET-42", "title": "Investigate login error", "priority": "High"}'`;
   }
+}
+
+/** Donetick config in an editable shape: label → project rows and the label filter as text. */
+function prepDonetick(config: Record<string, any>): Record<string, any> {
+  return {
+    ...config,
+    _rows: Object.entries(config['label_projects'] ?? {}).map(([label, project]) => ({ label, project })),
+    _labels: (config['labels'] ?? []).join(', '),
+  };
 }
