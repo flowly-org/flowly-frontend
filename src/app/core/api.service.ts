@@ -8,6 +8,8 @@ import {
   WorkspaceMcp,
   DonetickAccount,
   DayLoad,
+  InsightStats,
+  WeekReview,
   DayBlocks,
   DayPlanProposal,
   TimeBlock,
@@ -290,6 +292,18 @@ export class ApiService {
   }
   planDay(date: string, apply: boolean) {
     return this.run(this.http.post<DayPlanProposal>(this.url('my/blocks/plan/'), { date, apply }));
+  }
+  review(week?: string) {
+    const params = week ? new HttpParams().set('week', week) : undefined;
+    return this.run(this.http.get<WeekReview>(this.url('my/review/'), { params }));
+  }
+  writeReview(week: string) {
+    return this.run(this.http.post<WeekReview>(this.url('my/review/'), { week }));
+  }
+  insights(scope: 'me' | 'workspace' | 'project', id: number | null, weeks: number) {
+    let params = new HttpParams().set('scope', scope).set('weeks', weeks);
+    if (id) params = params.set('id', id);
+    return this.run(this.http.get<InsightStats>(this.url('insights/'), { params }));
   }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));

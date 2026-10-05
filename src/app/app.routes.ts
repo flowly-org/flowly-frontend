@@ -53,6 +53,8 @@ export const routes: Routes = [
         canActivate: [staffGuard],
         loadComponent: () => import('./pages/manage/manage-page').then((m) => m.ManagePage),
       },
+      { path: 'review', loadComponent: () => import('./pages/review/review-page').then((m) => m.ReviewPage) },
+      { path: 'insights', loadComponent: () => import('./pages/insights/insights-page').then((m) => m.InsightsPage) },
       { path: 'shared', loadComponent: () => import('./pages/shared/shared-page').then((m) => m.SharedPage) },
       { path: 'settings', loadComponent: () => import('./pages/settings/settings-page').then((m) => m.SettingsPage) },
       {

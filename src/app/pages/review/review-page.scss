@@ -1,0 +1,20 @@
+.page header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+.card strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.card span { font-size: .8rem; color: var(--muted); }
+.card.warn strong { color: var(--danger); }
+.flo-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.text { white-space: pre-line; line-height: 1.55; padding: 0 16px 12px; margin: 0; }
+.flo > p.muted { padding: 0 16px 12px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.two app-bar-chart { padding: 4px 16px 14px; }
+.panel > p.muted { padding: 0 16px 12px; }
+.row a { color: inherit; text-decoration: none; }
+.row a:hover { text-decoration: underline; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.filters select { width: auto; max-width: 280px; }
+.two app-bar-chart { display: block; }
+.people { width: calc(100% - 32px); margin: 0 16px 14px; border-collapse: collapse; font-size: .88rem; }
+.people th, .people td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.people th:not(:first-child), .people td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }

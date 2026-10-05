@@ -1,0 +1,77 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>{{ 'Weekly review' | t }}</h1>
+      <p class="muted">{{ 'Week of {date}' | t: { date: formatShort(week()) } }}</p>
+    </div>
+    <div class="btn-group">
+      <button class="btn icon" type="button" [attr.aria-label]="'Previous week' | t" (click)="shift(-1)">‹</button>
+      <button class="btn icon" type="button" [attr.aria-label]="'Next week' | t" [disabled]="isThisWeek()" (click)="shift(1)">›</button>
+    </div>
+  </header>
+
+  @if (data(); as d) {
+    <section class="cards">
+      <div class="card"><strong>{{ d.stats.totals.completed }}</strong><span>{{ 'tasks done' | t }}</span></div>
+      <div class="card"><strong>{{ formatMinutes(d.stats.totals.minutes) }}</strong><span>{{ 'tracked' | t }}</span></div>
+      <div class="card"><strong>{{ d.stats.planned.done }}/{{ d.stats.planned.total }}</strong><span>{{ 'of the planned tasks' | t }}</span></div>
+      <div class="card" [class.warn]="d.stats.totals.overdue"><strong>{{ d.stats.totals.overdue }}</strong><span>{{ 'overdue' | t }}</span></div>
+      @if (d.stats.totals.estimate_ratio) {
+        <div class="card"><strong>×{{ d.stats.totals.estimate_ratio }}</strong><span>{{ 'real time vs estimates' | t }}</span></div>
+      }
+      <div class="card" [class.warn]="d.stats.next_week.estimated_minutes > d.stats.next_week.capacity_minutes">
+        <strong>{{ formatMinutes(d.stats.next_week.estimated_minutes) }}</strong>
+        <span>{{ 'estimated next week ({n} tasks)' | t: { n: d.stats.next_week.tasks } }}</span>
+      </div>
+    </section>
+
+    <section class="panel flo">
+      <div class="flo-head">
+        <h2>{{ "Flo's review" | t }}</h2>
+        <button class="btn small" type="button" [disabled]="busy()" (click)="write()">
+          {{ (busy() ? 'Writing…' : d.text ? 'Write it again' : 'Write my review') | t }}
+        </button>
+      </div>
+      @if (d.text) {
+        <p class="text">{{ d.text }}</p>
+      } @else {
+        <p class="muted">{{ 'Flo writes your review every Friday afternoon (change it in Settings → Concierge), or now with the button.' | t }}</p>
+      }
+    </section>
+
+    <div class="two">
+      <section class="panel">
+        <h2>{{ 'Where the time went' | t }}</h2>
+        @if (projectBars().length) {
+          <app-bar-chart [bars]="projectBars()" [horizontal]="true" [format]="minutesFmt" />
+        } @else {
+          <p class="muted small">{{ 'No time tracked this week.' | t }}</p>
+        }
+      </section>
+      <section class="panel">
+        <h2>{{ 'Done by project' | t }}</h2>
+        @if (doneBars().length) {
+          <app-bar-chart [bars]="doneBars()" [horizontal]="true" />
+        } @else {
+          <p class="muted small">{{ 'Nothing done yet this week.' | t }}</p>
+        }
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>{{ 'Still open' | t }} <span class="muted">{{ d.stats.slipping.length }}</span></h2>
+      @for (t of d.stats.slipping; track t.id) {
+        <div class="row">
+          <a class="grow" [routerLink]="['/w', t.workspace, 'board']" [queryParams]="{ task: t.id }">
+            {{ t.title }} <span class="muted small">{{ t.where }}@if (t.planned_date) { · {{ formatShort(t.planned_date) }} }@if (t.due_date) { · ⚑ {{ formatShort(t.due_date) }} }</span>
+          </a>
+          <button class="btn ghost small" type="button" (click)="fix(t, 'next')">{{ 'Next Monday' | t }}</button>
+          <button class="btn ghost small" type="button" (click)="fix(t, 'backlog')">{{ 'Backlog' | t }}</button>
+          <button class="btn ghost small" type="button" (click)="fix(t, 'done')">✓</button>
+        </div>
+      } @empty {
+        <p class="muted small">{{ 'Nothing left behind. 🎉' | t }}</p>
+      }
+    </section>
+  }
+</div>

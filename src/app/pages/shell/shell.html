@@ -7,6 +7,8 @@
   <nav class="nav">
     <a routerLink="/day" routerLinkActive="active" class="nav-item my-day" [attr.aria-label]="'My day' | t" [attr.data-tip]="'My day' | t"><app-icon name="day" /><span class="label">{{ 'My day' | t }}</span></a>
     <a routerLink="/shared" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Shared' | t" [attr.data-tip]="'Shared' | t"><app-icon name="shared" /><span class="label">{{ 'Shared' | t }}</span></a>
+    <a routerLink="/review" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Weekly review' | t" [attr.data-tip]="'Weekly review' | t"><app-icon name="review" /><span class="label">{{ 'Weekly review' | t }}</span></a>
+    <a routerLink="/insights" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Insights' | t" [attr.data-tip]="'Insights' | t"><app-icon name="insights" /><span class="label">{{ 'Insights' | t }}</span></a>
     <span class="divider" aria-hidden="true"></span>
 
     @if (creating()) {

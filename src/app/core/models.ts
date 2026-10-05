@@ -389,7 +389,7 @@ export interface ConciergeState {
   platform_ai: boolean;
   telegram: { configured: boolean; bot: string; linked: boolean; username: string };
   languages: { code: string; label: string }[];
-  settings: { enabled: boolean; name: string; language: string; timezone: string; brief_time: string; morning_brief: boolean; alerts: boolean; provider: number | null; personality: string; learn: boolean };
+  settings: { enabled: boolean; name: string; language: string; timezone: string; brief_time: string; review_day?: 'fri' | 'sun' | 'off'; review_time?: string; morning_brief: boolean; alerts: boolean; provider: number | null; personality: string; learn: boolean };
   providers: { id: number; name: string; workspace: string; kind: string; model: string }[];
   personalities: { key: string; label: string; blurb: string; sample: string }[];
   memory: string;
@@ -776,4 +776,37 @@ export interface DayBlocks {
 export interface DayPlanProposal {
   placed: { task: number; title: string; start: string; end: string; minutes: number }[];
   unscheduled: { task: number; title: string; minutes: number }[];
+}
+
+export interface InsightStats {
+  from: string;
+  to: string;
+  totals: {
+    completed: number;
+    created: number;
+    minutes: number;
+    open: number;
+    overdue: number;
+    carried_over: number;
+    on_time_rate: number | null;
+    cycle_days: number | null;
+    estimate_ratio: number | null;
+    estimate_samples: number;
+  };
+  weeks: { week: string; created: number; completed: number; minutes: number }[];
+  projects: { name: string; color: string; completed: number; minutes: number }[];
+  people: { id: number; name: string; completed: number; open: number; minutes: number }[];
+  statuses: { name: string; count: number }[];
+}
+
+export interface WeekReview {
+  week_start: string;
+  text: string;
+  generated_at: string | null;
+  stats: InsightStats & {
+    week_start: string;
+    planned: { total: number; done: number };
+    slipping: { id: number; workspace: number; title: string; planned_date: string | null; due_date: string | null; where: string }[];
+    next_week: { tasks: number; estimated_minutes: number; capacity_minutes: number };
+  };
 }

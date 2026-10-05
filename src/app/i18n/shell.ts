@@ -2,6 +2,8 @@ import type { Dict } from './index';
 
 export const SHELL: Dict = {
   it: {
+    "Weekly review": "Revisione settimanale",
+    "Insights": "Statistiche",
     "Search": "Cerca",
     "Search tasks, comments, projects, wiki…": "Cerca attività, commenti, progetti, wiki…",
     "Nothing found.": "Nessun risultato.",
@@ -218,6 +220,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Errore del server ({status}). Riprova.",
   },
   es: {
+    "Weekly review": "Revisión semanal",
+    "Insights": "Estadísticas",
     "Search": "Buscar",
     "Search tasks, comments, projects, wiki…": "Buscar tareas, comentarios, proyectos, wiki…",
     "Nothing found.": "No se encontró nada.",
@@ -434,6 +438,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Error del servidor ({status}). Inténtalo de nuevo.",
   },
   fr: {
+    "Weekly review": "Bilan de la semaine",
+    "Insights": "Statistiques",
     "Search": "Rechercher",
     "Search tasks, comments, projects, wiki…": "Rechercher tâches, commentaires, projets, wiki…",
     "Nothing found.": "Rien trouvé.",
@@ -650,6 +656,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Erreur du serveur ({status}). Réessaie.",
   },
   de: {
+    "Weekly review": "Wochenrückblick",
+    "Insights": "Auswertungen",
     "Search": "Suchen",
     "Search tasks, comments, projects, wiki…": "Aufgaben, Kommentare, Projekte, Wiki durchsuchen…",
     "Nothing found.": "Nichts gefunden.",
@@ -866,6 +874,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Serverfehler ({status}). Bitte versuche es erneut.",
   },
   pt: {
+    "Weekly review": "Revisão semanal",
+    "Insights": "Estatísticas",
     "Search": "Pesquisar",
     "Search tasks, comments, projects, wiki…": "Pesquisar tarefas, comentários, projetos, wiki…",
     "Nothing found.": "Nada encontrado.",

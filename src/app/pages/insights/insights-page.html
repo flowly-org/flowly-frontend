@@ -1,0 +1,75 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>{{ 'Insights' | t }}</h1>
+      <p class="muted">{{ 'How work flows: what gets done, where the time goes, how good the estimates are.' | t }}</p>
+    </div>
+    <div class="filters">
+      <select [ngModel]="selected()" (ngModelChange)="pick($event)" [attr.aria-label]="'Scope' | t">
+        <option value="me">{{ 'Me (all my workspaces)' | t }}</option>
+        @for (c of contexts(); track c.id) {
+          <option [value]="'workspace:' + c.id">{{ 'Workspace: {name}' | t: { name: c.name } }}</option>
+        }
+        @for (p of projects(); track p.id) {
+          <option [value]="'project:' + p.id">{{ 'Project: {name}' | t: { name: p.name } }} ({{ p.ws }})</option>
+        }
+      </select>
+      <select [ngModel]="weeks()" (ngModelChange)="weeks.set(+$event)" [attr.aria-label]="'Period' | t">
+        <option [ngValue]="4">{{ '4 weeks' | t }}</option>
+        <option [ngValue]="12">{{ '12 weeks' | t }}</option>
+        <option [ngValue]="26">{{ '6 months' | t }}</option>
+        <option [ngValue]="52">{{ '1 year' | t }}</option>
+      </select>
+    </div>
+  </header>
+
+  @if (data(); as d) {
+    <section class="cards">
+      <div class="card"><strong>{{ d.totals.completed }}</strong><span>{{ 'done' | t }} ({{ d.totals.created }} {{ 'created' | t }})</span></div>
+      <div class="card"><strong>{{ formatMinutes(d.totals.minutes) }}</strong><span>{{ 'tracked' | t }}</span></div>
+      <div class="card"><strong>{{ d.totals.open }}</strong><span>{{ 'open now' | t }}</span></div>
+      <div class="card" [class.warn]="d.totals.overdue"><strong>{{ d.totals.overdue }}</strong><span>{{ 'overdue' | t }}</span></div>
+      <div class="card"><strong>{{ d.totals.on_time_rate !== null ? d.totals.on_time_rate + '%' : '—' }}</strong><span>{{ 'done by the due date' | t }}</span></div>
+      <div class="card"><strong>{{ d.totals.cycle_days !== null ? d.totals.cycle_days + 'd' : '—' }}</strong><span>{{ 'median time to done' | t }}</span></div>
+      <div class="card"><strong>{{ d.totals.estimate_ratio ? '×' + d.totals.estimate_ratio : '—' }}</strong>
+        <span>{{ 'real time vs estimates' | t }} @if (d.totals.estimate_samples) { ({{ d.totals.estimate_samples }}) }</span></div>
+    </section>
+
+    <div class="two">
+      <section class="panel">
+        <h2>{{ 'Done per week' | t }} <span class="muted small">{{ '(grey: created)' | t }}</span></h2>
+        <app-bar-chart [bars]="throughput()" />
+      </section>
+      <section class="panel">
+        <h2>{{ 'Time per week' | t }}</h2>
+        <app-bar-chart [bars]="time()" [format]="minutesFmt" />
+      </section>
+      @if (byProject().length) {
+        <section class="panel">
+          <h2>{{ 'Time by project' | t }}</h2>
+          <app-bar-chart [bars]="byProject()" [horizontal]="true" [format]="minutesFmt" />
+        </section>
+      }
+      @if (byStatus().length) {
+        <section class="panel">
+          <h2>{{ 'Open by status' | t }}</h2>
+          <app-bar-chart [bars]="byStatus()" [horizontal]="true" />
+        </section>
+      }
+    </div>
+
+    @if (d.people.length) {
+      <section class="panel">
+        <h2>{{ 'People' | t }}</h2>
+        <table class="people">
+          <thead><tr><th>{{ 'Name' | t }}</th><th>{{ 'Done' | t }}</th><th>{{ 'Open' | t }}</th><th>{{ 'Tracked' | t }}</th></tr></thead>
+          <tbody>
+            @for (p of d.people; track p.id) {
+              <tr><td>{{ p.name }}</td><td>{{ p.completed }}</td><td>{{ p.open }}</td><td>{{ formatMinutes(p.minutes) }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+  }
+</div>

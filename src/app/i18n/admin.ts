@@ -2,6 +2,10 @@ import type { Dict } from './index';
 
 export const ADMIN: Dict = {
   it: {
+    "Friday": "Venerdì",
+    "Sunday": "Domenica",
+    "Off": "No",
+    "Weekly review time": "Orario della revisione settimanale",
     "Working hours": "Orario di lavoro",
     "Notify me when a time block starts": "Avvisami quando inizia un blocco di tempo",
     "Used by “Plan” on My day to find free time around your meetings.": "Usato da “Pianifica” nella tua giornata per trovare tempo libero tra le riunioni.",
@@ -405,6 +409,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Uguale ai messaggi dell'utente",
   },
   es: {
+    "Friday": "Viernes",
+    "Sunday": "Domingo",
+    "Off": "No",
+    "Weekly review time": "Hora de la revisión semanal",
     "Working hours": "Horario de trabajo",
     "Notify me when a time block starts": "Avísame cuando empiece un bloque de tiempo",
     "Used by “Plan” on My day to find free time around your meetings.": "Lo usa “Planificar” en Mi día para encontrar tiempo libre entre reuniones.",
@@ -808,6 +816,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Igual que los mensajes del usuario",
   },
   fr: {
+    "Friday": "Vendredi",
+    "Sunday": "Dimanche",
+    "Off": "Non",
+    "Weekly review time": "Heure du bilan de la semaine",
     "Working hours": "Heures de travail",
     "Notify me when a time block starts": "Préviens-moi quand un bloc de temps commence",
     "Used by “Plan” on My day to find free time around your meetings.": "Utilisé par « Planifier » dans Ma journée pour trouver du temps libre autour de tes réunions.",
@@ -1211,6 +1223,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Comme les messages de l'utilisateur",
   },
   de: {
+    "Friday": "Freitag",
+    "Sunday": "Sonntag",
+    "Off": "Aus",
+    "Weekly review time": "Uhrzeit des Wochenrückblicks",
     "Working hours": "Arbeitszeit",
     "Notify me when a time block starts": "Benachrichtige mich, wenn ein Zeitblock beginnt",
     "Used by “Plan” on My day to find free time around your meetings.": "Wird von „Planen“ in Mein Tag genutzt, um freie Zeit zwischen Terminen zu finden.",
@@ -1614,6 +1630,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Wie die Nachrichten des Benutzers",
   },
   pt: {
+    "Friday": "Sexta-feira",
+    "Sunday": "Domingo",
+    "Off": "Não",
+    "Weekly review time": "Hora da revisão semanal",
     "Working hours": "Horário de trabalho",
     "Notify me when a time block starts": "Avisa-me quando um bloco de tempo começa",
     "Used by “Plan” on My day to find free time around your meetings.": "Usado por “Planear” no Meu dia para encontrar tempo livre entre reuniões.",

@@ -590,6 +590,15 @@
             }
           </select>
         </div>
+        <div class="row settings-grid">
+          <label class="check-line">{{ 'Weekly review' | t }}</label>
+          <select class="tz" [value]="s.settings.review_day ?? 'fri'" (change)="update({ review_day: $any($event.target).value })" [attr.aria-label]="'Weekly review' | t">
+            <option value="fri" [selected]="s.settings.review_day === 'fri'">{{ 'Friday' | t }}</option>
+            <option value="sun" [selected]="s.settings.review_day === 'sun'">{{ 'Sunday' | t }}</option>
+            <option value="off" [selected]="s.settings.review_day === 'off'">{{ 'Off' | t }}</option>
+          </select>
+          <input type="time" class="time" [value]="s.settings.review_time ?? '16:00'" (change)="update({ review_time: $any($event.target).value })" [attr.aria-label]="'Weekly review time' | t" />
+        </div>
         <div class="row">
           <label class="check-line">
             <input type="checkbox" [checked]="s.settings.alerts" (change)="update({ alerts: $any($event.target).checked })" />
