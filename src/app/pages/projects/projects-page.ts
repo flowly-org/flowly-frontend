@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ImportDialog } from '../../components/import-dialog/import-dialog';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -12,7 +13,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-projects-page',
-  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe],
+  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe, ImportDialog],
   templateUrl: './projects-page.html',
 })
 export class ProjectsPage {
@@ -24,6 +25,7 @@ export class ProjectsPage {
   protected newName = '';
   protected newColor = PALETTE[this.store.projects().length % PALETTE.length];
   protected showArchived = signal(false);
+  protected importing = signal(false);
   protected editingId = signal<number | null>(null);
   protected editName = '';
   protected confirmingDelete = signal<number | null>(null);

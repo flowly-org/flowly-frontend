@@ -1,0 +1,52 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section class="dialog" role="dialog" aria-modal="true" aria-labelledby="imp-title">
+  <header>
+    <h2 id="imp-title">{{ 'Import tasks' | t }}</h2>
+    <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="closed.emit()">✕</button>
+  </header>
+  <div class="content edit">
+    <div class="segmented" role="group" [attr.aria-label]="'From' | t">
+      <button type="button" class="btn" [class.primary]="source() === 'trello'" (click)="source.set('trello'); file.set(null)">Trello</button>
+      <button type="button" class="btn" [class.primary]="source() === 'asana'" (click)="source.set('asana'); file.set(null)">Asana</button>
+    </div>
+
+    @if (source() === 'trello') {
+      <p class="small muted">{{ 'In Trello: open the board → menu (…) → Print, export and share → Export as JSON. Lists, labels, checklists, due dates, members and comments come along; archived cards are skipped.' | t }}</p>
+      <label>{{ 'Board export (.json)' | t }} <input type="file" accept=".json,application/json" (change)="pick($event)" /></label>
+    } @else {
+      <div class="segmented">
+        <label class="radio"><input type="radio" name="am" [checked]="asanaMode() === 'csv'" (change)="asanaMode.set('csv')" /> {{ 'CSV export' | t }}</label>
+        <label class="radio"><input type="radio" name="am" [checked]="asanaMode() === 'api'" (change)="asanaMode.set('api')" /> {{ 'Personal access token (with comments)' | t }}</label>
+      </div>
+      @if (asanaMode() === 'csv') {
+        <p class="small muted">{{ 'In Asana: open the project → the arrow next to its name → Export / Print → CSV. Sections, tags, assignees, dates and subtasks come along.' | t }}</p>
+        <label>{{ 'Project export (.csv)' | t }} <input type="file" accept=".csv,text/csv" (change)="pick($event)" /></label>
+      } @else {
+        <p class="small muted">{{ 'Create a token in Asana → Settings → Apps → Developer apps → Personal access token. It is used once for this import and not stored.' | t }}</p>
+        <label>{{ 'Personal access token' | t }} <input type="password" [(ngModel)]="token" autocomplete="off" /></label>
+        <label>{{ 'Project link' | t }} <input [(ngModel)]="link" placeholder="https://app.asana.com/0/1205…/list" /></label>
+      }
+    }
+
+    <label>{{ 'Into' | t }}
+      <select [(ngModel)]="projectId">
+        <option [ngValue]="null">{{ 'A new project named after the board' | t }}</option>
+        @for (p of projects(); track p.id) {
+          <option [ngValue]="p.id">{{ p.name }}</option>
+        }
+      </select>
+    </label>
+    <p class="small muted">{{ 'Lists and sections become tags (group “List”); members are matched by name or email. Importing the same board again only adds what is new.' | t }}</p>
+
+    @if (result(); as r) {
+      <p class="linked-ok">✅ {{ '{n} tasks imported into “{project}”.' | t: { n: r.created, project: r.project_name } }}
+        @if (r.skipped) { {{ '{n} were already there.' | t: { n: r.skipped } }} }</p>
+    }
+
+    <div class="actions">
+      <span class="spacer"></span>
+      <button class="btn" type="button" (click)="closed.emit()">{{ 'Close' | t }}</button>
+      <button class="btn primary" type="button" [disabled]="busy() || !ready()" (click)="run()">{{ (busy() ? 'Importing…' : 'Import') | t }}</button>
+    </div>
+  </div>
+</section>

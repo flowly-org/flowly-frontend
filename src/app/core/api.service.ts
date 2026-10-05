@@ -270,6 +270,9 @@ export class ApiService {
   search(q: string) {
     return this.run(this.http.get<SearchResult[]>(this.url('my/search/'), { params: new HttpParams().set('q', q) }));
   }
+  importTasks(wsId: number, data: FormData | Record<string, unknown>) {
+    return this.run(this.http.post<{ created: number; skipped: number; project: number; project_name: string }>(this.ws(wsId, 'import/'), data));
+  }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));
   }

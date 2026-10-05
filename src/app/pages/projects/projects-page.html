@@ -4,6 +4,7 @@
       <h1>{{ 'Projects' | t }}</h1>
       <p class="muted">{{ 'Projects become swimlanes on your day board. Shared with everyone in {name}.' | t: { name: store.current()?.name } }}</p>
     </div>
+    <button class="btn" type="button" (click)="importing.set(true)">{{ 'Import from Trello or Asana' | t }}</button>
   </header>
 
   <section class="panel">
@@ -88,3 +89,7 @@
     }
   </div>
 </ng-template>
+
+@if (importing() && store.currentId(); as ws) {
+  <app-import-dialog [workspace]="ws" [projects]="active()" (imported)="store.refreshProjects(); store.refreshTags()" (closed)="importing.set(false)" />
+}
