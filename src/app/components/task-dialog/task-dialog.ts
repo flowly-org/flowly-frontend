@@ -82,6 +82,47 @@ export class TaskDialog implements OnInit {
   protected reminders = signal<TaskReminder[]>([]);
   protected reminderDraft = '';
   protected blockDraft = '';
+  protected blockers = signal<{ id: number; ref: string; title: string; done: boolean }[]>([]);
+  protected depQuery = '';
+  protected depResults = signal<Task[]>([]);
+  private depTimer: ReturnType<typeof setTimeout> | null = null;
+
+  protected searchDeps(q: string) {
+    const t = this.task();
+    if (this.depTimer) clearTimeout(this.depTimer);
+    if (!t || q.trim().length < 2) {
+      this.depResults.set([]);
+      return;
+    }
+    this.depTimer = setTimeout(async () => {
+      const have = new Set([t.id, ...this.blockers().map((b) => b.id)]);
+      const found = await this.api.tasks(t.workspace, { q: q.trim(), done: false }).catch(() => [] as Task[]);
+      this.depResults.set(found.filter((x) => !have.has(x.id)).slice(0, 8));
+    }, 200);
+  }
+
+  private async saveBlockers(ids: number[]) {
+    const t = this.task();
+    if (!t) return;
+    try {
+      const saved = await this.api.updateTask(t.workspace, t.id, { blocked_by: ids });
+      this.blockers.set(saved.blocked_by_info ?? []);
+      this.dirty = true;
+      this.error.set(null);
+    } catch (err) {
+      this.error.set(errorMessage(err));
+    }
+  }
+
+  protected addBlocker(r: Task) {
+    this.depQuery = '';
+    this.depResults.set([]);
+    this.saveBlockers([...this.blockers().map((b) => b.id), r.id]);
+  }
+
+  protected removeBlocker(id: number) {
+    this.saveBlockers(this.blockers().map((b) => b.id).filter((x) => x !== id));
+  }
 
   protected async blockTime() {
     const t = this.task();
@@ -156,6 +197,7 @@ export class TaskDialog implements OnInit {
     this.commentCount.set(this.task()?.comment_count ?? 0);
     this.attachmentCount.set(this.task()?.attachment_count ?? 0);
     this.checklist.set(this.task()?.checklist ?? []);
+    this.blockers.set(this.task()?.blocked_by_info ?? []);
     this.ngOnInitForm();
     const t = this.task();
     if (t) this.api.reminders(t.workspace, t.id).then((r) => this.reminders.set(r)).catch(() => {});

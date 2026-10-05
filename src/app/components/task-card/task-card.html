@@ -34,6 +34,9 @@
     @if (due(); as d) {
       <span class="badge" [class.late]="d.late" [class.today]="d.today" [title]="'Due date' | t">⚑ {{ d.label }}</span>
     }
+    @if (task().blocked) {
+      <span class="badge late" [title]="'Waits for: {list}' | t: { list: blockedTitles() }">⛓</span>
+    }
     @if (checklist(); as c) {
       <span class="badge" [class.complete]="c.done === c.total" [title]="'Checklist' | t">☑ {{ c.done }}/{{ c.total }}</span>
     }

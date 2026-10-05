@@ -50,6 +50,7 @@ export class TaskCard {
 
   protected done = computed(() => this.data.isDone(this.task()));
   protected readonly formatMinutes = formatMinutes;
+  protected readonly blockedTitles = computed(() => (this.task().blocked_by_info ?? []).filter((b) => !b.done).map((b) => b.title).join(', '));
   protected readonly checklist = computed(() => {
     const items = this.task().checklist ?? [];
     return items.length ? { done: items.filter((i) => i.done).length, total: items.length } : null;

@@ -1,0 +1,90 @@
+<div class="page wide">
+  <header>
+    <div>
+      <h1>{{ 'Timeline' | t }}</h1>
+      <p class="muted">{{ 'Tasks with dates as bars, from planned day to due date; arrows show what waits for what. Drag a bar to move it, its right edge to change the due date.' | t }}</p>
+    </div>
+    <div class="controls">
+      <select [ngModel]="project()" (ngModelChange)="setProject($event)" [attr.aria-label]="'Project' | t">
+        <option [ngValue]="null">{{ 'All projects' | t }}</option>
+        @for (p of store.activeProjects(); track p.id) {
+          <option [ngValue]="p.id">{{ p.name }}</option>
+        }
+      </select>
+      <select [ngModel]="weeks()" (ngModelChange)="weeks.set(+$event)" [attr.aria-label]="'Zoom' | t">
+        <option [ngValue]="4">{{ '4 weeks' | t }}</option>
+        <option [ngValue]="8">{{ '8 weeks' | t }}</option>
+        <option [ngValue]="13">{{ '3 months' | t }}</option>
+        <option [ngValue]="26">{{ '6 months' | t }}</option>
+      </select>
+      <label class="check"><input type="checkbox" [ngModel]="hideDone()" (ngModelChange)="hideDone.set($event)" /> {{ 'Hide done' | t }}</label>
+      <div class="btn-group">
+        <button class="btn icon" type="button" [attr.aria-label]="'Earlier' | t" (click)="shiftRange(-Math.max(1, weeks() / 4))">‹</button>
+        <button class="btn" type="button" (click)="goToday()">{{ 'Today' | t }}</button>
+        <button class="btn icon" type="button" [attr.aria-label]="'Later' | t" (click)="shiftRange(Math.max(1, weeks() / 4))">›</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="panel gantt">
+    <div class="labels">
+      <div class="corner">{{ formatShort(from()) }} – {{ formatShort(to()) }}</div>
+      @for (r of rows(); track $index) {
+        @if (r.kind === 'group') {
+          <div class="label group" [style.height.px]="ROW"><span class="dot" [style.background]="r.color"></span>{{ r.label }}</div>
+        } @else {
+          <button type="button" class="label task" [style.height.px]="ROW" [class.done]="r.task!.completed_at" (click)="open(r.task!)" [title]="r.label">
+            @if (r.task!.blocked) { <span class="chain" [title]="'Waiting for another task' | t">⛓</span> }
+            {{ r.label }}
+          </button>
+        }
+      }
+    </div>
+    <div class="scroll">
+      <div class="canvas" [style.width.px]="width()">
+        <div class="weeks">
+          @for (w of weekStarts(); track w) {
+            <span class="week" [style.left.px]="x(w)" [style.width.px]="dayWidth() * 7">{{ formatShort(w) }}</span>
+          }
+        </div>
+        <div class="grid" [style.height.px]="rows().length * ROW" (pointermove)="moving($event)">
+          @for (w of weekStarts(); track w) {
+            <span class="vline" [style.left.px]="x(w)"></span>
+          }
+          @if (todayX() >= 0 && todayX() <= width()) {
+            <span class="today" [style.left.px]="todayX() + dayWidth() / 2"></span>
+          }
+          @for (r of rows(); track $index; let i = $index) {
+            @if (r.kind === 'group') {
+              <span class="band" [style.top.px]="i * ROW" [style.height.px]="ROW"></span>
+            } @else if (r.milestone) {
+              <span class="milestone" [style.left.px]="x(r.end!) + dayWidth() / 2 - 7" [style.top.px]="i * ROW + ROW / 2 - 7" [style.--c]="r.color"
+                [class.done]="r.task!.completed_at" (pointerdown)="grab($event, r.task!, 'move')" (pointerup)="drop(r.task!)"
+                [title]="r.label + ' · ⚑ ' + formatShort(r.end!)"></span>
+            } @else {
+              <div class="bar" [style.left.px]="x(r.start!)" [style.width.px]="barWidth(r)" [style.top.px]="i * ROW + 6" [style.--c]="r.color"
+                [class.done]="r.task!.completed_at" [class.dragging]="drag()?.id === r.task!.id"
+                (pointerdown)="grab($event, r.task!, 'move')" (pointerup)="drop(r.task!)"
+                [title]="r.label + ' · ' + formatShort(r.start!) + ' → ' + formatShort(r.end!)">
+                <span class="name">{{ r.label }}</span>
+                <span class="handle" (pointerdown)="grab($event, r.task!, 'end')" (pointerup)="drop(r.task!)"></span>
+              </div>
+            }
+          }
+          <svg class="arrows" [attr.width]="width()" [attr.height]="rows().length * ROW">
+            <defs>
+              <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--muted)" /></marker>
+              <marker id="arrowhead-late" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--danger)" /></marker>
+            </defs>
+            @for (a of arrows(); track $index) {
+              <path [attr.d]="a.d" [class.late]="a.late" [attr.marker-end]="a.late ? 'url(#arrowhead-late)' : 'url(#arrowhead)'" />
+            }
+          </svg>
+        </div>
+      </div>
+    </div>
+    @if (!rows().length) {
+      <p class="empty muted">{{ 'No tasks with dates in this period. Give tasks a planned day or a due date to see them here.' | t }}</p>
+    }
+  </section>
+</div>

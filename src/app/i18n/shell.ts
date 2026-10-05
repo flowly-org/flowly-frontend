@@ -2,6 +2,7 @@ import type { Dict } from './index';
 
 export const SHELL: Dict = {
   it: {
+    "Timeline": "Timeline",
     "Weekly review": "Revisione settimanale",
     "Insights": "Statistiche",
     "Search": "Cerca",
@@ -220,6 +221,7 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Errore del server ({status}). Riprova.",
   },
   es: {
+    "Timeline": "Cronograma",
     "Weekly review": "Revisión semanal",
     "Insights": "Estadísticas",
     "Search": "Buscar",
@@ -438,6 +440,7 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Error del servidor ({status}). Inténtalo de nuevo.",
   },
   fr: {
+    "Timeline": "Chronologie",
     "Weekly review": "Bilan de la semaine",
     "Insights": "Statistiques",
     "Search": "Rechercher",
@@ -656,6 +659,7 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Erreur du serveur ({status}). Réessaie.",
   },
   de: {
+    "Timeline": "Zeitleiste",
     "Weekly review": "Wochenrückblick",
     "Insights": "Auswertungen",
     "Search": "Suchen",
@@ -874,6 +878,7 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Serverfehler ({status}). Bitte versuche es erneut.",
   },
   pt: {
+    "Timeline": "Cronograma",
     "Weekly review": "Revisão semanal",
     "Insights": "Estatísticas",
     "Search": "Pesquisar",

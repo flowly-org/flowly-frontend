@@ -19,6 +19,7 @@ const PATHS: Record<string, string> = {
   logout: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9',
   bell: 'M12 3a6 6 0 0 0-6 6v3.2L4.3 15a1 1 0 0 0 .9 1.5h13.6a1 1 0 0 0 .9-1.5L18 12.2V9a6 6 0 0 0-6-6Z M10 18a2 2 0 0 0 4 0',
   plus: 'M12 5v14 M5 12h14',
+  timeline: 'M3 6h8 M7 12h10 M13 18h8 M3 3v18',
   insights: 'M3 3v18h18 M7 15l4-5 3 3 5-7',
   review: 'M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z M9 16l2 2 4-4',
   search: 'M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14Z M21 21l-4.3-4.3',

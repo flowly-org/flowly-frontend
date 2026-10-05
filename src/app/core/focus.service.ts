@@ -50,7 +50,7 @@ export class FocusService {
     };
     const due = (t: Task) => (t.due_date && t.due_date <= day ? 0 : 1);
     return tasks
-      .filter((t) => !data.isDone(t) && (t.assignee === me || t.assignee === null))
+      .filter((t) => !data.isDone(t) && !t.blocked && (t.assignee === me || t.assignee === null))
       .sort((a, b) =>
         Number(timer.isRunningOn(b.id)) - Number(timer.isRunningOn(a.id)) ||
         due(a) - due(b) || rank(a) - rank(b) ||

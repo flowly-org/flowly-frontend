@@ -275,3 +275,43 @@ footer {
     padding: 4px 6px;
   }
 }
+
+.deps {
+  .dep { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+.dep-add {
+  position: relative;
+
+  input { width: 220px; padding: 4px 8px; }
+}
+
+.dep-results {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 300px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+
+  button {
+    all: unset;
+    display: block;
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover { background: var(--surface-2); }
+  }
+}

@@ -84,6 +84,27 @@
               <button type="button" class="btn ghost small" (click)="quickReminder('tomorrow')">{{ 'Tomorrow 9:00' | t }}</button>
             </span>
           </dd>
+          <dt>{{ 'Waits for' | t }}</dt>
+          <dd class="reminders deps">
+            @for (b of blockers(); track b.id) {
+              <span class="chip dep" [class.sent]="b.done">{{ b.done ? '✓' : '⛓' }} {{ b.title }}
+                <button type="button" class="x" [attr.aria-label]="'Remove' | t" (click)="removeBlocker(b.id)">✕</button></span>
+            }
+            <span class="dep-add">
+              <input [(ngModel)]="depQuery" [ngModelOptions]="{ standalone: true }" (ngModelChange)="searchDeps($event)" [placeholder]="'+ a task it waits for…' | t" [attr.aria-label]="'Add a task it waits for' | t" />
+              @if (depResults().length) {
+                <ul class="dep-results">
+                  @for (r of depResults(); track r.id) {
+                    <li><button type="button" (click)="addBlocker(r)">{{ r.title }}</button></li>
+                  }
+                </ul>
+              }
+            </span>
+          </dd>
+          @if (t.blocking?.length) {
+            <dt>{{ 'Holds up' | t }}</dt>
+            <dd class="muted">{{ (t.blocking!.length === 1 ? '1 task' : '{n} tasks') | t: { n: t.blocking!.length } }}</dd>
+          }
           @if (!v.status?.is_done) {
             <dt>{{ 'Time block' | t }}</dt>
             <dd class="reminders">

@@ -65,6 +65,9 @@ export interface TaskQuery {
   project?: number | 'none';
   workspace?: number;
   q?: string;
+  done?: boolean;
+  span_from?: string;
+  span_to?: string;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -171,12 +171,18 @@ export interface Task {
   estimate_minutes?: number | null;
   recurrence?: Recurrence | null;
   series?: string;
+  /** Tasks this one waits for (same workspace). */
+  blocked_by?: number[];
+  blocked_by_info?: { id: number; ref: string; title: string; done: boolean }[];
+  blocking?: number[];
+  /** Waits for a task that isn't done yet. */
+  blocked?: boolean;
   /** Set on the answer that ticked a recurring task: the occurrence just created. */
   next_occurrence?: { id: number; planned_date: string | null; due_date: string | null };
 }
 
 export type TaskInput = Partial<
-  Omit<Task, 'id' | 'ref' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count' | 'series' | 'next_occurrence'>
+  Omit<Task, 'id' | 'ref' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count' | 'series' | 'next_occurrence' | 'blocked_by_info' | 'blocking' | 'blocked'>
 >;
 
 export interface ChecklistItem {
