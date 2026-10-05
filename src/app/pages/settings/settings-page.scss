@@ -479,3 +479,17 @@ label.grow {
     }
   }
 }
+
+#calendars > .cal-add,
+#calendars > .cal-form,
+#calendars > .feed-title,
+#calendars > p,
+#calendars > .copy-row,
+#calendars > button {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+#calendars > button {
+  margin-bottom: 14px;
+}
