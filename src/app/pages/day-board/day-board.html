@@ -16,6 +16,15 @@
   <div class="progress" [attr.aria-label]="'{done} of {total} tasks done' | t: { done: progress().done, total: progress().total }">
     <div class="bar"><span [style.width.%]="progress().pct"></span></div>
     <span class="muted">{{ '{done}/{total} done' | t: { done: progress().done, total: progress().total } }}</span>
+    @if (dayLoad(); as l) {
+      @if (l.estimated_minutes) {
+        <span class="load" [class.over]="l.over_minutes > 0"
+          [title]="'{busy} in meetings · {n} tasks without an estimate' | t: { busy: formatMinutes(l.busy_minutes), n: l.unestimated }">
+          ≈ {{ formatMinutes(l.estimated_minutes) }} {{ 'planned' | t }} · {{ formatMinutes(l.free_minutes) }} {{ 'free' | t }}
+          @if (l.over_minutes) { · {{ '{over} too much' | t: { over: formatMinutes(l.over_minutes) } }} }
+        </span>
+      }
+    }
   </div>
 
   <div class="controls">

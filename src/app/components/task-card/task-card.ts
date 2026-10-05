@@ -5,7 +5,7 @@ import { TimerService } from '../../core/timer.service';
 import { formatShort } from '../../core/dates';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
-import { Tag, Task, VISIBILITIES } from '../../core/models';
+import { Tag, Task, VISIBILITIES, formatMinutes } from '../../core/models';
 
 @Component({
   selector: 'app-task-card',
@@ -49,6 +49,11 @@ export class TaskCard {
   );
 
   protected done = computed(() => this.data.isDone(this.task()));
+  protected readonly formatMinutes = formatMinutes;
+  protected readonly checklist = computed(() => {
+    const items = this.task().checklist ?? [];
+    return items.length ? { done: items.filter((i) => i.done).length, total: items.length } : null;
+  });
   protected canToggle = computed(() => this.data.toggledStatus(this.task()) !== null);
 
   protected project = computed(() => {

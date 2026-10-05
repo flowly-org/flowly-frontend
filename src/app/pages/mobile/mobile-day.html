@@ -44,6 +44,15 @@
             @if (carried(task)) {
               <span class="carried">{{ 'carried over' | t }}</span>
             }
+            @if (task.checklist?.length) {
+              <span>☑ {{ checkedCount(task) }}/{{ task.checklist!.length }}</span>
+            }
+            @if (task.estimate_minutes) {
+              <span>≈ {{ formatMinutes(task.estimate_minutes) }}</span>
+            }
+            @if (task.recurrence) {
+              <span>↻</span>
+            }
             {{ where(task) }}
           </span>
         </button>
@@ -57,6 +66,9 @@
           <div class="details">
             @if (task.description) {
               <p class="notes">{{ task.description }}</p>
+            }
+            @if (task.checklist?.length) {
+              <app-task-checklist [items]="task.checklist!" (changed)="saveChecklist(task, $event)" />
             }
             @if (task.due_date) {
               <p class="muted small">{{ 'Due' | t }} {{ task.due_date }}</p>

@@ -15,7 +15,7 @@ import { BoardData } from '../../core/board-data';
 import { FocusService } from '../../core/focus.service';
 import { NotificationService } from '../../core/notification.service';
 import { addDays, formatLong, isValidIsoDate, today } from '../../core/dates';
-import { CalendarTaskRef, Task, TaskInput } from '../../core/models';
+import { CalendarTaskRef, DayLoad, Task, TaskInput, formatMinutes } from '../../core/models';
 import { I18nService } from '../../core/i18n.service';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { ToastService } from '../../core/toast.service';
@@ -147,6 +147,18 @@ export class DayBoard {
     return q ? list.filter((t) => t.title.toLowerCase().includes(q)) : list;
   });
 
+  /** My day: estimated work vs free time (capacity minus meetings). */
+  protected dayLoad = signal<DayLoad | null>(null);
+  protected readonly formatMinutes = formatMinutes;
+  private loadTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly loadWatcher = effect(() => {
+    const date = this.date();
+    this.tasks(); // re-check when the tasks change
+    if (this.mode !== 'global') return;
+    if (this.loadTimer) clearTimeout(this.loadTimer);
+    this.loadTimer = setTimeout(() => this.api.dayLoad(date).then((l) => this.dayLoad.set(l)).catch(() => {}), 400);
+  });
+
   protected readonly progress = computed(() => {
     const all = this.tasks();
     const done = all.filter((t) => this.data.isDone(t)).length;
@@ -276,7 +288,13 @@ export class DayBoard {
   private async patch(task: Task, changes: TaskInput) {
     this.place({ ...task, ...changes } as Task); // optimistic
     try {
-      this.place(await this.api.updateTask(task.workspace, task.id, changes));
+      const saved = await this.api.updateTask(task.workspace, task.id, changes);
+      this.place(saved);
+      if (saved.next_occurrence) {
+        const when = saved.next_occurrence.planned_date ?? saved.next_occurrence.due_date;
+        this.toast.show(this.i18n.t('↻ Next one: {date}', { date: when ? formatLong(when) : this.i18n.t('Backlog') }));
+        if (when === this.date()) this.reload();
+      }
     } catch (err) {
       this.toast.error(errorMessage(err, this.i18n.t('Could not update the task.')));
       this.reload();

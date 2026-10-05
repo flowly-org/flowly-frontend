@@ -47,6 +47,7 @@
         @if (t.description) {
           <p class="notes">{{ t.description }}</p>
         }
+        <app-task-checklist class="checklist" [items]="checklist()" (changed)="saveChecklist($event)" />
         <dl class="facts">
           <dt>{{ 'Status' | t }}</dt>
           <dd>@if (v.status) {<span class="chip" [style.--chip]="v.status.color">{{ v.status.name }}</span>}</dd>
@@ -62,6 +63,27 @@
             <dt>{{ 'Due' | t }}</dt>
             <dd>{{ v.due }}</dd>
           }
+          @if (v.estimate) {
+            <dt>{{ 'Estimate' | t }}</dt>
+            <dd>≈ {{ v.estimate }}</dd>
+          }
+          @if (v.repeat) {
+            <dt>{{ 'Repeats' | t }}</dt>
+            <dd>↻ {{ v.repeat }}</dd>
+          }
+          <dt>{{ 'Reminders' | t }}</dt>
+          <dd class="reminders">
+            @for (r of reminders(); track r.id) {
+              <span class="chip reminder" [class.sent]="r.sent">⏰ {{ r.remind_at | ldate: 'EEE d MMM, HH:mm' }}
+                <button type="button" class="x" [attr.aria-label]="'Remove' | t" (click)="removeReminder(r.id)">✕</button></span>
+            }
+            <span class="add-reminder">
+              <input type="datetime-local" [(ngModel)]="reminderDraft" [ngModelOptions]="{ standalone: true }" [attr.aria-label]="'Remind me at' | t" />
+              <button type="button" class="btn small" [disabled]="!reminderDraft" (click)="addReminder()">{{ 'Add' | t }}</button>
+              <button type="button" class="btn ghost small" (click)="quickReminder('hour')">{{ 'In 1 hour' | t }}</button>
+              <button type="button" class="btn ghost small" (click)="quickReminder('tomorrow')">{{ 'Tomorrow 9:00' | t }}</button>
+            </span>
+          </dd>
           @if (v.tags.length) {
             <dt>{{ 'Tags' | t }}</dt>
             <dd class="tag-list">@for (tag of v.tags; track tag!.id) {<span class="chip" [style.--chip]="tag!.color">{{ tag!.name }}</span>}</dd>
@@ -91,6 +113,7 @@
       <input class="title-input" name="title" [(ngModel)]="model.title" [placeholder]="'What needs doing?' | t" required autofocus />
     }
     <textarea name="description" [(ngModel)]="model.description" [placeholder]="'Notes (optional)' | t" rows="3"></textarea>
+    <app-task-checklist class="checklist" [items]="model.checklist" (changed)="model.checklist = $event; task() && checklist.set($event)" />
 
     <div class="grid">
       @if (data.multi() && !task()) {
@@ -147,6 +170,28 @@
       <label>
         {{ 'Due' | t }}
         <input type="date" name="due" [(ngModel)]="model.due_date" />
+      </label>
+      <label>
+        {{ 'Estimate' | t }}
+        <select name="estimate" [(ngModel)]="model.estimate">
+          <option [ngValue]="null">{{ 'None' | t }}</option>
+          @for (e of estimates; track e) {
+            <option [ngValue]="e">{{ formatMinutes(e) }}</option>
+          }
+          @if (model.estimate && !estimates.includes(model.estimate)) {
+            <option [ngValue]="model.estimate">{{ formatMinutes(model.estimate) }}</option>
+          }
+        </select>
+      </label>
+      @if (!task()) {
+        <label>
+          {{ 'Remind me at' | t }}
+          <input type="datetime-local" name="remindAt" [(ngModel)]="model.remindAt" />
+        </label>
+      }
+      <label class="span2">
+        {{ 'Repeat' | t }}
+        <app-repeat-picker [value]="model.recurrence" (changed)="model.recurrence = $event" />
       </label>
       @for (group of customGroups(); track group.id) {
         <label>

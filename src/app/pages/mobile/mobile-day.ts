@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { parseList } from '../../components/bulk-add/bulk-parse';
 import { Logo } from '../../components/logo/logo';
 import { SwipeDeck, SwipeLabels } from '../../components/swipe-deck/swipe-deck';
+import { TaskChecklist } from '../../components/task-checklist/task-checklist';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
@@ -12,7 +13,7 @@ import { FocusService } from '../../core/focus.service';
 import { addDays, formatLong, formatShort, today } from '../../core/dates';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
-import { Task, TaskInput, formatDuration } from '../../core/models';
+import { ChecklistItem, Task, TaskInput, formatDuration, formatMinutes } from '../../core/models';
 import { NotificationService } from '../../core/notification.service';
 import { shrinkPhoto } from '../../core/photo';
 import { TimerService } from '../../core/timer.service';
@@ -27,7 +28,7 @@ type Sheet = { kind: 'add'; text: string } | { kind: 'photo'; text: string } | n
  */
 @Component({
   selector: 'app-mobile-day',
-  imports: [FormsModule, Logo, SwipeDeck, TranslatePipe],
+  imports: [FormsModule, Logo, SwipeDeck, TranslatePipe, TaskChecklist],
   providers: [BoardData],
   templateUrl: './mobile-day.html',
   styleUrl: './mobile-day.scss',
@@ -158,6 +159,24 @@ export class MobileDay {
   }
 
   // --- actions --------------------------------------------------------------
+
+  protected readonly formatMinutes = formatMinutes;
+
+  protected checkedCount(task: Task) {
+    return (task.checklist ?? []).filter((i) => i.done).length;
+  }
+
+  protected async saveChecklist(task: Task, items: ChecklistItem[]) {
+    const before = this.tasks();
+    this.tasks.update((list) => list.map((t) => (t.id === task.id ? { ...t, checklist: items } : t)));
+    try {
+      const saved = await this.api.updateTask(task.workspace, task.id, { checklist: items });
+      this.tasks.update((list) => list.map((t) => (t.id === task.id ? { ...t, checklist: saved.checklist } : t)));
+    } catch (err) {
+      this.tasks.set(before);
+      this.toast.error(errorMessage(err));
+    }
+  }
 
   protected async toggleDone(task: Task) {
     const status = this.data.toggledStatus(task);

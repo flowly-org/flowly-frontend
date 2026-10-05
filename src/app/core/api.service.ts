@@ -7,6 +7,8 @@ import { ConfigService } from './config.service';
 import {
   WorkspaceMcp,
   DonetickAccount,
+  DayLoad,
+  TaskReminder,
   ApiTokenRow,
   BillingSettings,
   Invoice,
@@ -231,6 +233,18 @@ export class ApiService {
   }
   syncDonetick(id: number) {
     return this.run(this.http.post<{ detail: string; account: DonetickAccount }>(this.url(`my/donetick/${id}/sync/`), {}));
+  }
+  reminders(wsId: number, taskId: number) {
+    return this.run(this.http.get<TaskReminder[]>(this.ws(wsId, `tasks/${taskId}/reminders/`)));
+  }
+  addReminder(wsId: number, taskId: number, remindAt: string) {
+    return this.run(this.http.post<TaskReminder[]>(this.ws(wsId, `tasks/${taskId}/reminders/`), { remind_at: remindAt }));
+  }
+  deleteReminder(wsId: number, taskId: number, id: number) {
+    return this.run(this.http.delete<TaskReminder[]>(this.ws(wsId, `tasks/${taskId}/reminders/${id}/`)));
+  }
+  dayLoad(date: string) {
+    return this.run(this.http.get<DayLoad>(this.url('my/day-load/'), { params: new HttpParams().set('date', date) }));
   }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));

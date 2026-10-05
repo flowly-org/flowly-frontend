@@ -1,17 +1,19 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { RepeatPicker, repeatText } from '../repeat-picker/repeat-picker';
 import { TaskAttachments } from '../task-attachments/task-attachments';
+import { TaskChecklist } from '../task-checklist/task-checklist';
 import { TaskDelegate } from '../task-delegate/task-delegate';
 import { TaskDiscussion } from '../task-discussion/task-discussion';
 import { TaskShare } from '../task-share/task-share';
 import { TaskTime } from '../task-time/task-time';
 import { formatLong } from '../../core/dates';
-import { TranslatePipe } from '../../core/i18n.pipes';
+import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { BoardData } from '../../core/board-data';
-import { Task, TaskInput, VISIBILITIES, Visibility } from '../../core/models';
+import { ChecklistItem, Recurrence, Task, TaskInput, TaskReminder, VISIBILITIES, Visibility, formatMinutes } from '../../core/models';
 
 interface FormModel {
   title: string;
@@ -25,11 +27,18 @@ interface FormModel {
   /** Selected tag per custom tag group (group id → tag id | null). */
   grouped: Record<number, number | null>;
   free: Set<number>;
+  checklist: ChecklistItem[];
+  estimate: number | null;
+  recurrence: Recurrence | null;
+  /** New tasks: a reminder to add once created (datetime-local value). */
+  remindAt: string;
 }
+
+export const ESTIMATES = [5, 10, 15, 30, 45, 60, 90, 120, 180, 240, 360, 480];
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TaskDelegate, TranslatePipe],
+  imports: [FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TaskDelegate, TaskChecklist, RepeatPicker, TranslatePipe, LocalDatePipe],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   host: { '(document:keydown.escape)': 'close()' },
@@ -65,6 +74,11 @@ export class TaskDialog implements OnInit {
   protected editing = signal(false);
   protected visibility = signal<Visibility>('team');
   protected readonly visibilities = VISIBILITIES;
+  protected readonly estimates = ESTIMATES;
+  protected readonly formatMinutes = formatMinutes;
+  protected checklist = signal<ChecklistItem[]>([]);
+  protected reminders = signal<TaskReminder[]>([]);
+  protected reminderDraft = '';
 
   /** Read-only summary of the task as it is now. */
   protected readonly view = computed(() => {
@@ -82,6 +96,8 @@ export class TaskDialog implements OnInit {
       planned: t.planned_date ? formatLong(t.planned_date) : this.i18n.t('Backlog'),
       due: t.due_date ? formatLong(t.due_date) : null,
       visibility: VISIBILITIES.find((v) => v.value === this.visibility())!,
+      estimate: t.estimate_minutes ? formatMinutes(t.estimate_minutes) : null,
+      repeat: repeatText(t.recurrence, (k, p) => this.i18n.t(k, p as any)),
     };
   });
 
@@ -123,7 +139,63 @@ export class TaskDialog implements OnInit {
     this.visibility.set(this.task()?.visibility ?? 'team');
     this.commentCount.set(this.task()?.comment_count ?? 0);
     this.attachmentCount.set(this.task()?.attachment_count ?? 0);
+    this.checklist.set(this.task()?.checklist ?? []);
     this.ngOnInitForm();
+    const t = this.task();
+    if (t) this.api.reminders(t.workspace, t.id).then((r) => this.reminders.set(r)).catch(() => {});
+  }
+
+  /** Ticking or editing the checklist of an existing task saves right away. */
+  protected async saveChecklist(items: ChecklistItem[]) {
+    const t = this.task();
+    const before = this.checklist();
+    this.checklist.set(items);
+    this.model.checklist = items;
+    if (!t) return;
+    try {
+      const saved = await this.api.updateTask(t.workspace, t.id, { checklist: items });
+      this.checklist.set(saved.checklist ?? items);
+      this.model.checklist = this.checklist();
+      this.dirty = true;
+    } catch (err) {
+      this.checklist.set(before);
+      this.error.set(errorMessage(err));
+    }
+  }
+
+  protected async addReminder() {
+    const t = this.task();
+    if (!t || !this.reminderDraft) return;
+    try {
+      this.reminders.set(await this.api.addReminder(t.workspace, t.id, new Date(this.reminderDraft).toISOString()));
+      this.reminderDraft = '';
+    } catch (err) {
+      this.error.set(errorMessage(err));
+    }
+  }
+
+  protected async removeReminder(id: number) {
+    const t = this.task();
+    if (!t) return;
+    try {
+      this.reminders.set(await this.api.deleteReminder(t.workspace, t.id, id));
+    } catch (err) {
+      this.error.set(errorMessage(err));
+    }
+  }
+
+  /** Quick picks for a reminder: later today, tomorrow morning. */
+  protected quickReminder(kind: 'hour' | 'evening' | 'tomorrow') {
+    const d = new Date();
+    if (kind === 'hour') d.setHours(d.getHours() + 1, d.getMinutes(), 0, 0);
+    if (kind === 'evening') d.setHours(18, 0, 0, 0);
+    if (kind === 'tomorrow') {
+      d.setDate(d.getDate() + 1);
+      d.setHours(9, 0, 0, 0);
+    }
+    const pad = (n: number) => String(n).padStart(2, '0');
+    this.reminderDraft = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    this.addReminder();
   }
 
   /** (Re)fill the form from the task or the defaults. */
@@ -141,6 +213,10 @@ export class TaskDialog implements OnInit {
       due_date: src.due_date ?? '',
       grouped: {},
       free: new Set(),
+      checklist: this.task() ? this.checklist() : (src.checklist ?? []),
+      estimate: src.estimate_minutes ?? null,
+      recurrence: src.recurrence ?? null,
+      remindAt: '',
     };
     this.applyTags(src.tags ?? []);
     if (this.model.status === null) this.model.status = this.defaultStatus();
@@ -192,6 +268,9 @@ export class TaskDialog implements OnInit {
       planned_date: m.planned_date || null,
       due_date: m.due_date || null,
       tags,
+      checklist: m.checklist,
+      estimate_minutes: m.estimate,
+      recurrence: m.recurrence,
       ...(m.status !== null ? { status: m.status } : {}),
     };
     this.busy.set(true);
@@ -201,6 +280,7 @@ export class TaskDialog implements OnInit {
       const result = existing
         ? await this.api.updateTask(existing.workspace, existing.id, payload)
         : await this.api.createTask(this.wsId(), payload);
+      if (!existing && m.remindAt) await this.api.addReminder(result.workspace, result.id, new Date(m.remindAt).toISOString()).catch(() => {});
       this.saved.emit(result);
     } catch (err) {
       this.error.set(errorMessage(err, this.i18n.t('Could not save the task.')));

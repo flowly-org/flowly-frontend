@@ -163,11 +163,56 @@ export interface Task {
   completed_at: string | null;
   comment_count?: number;
   attachment_count?: number;
+  checklist?: ChecklistItem[];
+  estimate_minutes?: number | null;
+  recurrence?: Recurrence | null;
+  series?: string;
+  /** Set on the answer that ticked a recurring task: the occurrence just created. */
+  next_occurrence?: { id: number; planned_date: string | null; due_date: string | null };
 }
 
 export type TaskInput = Partial<
-  Omit<Task, 'id' | 'ref' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count'>
+  Omit<Task, 'id' | 'ref' | 'created_by' | 'created_at' | 'updated_at' | 'completed_at' | 'comment_count' | 'attachment_count' | 'series' | 'next_occurrence'>
 >;
+
+export interface ChecklistItem {
+  id?: string;
+  text: string;
+  done: boolean;
+}
+
+/** Repeat rule of a recurring task (Monday = 0). */
+export interface Recurrence {
+  freq: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  weekdays?: number[];
+  after_done?: boolean;
+  until?: string;
+}
+
+export interface TaskReminder {
+  id: number;
+  remind_at: string;
+  sent: boolean;
+}
+
+export interface DayLoad {
+  date: string;
+  tasks: number;
+  estimated_minutes: number;
+  unestimated: number;
+  busy_minutes: number;
+  capacity_minutes: number;
+  free_minutes: number;
+  over_minutes: number;
+}
+
+/** "1h 30m", "45m". */
+export function formatMinutes(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+}
 
 export interface Comment {
   id: number;

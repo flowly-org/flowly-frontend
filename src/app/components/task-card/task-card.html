@@ -34,6 +34,15 @@
     @if (due(); as d) {
       <span class="badge" [class.late]="d.late" [class.today]="d.today" [title]="'Due date' | t">⚑ {{ d.label }}</span>
     }
+    @if (checklist(); as c) {
+      <span class="badge" [class.complete]="c.done === c.total" [title]="'Checklist' | t">☑ {{ c.done }}/{{ c.total }}</span>
+    }
+    @if (task().estimate_minutes) {
+      <span class="badge" [title]="'Estimate' | t">≈ {{ formatMinutes(task().estimate_minutes!) }}</span>
+    }
+    @if (task().recurrence) {
+      <span class="badge" [title]="'Repeats' | t">↻</span>
+    }
     @if (task().comment_count) {
       <button type="button" class="badge count-badge" [title]="'Discussion' | t" (click)="openTab($event, 'discussion')" (mousedown)="$event.stopPropagation()">💬 {{ task().comment_count }}</button>
     }

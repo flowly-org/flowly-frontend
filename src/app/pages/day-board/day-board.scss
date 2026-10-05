@@ -405,3 +405,14 @@
 .now-card {
   margin: 0 0 12px;
 }
+
+.load {
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+
+  &.over {
+    color: var(--danger);
+    font-weight: 600;
+  }
+}
