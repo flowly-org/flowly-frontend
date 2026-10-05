@@ -245,22 +245,30 @@
                       <option value="github_wiki">{{ 'GitHub wiki' | t }}</option>
                       <option value="github_repo">{{ 'Folder of a GitHub repository' | t }}</option>
                       <option value="git">{{ 'Any git repository (https)' | t }}</option>
+                      <option value="mediawiki">MediaWiki</option>
                     </select>
                   </label>
-                  @if (f.config['source'] === 'git') {
+                  @if (f.config['source'] === 'mediawiki') {
+                    <label>{{ 'Wiki address' | t }} <input name="url" [(ngModel)]="f.config['url']" placeholder="https://wiki.example.org" required /></label>
+                  } @else if (f.config['source'] === 'git') {
                     <label>{{ 'Clone URL' | t }} <input name="url" [(ngModel)]="f.config['url']" placeholder="https://git.example.org/team/handbook.git" required /></label>
                   } @else {
                     <label>{{ 'Repository' | t }} <input name="repo" [(ngModel)]="f.config['repo']" placeholder="owner/repository" required /></label>
                   }
                 </div>
-                @if (f.config['source'] !== 'github_wiki') {
+                @if (f.config['source'] === 'mediawiki') {
+                  <div class="grid2">
+                    <label>{{ 'Only this category (optional)' | t }} <input name="category" [(ngModel)]="f.config['category']" [placeholder]="'e.g. {example}' | t: { example: 'Mensa' }" /></label>
+                    <label>{{ 'Bot username (only for private wikis)' | t }} <input name="username" [(ngModel)]="f.config['username']" placeholder="Name@flowly" autocomplete="off" /></label>
+                  </div>
+                } @else if (f.config['source'] !== 'github_wiki') {
                   <div class="grid2">
                     <label>{{ 'Folder (optional)' | t }} <input name="path" [(ngModel)]="f.config['path']" placeholder="docs" /></label>
                     <label>{{ 'Branch (optional)' | t }} <input name="branch" [(ngModel)]="f.config['branch']" placeholder="main" /></label>
                   </div>
                 }
                 <label>
-                  {{ 'Access token (only for private repositories)' | t }}
+                  {{ (f.config['source'] === 'mediawiki' ? 'Bot password (Special:BotPasswords, read rights)' : 'Access token (only for private repositories)') | t }}
                   <input name="apiKey" type="password" [(ngModel)]="f.apiKey" autocomplete="off"
                     [placeholder]="current()?.info?.['api_key'] ? ('Saved ({hint}); type to replace' | t: { hint: current()?.info?.['api_key'] }) : 'github_pat_…'" />
                 </label>

@@ -26,7 +26,7 @@ export const KINDS: KindInfo[] = [
   { kind: 'incoming_webhook', label: 'Incoming webhook', icon: '↘', blurb: 'A secret URL any system can call to create or update tasks.' },
   { kind: 'email', label: 'Email in', icon: '✉', blurb: 'Email an address to create a task.' },
   { kind: 'donetick', label: 'Donetick', icon: '✔', blurb: 'Two-way sync with your self-hosted Donetick: chores become tasks, done is done in both.' },
-  { kind: 'wiki', label: 'Wiki', icon: '📖', blurb: 'Link a GitHub wiki or docs folder: Flo and the AI agent use it as team knowledge.' },
+  { kind: 'wiki', label: 'Wiki', icon: '📖', blurb: 'Link a GitHub wiki, a docs folder or a MediaWiki: Flo and the AI agent use it as team knowledge.' },
   { kind: 'telegram_group', label: 'Telegram group', icon: '✈', enterprise: true,
     blurb: "Flowly in your team's Telegram group: today's plan, updates, questions and photos of lists." },
   { kind: 'slack_bot', label: 'Slack app', icon: '◆', enterprise: true,
