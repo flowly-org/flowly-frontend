@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { Guide } from '../../components/guide/guide';
+import { Icon } from '../../components/icon/icon';
 import { Logo, logoSvg } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
@@ -20,7 +21,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, Guide, TranslatePipe, LocalDatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, Guide, Icon, TranslatePipe, LocalDatePipe],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   host: { '[style.--brand]': 'brandColor()' },

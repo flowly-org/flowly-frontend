@@ -67,7 +67,6 @@
   align-items: center;
   gap: 2px;
   flex: 1 1 auto;
-  overflow-x: auto;
 
   .divider {
     width: 1px;
@@ -82,22 +81,73 @@
     flex: none;
   }
 
-  a {
+  .nav-item {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    min-width: 34px;
+    justify-content: center;
     color: var(--muted);
     text-decoration: none;
-    padding: 6px 10px;
-    border-radius: 8px;
+    padding: 0 8px;
+    border-radius: 9px;
     font-weight: 500;
     white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    .label {
+      display: none;
+    }
 
     &:hover {
       color: var(--ink);
       background: var(--surface-2);
     }
 
+    &:focus-visible {
+      outline: 2px solid var(--brand, var(--accent));
+      outline-offset: 1px;
+    }
+
+    // Where you are: the icon gets its name and the workspace colour.
     &.active {
-      color: var(--ink);
-      background: var(--surface-2);
+      color: var(--brand, var(--accent));
+      background: color-mix(in srgb, var(--brand, var(--accent)) 12%, transparent);
+      padding: 0 12px 0 10px;
+
+      .label {
+        display: inline;
+        color: var(--ink);
+      }
+    }
+
+    // Tooltip with the name of the others.
+    &:not(.active)::after {
+      content: attr(data-tip);
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translate(-50%, -2px);
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--surface);
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease 0.25s, transform 0.12s ease 0.25s;
+      z-index: 60;
+    }
+
+    &:not(.active):hover::after,
+    &:not(.active):focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
     }
   }
 }
@@ -285,7 +335,12 @@
 
 .menu-link {
   justify-content: flex-start;
+  gap: 10px;
   margin-bottom: 4px;
+
+  app-icon {
+    color: var(--muted);
+  }
 }
 
 .menu {
@@ -316,6 +371,12 @@
   .nav {
     order: 5;
     flex-basis: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    .ws-select {
+      max-width: 130px;
+    }
   }
 }
 
