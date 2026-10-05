@@ -493,3 +493,16 @@ label.grow {
 #calendars > button {
   margin-bottom: 14px;
 }
+
+#calendars > .hours-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 20px;
+  margin: 8px 16px 2px;
+
+  label { display: flex; flex-direction: column; gap: 4px; }
+  label.radio { flex-direction: row; align-items: center; gap: 8px; }
+  .hours { display: flex; align-items: center; gap: 6px; }
+  input[type='time'] { width: auto; }
+}

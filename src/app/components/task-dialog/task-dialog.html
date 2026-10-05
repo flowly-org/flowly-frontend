@@ -84,6 +84,15 @@
               <button type="button" class="btn ghost small" (click)="quickReminder('tomorrow')">{{ 'Tomorrow 9:00' | t }}</button>
             </span>
           </dd>
+          @if (!v.status?.is_done) {
+            <dt>{{ 'Time block' | t }}</dt>
+            <dd class="reminders">
+              <span class="add-reminder">
+                <input type="datetime-local" [(ngModel)]="blockDraft" [ngModelOptions]="{ standalone: true }" [attr.aria-label]="'Block time at' | t" />
+                <button type="button" class="btn small" [disabled]="!blockDraft" (click)="blockTime()">▶ {{ 'Block' | t }} {{ formatMinutes(t.estimate_minutes ?? 30) }}</button>
+              </span>
+            </dd>
+          }
           @if (v.tags.length) {
             <dt>{{ 'Tags' | t }}</dt>
             <dd class="tag-list">@for (tag of v.tags; track tag!.id) {<span class="chip" [style.--chip]="tag!.color">{{ tag!.name }}</span>}</dd>

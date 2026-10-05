@@ -12,6 +12,7 @@ import { formatLong } from '../../core/dates';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
 import { ApiService, errorMessage } from '../../core/api.service';
+import { ToastService } from '../../core/toast.service';
 import { BoardData } from '../../core/board-data';
 import { ChecklistItem, Recurrence, Task, TaskInput, TaskReminder, VISIBILITIES, Visibility, formatMinutes } from '../../core/models';
 
@@ -57,6 +58,7 @@ export class TaskDialog implements OnInit {
   protected data = inject(BoardData);
   protected i18n = inject(I18nService);
   private api = inject(ApiService);
+  private toast = inject(ToastService);
 
   protected wsId = signal<number>(0);
   protected ctx = computed(() => this.data.ctx(this.wsId()));
@@ -79,6 +81,20 @@ export class TaskDialog implements OnInit {
   protected checklist = signal<ChecklistItem[]>([]);
   protected reminders = signal<TaskReminder[]>([]);
   protected reminderDraft = '';
+  protected blockDraft = '';
+
+  protected async blockTime() {
+    const t = this.task();
+    if (!t || !this.blockDraft) return;
+    try {
+      const b = await this.api.addBlock({ task: t.id, start: new Date(this.blockDraft).toISOString() });
+      this.blockDraft = '';
+      this.error.set(null);
+      this.toast?.show(this.i18n.t('Blocked {from}–{to}.', { from: new Date(b.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), to: new Date(b.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
+    } catch (err) {
+      this.error.set(errorMessage(err));
+    }
+  }
 
   /** Read-only summary of the task as it is now. */
   protected readonly view = computed(() => {

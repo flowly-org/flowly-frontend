@@ -2,6 +2,9 @@ import type { Dict } from './index';
 
 export const ADMIN: Dict = {
   it: {
+    "Working hours": "Orario di lavoro",
+    "Notify me when a time block starts": "Avvisami quando inizia un blocco di tempo",
+    "Used by “Plan” on My day to find free time around your meetings.": "Usato da “Pianifica” nella tua giornata per trovare tempo libero tra le riunioni.",
     "Account": "Account",
     "Connect Google Calendar": "Collega Google Calendar",
     "Connect Outlook / Microsoft 365": "Collega Outlook / Microsoft 365",
@@ -402,6 +405,9 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Uguale ai messaggi dell'utente",
   },
   es: {
+    "Working hours": "Horario de trabajo",
+    "Notify me when a time block starts": "Avísame cuando empiece un bloque de tiempo",
+    "Used by “Plan” on My day to find free time around your meetings.": "Lo usa “Planificar” en Mi día para encontrar tiempo libre entre reuniones.",
     "Account": "Cuenta",
     "Connect Google Calendar": "Conectar Google Calendar",
     "Connect Outlook / Microsoft 365": "Conectar Outlook / Microsoft 365",
@@ -802,6 +808,9 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Igual que los mensajes del usuario",
   },
   fr: {
+    "Working hours": "Heures de travail",
+    "Notify me when a time block starts": "Préviens-moi quand un bloc de temps commence",
+    "Used by “Plan” on My day to find free time around your meetings.": "Utilisé par « Planifier » dans Ma journée pour trouver du temps libre autour de tes réunions.",
     "Account": "Compte",
     "Connect Google Calendar": "Connecter Google Agenda",
     "Connect Outlook / Microsoft 365": "Connecter Outlook / Microsoft 365",
@@ -1202,6 +1211,9 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Comme les messages de l'utilisateur",
   },
   de: {
+    "Working hours": "Arbeitszeit",
+    "Notify me when a time block starts": "Benachrichtige mich, wenn ein Zeitblock beginnt",
+    "Used by “Plan” on My day to find free time around your meetings.": "Wird von „Planen“ in Mein Tag genutzt, um freie Zeit zwischen Terminen zu finden.",
     "Account": "Konto",
     "Connect Google Calendar": "Google Kalender verbinden",
     "Connect Outlook / Microsoft 365": "Outlook / Microsoft 365 verbinden",
@@ -1602,6 +1614,9 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Wie die Nachrichten des Benutzers",
   },
   pt: {
+    "Working hours": "Horário de trabalho",
+    "Notify me when a time block starts": "Avisa-me quando um bloco de tempo começa",
+    "Used by “Plan” on My day to find free time around your meetings.": "Usado por “Planear” no Meu dia para encontrar tempo livre entre reuniões.",
     "Account": "Conta",
     "Connect Google Calendar": "Ligar o Google Calendar",
     "Connect Outlook / Microsoft 365": "Ligar o Outlook / Microsoft 365",

@@ -8,6 +8,9 @@ import {
   WorkspaceMcp,
   DonetickAccount,
   DayLoad,
+  DayBlocks,
+  DayPlanProposal,
+  TimeBlock,
   SearchResult,
   TaskTemplate,
   TaskReminder,
@@ -272,6 +275,21 @@ export class ApiService {
   }
   importTasks(wsId: number, data: FormData | Record<string, unknown>) {
     return this.run(this.http.post<{ created: number; skipped: number; project: number; project_name: string }>(this.ws(wsId, 'import/'), data));
+  }
+  dayBlocks(date: string) {
+    return this.run(this.http.get<DayBlocks>(this.url('my/blocks/'), { params: new HttpParams().set('date', date) }));
+  }
+  addBlock(data: { task?: number | null; title?: string; start: string; minutes?: number }) {
+    return this.run(this.http.post<TimeBlock>(this.url('my/blocks/'), data));
+  }
+  moveBlock(id: number, start: string, end?: string) {
+    return this.run(this.http.patch<TimeBlock>(this.url(`my/blocks/${id}/`), end ? { start, end } : { start }));
+  }
+  deleteBlock(id: number) {
+    return this.run(this.http.delete<void>(this.url(`my/blocks/${id}/`)));
+  }
+  planDay(date: string, apply: boolean) {
+    return this.run(this.http.post<DayPlanProposal>(this.url('my/blocks/plan/'), { date, apply }));
   }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));

@@ -64,6 +64,7 @@
         </select>
       </label>
     }
+    <button class="btn" type="button" [class.active]="planOpen()" (click)="togglePlan()" [title]="'Block time for your tasks in the day' | t">{{ 'Plan' | t }}</button>
     <button class="btn" type="button" (click)="templatesOpen.set(true)" [title]="'Create a set of tasks from a template' | t">{{ 'Templates' | t }}</button>
     <button class="btn" type="button" (click)="bulk.set('day')" [title]="'Paste a list to add many tasks at once' | t">{{ 'Bulk add' | t }}</button>
     <button class="btn primary" type="button" (click)="openNew()">{{ '+ New task' | t }}</button>
@@ -72,6 +73,10 @@
 
 @if (focus.on() && isToday()) {
   <app-now-card class="now-card" [tasks]="tasks()" [day]="date()" (done)="toggleDone($event)" (open)="openTask($event)" (changed)="refreshTask($event)" />
+}
+
+@if (planOpen()) {
+  <app-day-plan class="day-plan" [date]="date()" [tasks]="tasks()" [me]="me" (openTask)="openById($event)" />
 }
 
 <app-calendar-strip

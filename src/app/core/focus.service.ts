@@ -14,6 +14,10 @@ export const FOCUS_DEFAULTS: FocusOptions = {
   heads_up_minutes: 10,
   celebrate: true,
   calm: false,
+  capacity_minutes: 480,
+  day_start: '09:00',
+  day_end: '18:00',
+  block_reminders: true,
 };
 
 const CHEERS = ['Nice! One down.', 'Done! That counts.', 'Great work. Take the win.', 'Done. Ready for the next small step?'];

@@ -160,6 +160,19 @@
       <button class="btn" type="submit">{{ 'Save' | t }}</button>
     </form>
     <p class="small muted">{{ 'Events at an address outside your home town count as trips.' | t }}</p>
+    <div class="hours-row">
+      <label>
+        <span class="small muted">{{ 'Working hours' | t }}</span>
+        <span class="hours">
+          <input type="time" [value]="focus.opts().day_start" (change)="setFocus({ focus: { day_start: $any($event.target).value } })" [attr.aria-label]="'Start' | t" />
+          –
+          <input type="time" [value]="focus.opts().day_end" (change)="setFocus({ focus: { day_end: $any($event.target).value } })" [attr.aria-label]="'End' | t" />
+        </span>
+      </label>
+      <label class="radio"><input type="checkbox" [checked]="focus.opts().block_reminders" (change)="setFocus({ focus: { block_reminders: $any($event.target).checked } })" />
+        {{ 'Notify me when a time block starts' | t }}</label>
+    </div>
+    <p class="small muted">{{ 'Used by “Plan” on My day to find free time around your meetings.' | t }}</p>
 
     @if (calendars(); as cal) {
       @for (a of cal.accounts; track a.id) {

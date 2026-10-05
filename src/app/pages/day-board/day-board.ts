@@ -11,6 +11,7 @@ import { NowCard } from '../../components/now-card/now-card';
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskDialog } from '../../components/task-dialog/task-dialog';
 import { TemplatesDialog } from '../../components/templates-dialog/templates-dialog';
+import { DayPlan } from '../../components/day-plan/day-plan';
 import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
@@ -56,7 +57,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, TranslatePipe],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, DayPlan, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -98,6 +99,20 @@ export class DayBoard {
   /** Bulk-add dialog: null = closed; 'day' plans for the viewed day, 'backlog' leaves them unscheduled. */
   protected bulk = signal<'day' | 'backlog' | null>(null);
   protected templatesOpen = signal(false);
+  protected planOpen = signal(false);
+  protected readonly me = this.auth.user()?.id ?? null;
+
+  protected togglePlan() {
+    this.planOpen.set(!this.planOpen());
+    try {
+      localStorage.setItem('flowly.plan', this.planOpen() ? '1' : '');
+    } catch {}
+  }
+
+  protected async openById(id: number) {
+    const task = this.tasks().find((t) => t.id === id) ?? this.backlog().find((t) => t.id === id);
+    if (task) this.openTask(task);
+  }
   protected quickAddTitle = '';
   protected backlogTitle = '';
 
@@ -174,6 +189,9 @@ export class DayBoard {
 
   constructor() {
     this.restorePrefs();
+    try {
+      this.planOpen.set(localStorage.getItem('flowly.plan') === '1');
+    } catch {}
     // Deep links (also when already on this board, e.g. from search): ?task=<id>, ?templates=1.
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((qp) => {
       if (qp.get('task')) this.openFromLink();

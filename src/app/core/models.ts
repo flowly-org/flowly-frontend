@@ -25,6 +25,10 @@ export interface FocusOptions {
   heads_up_minutes: number;
   celebrate: boolean;
   calm: boolean;
+  capacity_minutes?: number;
+  day_start: string;
+  day_end: string;
+  block_reminders: boolean;
 }
 
 export interface AuthResponse {
@@ -747,4 +751,29 @@ export interface SearchResult {
   project?: string | null;
   color?: string;
   url?: string;
+}
+
+export interface TimeBlock {
+  id: number;
+  task: number | null;
+  title: string;
+  start: string;
+  end: string;
+  workspace: number | null;
+  project: number | null;
+  done: boolean;
+}
+
+export interface DayBlocks {
+  date: string;
+  day_start: string;
+  day_end: string;
+  blocks: TimeBlock[];
+  events: { id: number; title: string; start: string; end: string; color: string; background: boolean }[];
+  free: { start: string; end: string }[];
+}
+
+export interface DayPlanProposal {
+  placed: { task: number; title: string; start: string; end: string; minutes: number }[];
+  unscheduled: { task: number; title: string; minutes: number }[];
 }

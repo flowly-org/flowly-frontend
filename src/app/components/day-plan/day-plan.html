@@ -1,0 +1,61 @@
+<section class="plan" [attr.aria-label]="'Plan the day' | t">
+  <div class="head">
+    <strong>{{ 'Plan the day' | t }}</strong>
+    <span class="muted small">{{ '{time} blocked' | t: { time: formatMinutes(plannedMinutes()) } }}</span>
+    <span class="spacer"></span>
+    @if (proposal(); as p) {
+      <span class="small">{{ '{n} tasks fit' | t: { n: p.placed.length } }}@if (p.unscheduled.length) { · {{ "{n} don't fit" | t: { n: p.unscheduled.length } }} }</span>
+      <button type="button" class="btn small" (click)="proposal.set(null)">{{ 'Cancel' | t }}</button>
+      <button type="button" class="btn primary small" [disabled]="busy() || !p.placed.length" (click)="autoPlan(true)">{{ 'Add these blocks' | t }}</button>
+    } @else {
+      <button type="button" class="btn small" [disabled]="busy()" (click)="autoPlan(false)"
+        [title]="'Fit the day\'s tasks into the free time around your meetings, using their estimates' | t">✨ {{ 'Auto-plan' | t }}</button>
+    }
+  </div>
+
+  @if (range(); as r) {
+    <div class="track" #track [style.height.px]="48 + lanes().count * 28" (dragover)="over($event)" (dragleave)="hover.set(null)" (drop)="drop($event)">
+      @for (h of hours(); track h) {
+        <span class="hour" [style.left.%]="left(h)">{{ clock(h) }}</span>
+      }
+      @if (day(); as d) {
+        <span class="work" [style.left.%]="left(d.day_start)" [style.width.%]="width(d.day_start, d.day_end)"></span>
+        @for (e of d.events; track e.id) {
+          <span class="event" [class.bg]="e.background" [style.left.%]="left(e.start)" [style.width.%]="width(e.start, e.end)"
+            [title]="clock(e.start) + '–' + clock(e.end) + ' ' + e.title">{{ e.title }}</span>
+        }
+        @for (b of d.blocks; track b.id) {
+          <div class="block" [class.done]="b.done" [class.moving]="dragging()?.id === b.id" [style.left.%]="left(b.start)" [style.width.%]="width(b.start, b.end)"
+            [style.top.px]="42 + (lanes().of.get(b.id) ?? 0) * 28" [style.--c]="color(b)" (pointerdown)="grab($event, b)" (pointermove)="move($event, b)" (pointerup)="release(b)"
+            [title]="clock(b.start) + '–' + clock(b.end) + ' ' + b.title">
+            <span class="name" role="button" tabindex="0" (keydown.enter)="b.task && openTask.emit(b.task)">{{ b.title }}</span>
+            <button type="button" class="x" [attr.aria-label]="'Remove block' | t" (click)="remove(b)">✕</button>
+          </div>
+        }
+      }
+      @if (proposal(); as p) {
+        @for (x of p.placed; track x.task) {
+          <span class="ghost" [style.left.%]="left(x.start)" [style.width.%]="width(x.start, x.end)">{{ x.title }}</span>
+        }
+      }
+      @if (hover(); as t) {
+        <span class="drop-mark" [style.left.%]="left(t)">{{ clock(t) }}</span>
+      }
+      @if (now() > r.lo && now() < r.hi) {
+        <span class="now" [style.left.%]="left(now())"></span>
+      }
+    </div>
+  }
+
+  @if (unscheduled().length) {
+    <div class="todo">
+      <span class="muted small">{{ 'Drag onto the timeline:' | t }}</span>
+      @for (t of unscheduled(); track t.id) {
+        <button type="button" class="chip" draggable="true" (dragstart)="dragTask($event, t)" (click)="blockNext(t)"
+          [title]="'Drag to a time, or click for the first free slot' | t">
+          {{ t.title }} <span class="muted">{{ formatMinutes(t.estimate_minutes ?? 30) }}</span>
+        </button>
+      }
+    </div>
+  }
+</section>
