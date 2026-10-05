@@ -591,8 +591,9 @@ export interface CalendarRow {
 
 export interface CalendarAccount {
   id: number;
-  provider: 'google';
+  provider: 'google' | 'microsoft' | 'caldav' | 'ics';
   email: string;
+  label: string;
   status: 'ok' | 'error';
   last_error: string;
   last_synced_at: string | null;
@@ -601,6 +602,7 @@ export interface CalendarAccount {
 
 export interface CalendarOverview {
   available: boolean;
+  providers?: { google: boolean; microsoft: boolean; caldav: boolean; ics: boolean };
   home_location: string;
   accounts: CalendarAccount[];
 }

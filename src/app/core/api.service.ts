@@ -422,6 +422,20 @@ export class ApiService {
   connectGoogleCalendar() {
     return this.run(this.http.post<{ url: string }>(this.url('calendar/google/connect/'), {}));
   }
+  connectMicrosoftCalendar() {
+    return this.run(this.http.post<{ url: string }>(this.url('calendar/microsoft/connect/'), {}));
+  }
+  addCalDav(data: { server_url: string; username: string; password: string }) {
+    return this.run(this.http.post<CalendarAccount>(this.url('calendar/caldav/'), data));
+  }
+  addIcs(data: { url: string; name: string }) {
+    return this.run(this.http.post<CalendarAccount>(this.url('calendar/ics/'), data));
+  }
+  calendarFeed(action: 'get' | 'create' | 'delete') {
+    const url = this.url('calendar/feed/');
+    const req = action === 'get' ? this.http.get<{ url: string | null }>(url) : action === 'create' ? this.http.post<{ url: string | null }>(url, {}) : this.http.delete<{ url: string | null }>(url);
+    return this.run(req);
+  }
   syncCalendarAccount(id: number) {
     return this.run(this.http.post<CalendarAccount>(this.url(`calendar/accounts/${id}/`), {}));
   }

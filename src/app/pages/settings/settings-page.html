@@ -166,15 +166,18 @@
         <div class="cal-account">
           <div class="row">
             <span class="grow">
-              <strong>Google</strong> · {{ a.email || ('Google account' | t) }}
+              <strong>{{ providerNames[a.provider] }}</strong> · {{ a.label || a.email || ('Account' | t) }}
               @if (a.status === 'error') {
                 <span class="danger-text small"> · {{ a.last_error || ('Needs attention' | t) }}</span>
               } @else if (a.last_synced_at) {
                 <span class="muted small"> · {{ 'synced {date}' | t: { date: (a.last_synced_at | ldate: 'MMM d, HH:mm') } }}</span>
               }
             </span>
-            @if (a.status === 'error' && cal.available) {
+            @if (a.status === 'error' && a.provider === 'google' && cal.available) {
               <button class="btn small" type="button" (click)="connectGoogle()">{{ 'Reconnect' | t }}</button>
+            }
+            @if (a.status === 'error' && a.provider === 'microsoft' && cal.providers?.microsoft) {
+              <button class="btn small" type="button" (click)="connectMicrosoft()">{{ 'Reconnect' | t }}</button>
             }
             <button class="btn ghost small" type="button" [disabled]="calBusy()" (click)="syncAccount(a.id)">{{ 'Sync now' | t }}</button>
             <button class="btn ghost danger small" type="button" (click)="disconnectAccount(a.id)">{{ 'Disconnect' | t }}</button>
@@ -190,14 +193,49 @@
           </div>
         </div>
       }
-      @if (cal.available) {
-        <button class="btn primary" type="button" (click)="connectGoogle()">
-          {{ (cal.accounts.length ? 'Add another Google account' : 'Connect Google Calendar') | t }}
-        </button>
-        <p class="small muted">{{ 'Read-only access. Connect as many Google accounts as you like (personal, work…).' | t }}</p>
-      } @else {
+      <div class="cal-add">
+        @if (cal.available) {
+          <button class="btn primary" type="button" (click)="connectGoogle()">{{ 'Connect Google Calendar' | t }}</button>
+        }
+        @if (cal.providers?.microsoft) {
+          <button class="btn primary" type="button" (click)="connectMicrosoft()">{{ 'Connect Outlook / Microsoft 365' | t }}</button>
+        }
+        <button class="btn" type="button" (click)="calForm.set(calForm() === 'caldav' ? null : 'caldav')">{{ 'Add a CalDAV calendar' | t }}</button>
+        <button class="btn" type="button" (click)="calForm.set(calForm() === 'ics' ? null : 'ics')">{{ 'Subscribe to an iCal link' | t }}</button>
+      </div>
+      @if (calForm() === 'caldav') {
+        <form class="cal-form" (ngSubmit)="addCalDav()">
+          <input name="dav-url" [(ngModel)]="caldav.server_url" placeholder="https://cloud.example.org/remote.php/dav" [attr.aria-label]="'Server address' | t" />
+          <input name="dav-user" [(ngModel)]="caldav.username" [placeholder]="'Username' | t" autocomplete="off" />
+          <input name="dav-pass" type="password" [(ngModel)]="caldav.password" [placeholder]="'App password' | t" autocomplete="off" />
+          <button class="btn primary" type="submit" [disabled]="calBusy() || !caldav.server_url || !caldav.username || !caldav.password">{{ 'Connect' | t }}</button>
+          <p class="small muted">{{ 'Nextcloud, iCloud (caldav.icloud.com), Fastmail, Synology, Radicale… Use an app password if your account has two-factor sign-in. Read-only.' | t }}</p>
+        </form>
+      }
+      @if (calForm() === 'ics') {
+        <form class="cal-form" (ngSubmit)="addIcs()">
+          <input name="ics-url" [(ngModel)]="icsLink.url" placeholder="https://… .ics  /  webcal://…" [attr.aria-label]="'iCal address' | t" />
+          <input name="ics-name" [(ngModel)]="icsLink.name" [placeholder]="'Name (optional)' | t" />
+          <button class="btn primary" type="submit" [disabled]="calBusy() || !icsLink.url">{{ 'Subscribe' | t }}</button>
+          <p class="small muted">{{ 'Any public or secret iCal address: holidays, a shared team calendar, an Outlook or Google “secret address”. Refreshed every 15 minutes.' | t }}</p>
+        </form>
+      }
+      @if (!cal.available) {
         <p class="small muted">{{ 'Google Calendar is not set up on this server yet: an admin needs to add the Google OAuth client secret.' | t }}</p>
       }
+    }
+
+    <h3 class="feed-title">{{ 'Your tasks in your calendar app' | t }}</h3>
+    <p class="small muted">{{ 'A private iCal link with your planned tasks and due dates, for Google Calendar, Outlook, Apple Calendar… (add it as a calendar “from URL”). Anyone with the link can see those tasks: keep it to yourself.' | t }}</p>
+    @if (feedUrl(); as url) {
+      <div class="copy-row">
+        <input readonly [value]="url" (focus)="$any($event.target).select()" [attr.aria-label]="'Calendar feed' | t" />
+        <button class="btn small" type="button" (click)="copyText(url)">{{ 'Copy' | t }}</button>
+        <button class="btn ghost small" type="button" (click)="feed('create')" [title]="'The old link stops working' | t">{{ 'New link' | t }}</button>
+        <button class="btn ghost danger small" type="button" (click)="feed('delete')">{{ 'Turn off' | t }}</button>
+      </div>
+    } @else {
+      <button class="btn" type="button" (click)="feed('create')">{{ 'Create my calendar link' | t }}</button>
     }
   </section>
 

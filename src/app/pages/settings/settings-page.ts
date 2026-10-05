@@ -176,7 +176,7 @@ export class SettingsPage implements OnInit {
   }
 
   async ngOnInit() {
-    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing(), this.loadPlan(), this.loadDonetick()]);
+    await Promise.all([this.load(), this.loadTokens(), this.loadCalendars(), this.loadInvoicing(), this.loadPlan(), this.loadDonetick(), this.feed('get')]);
     const pro = this.route.snapshot.queryParamMap.get('pro');
     if (pro === 'success') {
       this.toast.show(this.i18n.t('Welcome to Flowly Pro! It may take a few seconds to switch on.'));
@@ -293,6 +293,58 @@ export class SettingsPage implements OnInit {
       this.toast.show(this.i18n.t('Home saved.'));
     } catch (err) {
       this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected calForm = signal<'caldav' | 'ics' | null>(null);
+  protected caldav = { server_url: '', username: '', password: '' };
+  protected icsLink = { url: '', name: '' };
+  protected feedUrl = signal<string | null>(null);
+  protected readonly providerNames: Record<string, string> = { google: 'Google', microsoft: 'Microsoft', caldav: 'CalDAV', ics: 'iCal' };
+
+  async connectMicrosoft() {
+    try {
+      window.location.href = (await this.api.connectMicrosoftCalendar()).url;
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  async addCalDav() {
+    this.calBusy.set(true);
+    try {
+      await this.api.addCalDav({ ...this.caldav });
+      this.caldav = { server_url: '', username: '', password: '' };
+      this.calForm.set(null);
+      this.toast.show(this.i18n.t('Calendar connected.'));
+      await this.loadCalendars();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.calBusy.set(false);
+    }
+  }
+
+  async addIcs() {
+    this.calBusy.set(true);
+    try {
+      await this.api.addIcs({ ...this.icsLink });
+      this.icsLink = { url: '', name: '' };
+      this.calForm.set(null);
+      this.toast.show(this.i18n.t('Calendar connected.'));
+      await this.loadCalendars();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    } finally {
+      this.calBusy.set(false);
+    }
+  }
+
+  async feed(action: 'get' | 'create' | 'delete') {
+    try {
+      this.feedUrl.set((await this.api.calendarFeed(action)).url);
+    } catch (err) {
+      if (action !== 'get') this.toast.error(errorMessage(err));
     }
   }
 
