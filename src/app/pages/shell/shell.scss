@@ -152,9 +152,21 @@
   }
 }
 
+.search-btn {
+  margin-left: auto;
+  color: var(--muted);
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+.timer-pill ~ .search-btn {
+  margin-left: 0;
+}
+
 .bell-wrap {
   position: relative;
-  margin-left: auto;
 }
 
 .timer-pill ~ .bell-wrap {

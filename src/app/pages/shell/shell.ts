@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 
 import { Guide } from '../../components/guide/guide';
 import { Icon } from '../../components/icon/icon';
+import { SearchPalette } from '../../components/search-palette/search-palette';
 import { Logo, logoSvg } from '../../components/logo/logo';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
@@ -21,12 +22,21 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, Guide, Icon, TranslatePipe, LocalDatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, Guide, Icon, SearchPalette, TranslatePipe, LocalDatePipe],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
-  host: { '[style.--brand]': 'brandColor()' },
+  host: { '[style.--brand]': 'brandColor()', '(document:keydown)': 'shortcut($event)' },
 })
 export class Shell {
+  protected searchOpen = signal(false);
+
+  protected shortcut(e: KeyboardEvent) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      this.searchOpen.set(!this.searchOpen());
+    }
+  }
+
   protected store = inject(WorkspaceStore);
   protected auth = inject(AuthService);
   protected theme = inject(ThemeService);

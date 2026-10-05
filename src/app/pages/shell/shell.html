@@ -54,6 +54,10 @@
     </div>
   }
 
+  <button class="btn ghost icon search-btn" type="button" (click)="searchOpen.set(true)" [attr.aria-label]="'Search' | t" [title]="('Search' | t) + ' (Ctrl+K)'">
+    <app-icon name="search" />
+  </button>
+
   <app-guide #guide (opened)="bellOpen.set(false); menuOpen.set(false)" />
 
   <div class="bell-wrap">
@@ -132,3 +136,7 @@
 <main class="main">
   <router-outlet />
 </main>
+
+@if (searchOpen()) {
+  <app-search-palette (closed)="searchOpen.set(false)" />
+}

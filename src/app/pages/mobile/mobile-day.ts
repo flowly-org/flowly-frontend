@@ -285,6 +285,8 @@ export class MobileDay {
       priority: d.priority?.id ?? null,
       tags: d.tags.map((t) => t.id),
       planned_date: d.date === undefined ? this.date() : d.date,
+      ...(d.estimate ? { estimate_minutes: d.estimate } : {}),
+      ...(d.checklist.length ? { checklist: d.checklist } : {}),
       assignee: me,
       ...(d.done && done ? { status: done } : {}),
     }));

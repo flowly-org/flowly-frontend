@@ -1,0 +1,87 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<section class="dialog" role="dialog" aria-modal="true" aria-labelledby="tpl-title">
+  <header>
+    <h2 id="tpl-title">{{ 'Task templates' | t }}</h2>
+    @if (data.multi()) {
+      <select [ngModel]="wsId()" (ngModelChange)="switchWorkspace(+$event)" [attr.aria-label]="'Workspace' | t">
+        @for (c of data.contexts(); track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    }
+    <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="closed.emit()">✕</button>
+  </header>
+
+  <div class="content">
+    @if (editing(); as e) {
+      <div class="edit">
+        <label>{{ 'Name' | t }} <input [(ngModel)]="e.name" [placeholder]="'e.g. {example}' | t: { example: 'Client onboarding' }" autofocus /></label>
+        <label>{{ 'Project' | t }}
+          <select [(ngModel)]="e.project">
+            <option [ngValue]="null">{{ 'No project' | t }}</option>
+            @for (p of projects(); track p.id) {
+              <option [ngValue]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </label>
+        <label>{{ 'Tasks' | t }}
+          <textarea [(ngModel)]="e.body" rows="10" spellcheck="false"></textarea>
+        </label>
+        <p class="syntax muted small">
+          {{ 'One task per line.' | t }} <code>&#64;+1</code> {{ 'one day after the start' | t }} · <code>&#64;+1w</code> {{ 'a week after' | t }} ·
+          <code>~30m</code> {{ 'estimate' | t }} · <code>!high</code> · <code>+Project</code> · <code>#tag</code> · {{ 'indented' | t }} <code>[ ]</code> {{ 'checklist' | t }}
+        </p>
+        <div class="actions">
+          @if (e.id) {
+            <button class="btn ghost danger small" type="button" (click)="remove($any(e))">{{ 'Delete' | t }}</button>
+          }
+          <span class="spacer"></span>
+          <button class="btn" type="button" (click)="editing.set(null)">{{ 'Cancel' | t }}</button>
+          <button class="btn primary" type="button" [disabled]="busy() || !e.name?.trim() || !e.body?.trim()" (click)="save()">{{ 'Save' | t }}</button>
+        </div>
+      </div>
+    } @else if (using(); as u) {
+      <div class="edit">
+        <h3>{{ u.tpl.name }}</h3>
+        <pre class="preview">{{ u.tpl.body }}</pre>
+        <div class="row">
+          <label>{{ 'Start on' | t }} <input type="date" [(ngModel)]="u.start" /></label>
+          <label>{{ 'Project' | t }}
+            <select [(ngModel)]="u.project">
+              <option [ngValue]="null">{{ 'No project' | t }}</option>
+              @for (p of projects(); track p.id) {
+                <option [ngValue]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <span class="spacer"></span>
+          <button class="btn" type="button" (click)="using.set(null)">{{ 'Back' | t }}</button>
+          <button class="btn primary" type="button" [disabled]="busy()" (click)="apply()">
+            {{ (u.tpl.count === 1 ? 'Create 1 task' : 'Create {n} tasks') | t: { n: u.tpl.count } }}
+          </button>
+        </div>
+      </div>
+    } @else {
+      <ul class="list">
+        @for (tpl of templates(); track tpl.id) {
+          <li>
+            <span class="grow"><strong>{{ tpl.name }}</strong> <span class="muted small">{{ (tpl.count === 1 ? '1 task' : '{n} tasks') | t: { n: tpl.count } }}</span></span>
+            <button class="btn ghost small" type="button" (click)="editing.set({ ...tpl })">{{ 'Edit' | t }}</button>
+            <button class="btn primary small" type="button" (click)="using.set({ tpl, start: day(), project: tpl.project })">{{ 'Use' | t }}</button>
+          </li>
+        } @empty {
+          <li class="empty muted">{{ 'No templates yet. Write one, or save the tasks of this day as a template.' | t }}</li>
+        }
+      </ul>
+      <div class="actions">
+        @if (dayTasks().length) {
+          <button class="btn" type="button" [disabled]="busy()" (click)="saveDay()">{{ 'Save these {n} tasks as a template' | t: { n: dayTasks().length } }}</button>
+        }
+        <span class="spacer"></span>
+        <button class="btn primary" type="button" (click)="newTemplate()">{{ '+ New template' | t }}</button>
+      </div>
+    }
+  </div>
+</section>

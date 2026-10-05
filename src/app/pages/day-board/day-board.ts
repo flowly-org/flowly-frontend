@@ -1,6 +1,7 @@
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -9,6 +10,7 @@ import { CalendarStrip } from '../../components/calendar-strip/calendar-strip';
 import { NowCard } from '../../components/now-card/now-card';
 import { TaskCard } from '../../components/task-card/task-card';
 import { TaskDialog } from '../../components/task-dialog/task-dialog';
+import { TemplatesDialog } from '../../components/templates-dialog/templates-dialog';
 import { ApiService, TaskQuery, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { BoardData } from '../../core/board-data';
@@ -54,7 +56,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TranslatePipe],
+  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -95,6 +97,7 @@ export class DayBoard {
   protected quickAddLane = signal<string | null>(null);
   /** Bulk-add dialog: null = closed; 'day' plans for the viewed day, 'backlog' leaves them unscheduled. */
   protected bulk = signal<'day' | 'backlog' | null>(null);
+  protected templatesOpen = signal(false);
   protected quickAddTitle = '';
   protected backlogTitle = '';
 
@@ -171,7 +174,11 @@ export class DayBoard {
 
   constructor() {
     this.restorePrefs();
-    this.openFromLink();
+    // Deep links (also when already on this board, e.g. from search): ?task=<id>, ?templates=1.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((qp) => {
+      if (qp.get('task')) this.openFromLink();
+      if (qp.get('templates')) this.templatesOpen.set(true);
+    });
 
     if (this.mode === 'workspace') {
       effect(() => {
@@ -213,6 +220,7 @@ export class DayBoard {
   /** /w/<ws>/board?task=<id> (from notifications): jump to the task's day and open it. */
   private async openFromLink() {
     const id = Number(this.route.snapshot.queryParamMap.get('task'));
+    if (this.editing()?.task?.id === id) return;
     if (!id || this.wsId === null) return;
     try {
       const task = await this.api.task(this.wsId, id);

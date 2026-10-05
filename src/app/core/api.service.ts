@@ -8,6 +8,8 @@ import {
   WorkspaceMcp,
   DonetickAccount,
   DayLoad,
+  SearchResult,
+  TaskTemplate,
   TaskReminder,
   ApiTokenRow,
   BillingSettings,
@@ -245,6 +247,28 @@ export class ApiService {
   }
   dayLoad(date: string) {
     return this.run(this.http.get<DayLoad>(this.url('my/day-load/'), { params: new HttpParams().set('date', date) }));
+  }
+  templates(wsId: number) {
+    return this.run(this.http.get<TaskTemplate[]>(this.ws(wsId, 'templates/')));
+  }
+  saveTemplate(wsId: number, data: Partial<TaskTemplate>) {
+    return this.run(
+      data.id
+        ? this.http.patch<TaskTemplate>(this.ws(wsId, `templates/${data.id}/`), data)
+        : this.http.post<TaskTemplate>(this.ws(wsId, 'templates/'), data),
+    );
+  }
+  deleteTemplate(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `templates/${id}/`)));
+  }
+  applyTemplate(wsId: number, id: number, data: { start: string; project?: number | null }) {
+    return this.run(this.http.post<Task[]>(this.ws(wsId, `templates/${id}/apply/`), data));
+  }
+  templateFromTasks(wsId: number, name: string, tasks: number[]) {
+    return this.run(this.http.post<TaskTemplate>(this.ws(wsId, 'templates/from-tasks/'), { name, tasks }));
+  }
+  search(q: string) {
+    return this.run(this.http.get<SearchResult[]>(this.url('my/search/'), { params: new HttpParams().set('q', q) }));
   }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));

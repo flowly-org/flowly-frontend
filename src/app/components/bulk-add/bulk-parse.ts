@@ -5,11 +5,13 @@
  *   * [x] Already done +Website
  *     an indented line becomes a note on the task above
  *
- * Bullets (-, *, •, +, 1., 1)), checkboxes ([ ], [x]) and blank lines are understood.
- * Tokens: !priority  #tag  +project  @today|@tomorrow|@backlog|@mon…@sun|@YYYY-MM-DD
+ * Bullets (-, *, •, +, 1., 1)), checkboxes ([ ], [x]) and blank lines are understood; an indented [ ] line is a
+ * checklist item of the task above.
+ * Tokens: !priority  #tag  +project  @today|@tomorrow|@backlog|@mon…@sun|@YYYY-MM-DD|@+3 (days after the start)
+ *         ~30m|~1h|~1h30 (estimate)
  */
 import { addDays, parseIsoDate, toIsoDate } from '../../core/dates';
-import { Project, Tag, WorkspaceContext } from '../../core/models';
+import { ChecklistItem, Project, Tag, WorkspaceContext } from '../../core/models';
 
 export interface Draft {
   title: string;
@@ -22,6 +24,17 @@ export interface Draft {
   date: string | null | undefined;
   /** Untranslated message keys with a {value} placeholder; shown with the `t` pipe. */
   warnings: { key: string; value: string }[];
+  estimate: number | null;
+  checklist: ChecklistItem[];
+}
+
+/** "~30m", "~1h", "~1h30", "~1.5h", "~90" → minutes. */
+export function parseEstimate(token: string): number | null {
+  const m = token.match(/^~(\d+(?:[.,]\d+)?)(m|min|h)?(\d{1,2})?$/i);
+  if (!m) return null;
+  const value = parseFloat(m[1].replace(',', '.'));
+  const minutes = (m[2] ?? 'm').toLowerCase() === 'h' ? value * 60 + Number(m[3] ?? 0) : value;
+  return minutes > 0 && minutes <= 7 * 24 * 60 ? Math.round(minutes) : null;
 }
 
 const BULLET = /^(?:[-*•+]|\d+[.)])\s+/;
@@ -34,6 +47,8 @@ function parseDate(token: string, today: string): string | null | undefined {
   if (t === 'today') return today;
   if (t === 'tomorrow') return addDays(today, 1);
   if (t === 'backlog' || t === 'someday') return null;
+  const rel = t.match(/^\+(\d{1,3})(d|w)?$/);
+  if (rel) return addDays(today, Number(rel[1]) * (rel[2] === 'w' ? 7 : 1));
   if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
   const wd = WEEKDAYS.findIndex((d) => t.startsWith(d));
   if (wd >= 0) {
@@ -63,10 +78,12 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
     let line = raw.trim().replace(BULLET, '');
     if (indent > base && drafts.length) {
       const last = drafts[drafts.length - 1];
-      last.notes = (last.notes ? last.notes + '\n' : '') + line;
+      const item = line.match(CHECKBOX);
+      if (item && line.slice(item[0].length).trim()) last.checklist.push({ text: line.slice(item[0].length).trim(), done: item[1].toLowerCase() === 'x' });
+      else last.notes = (last.notes ? last.notes + '\n' : '') + line;
       continue;
     }
-    const draft: Draft = { title: '', notes: '', done: false, priority: null, tags: [], project: null, date: undefined, warnings: [] };
+    const draft: Draft = { title: '', notes: '', done: false, priority: null, tags: [], project: null, date: undefined, warnings: [], estimate: null, checklist: [] };
     const box = line.match(CHECKBOX);
     if (box) {
       draft.done = box[1].toLowerCase() === 'x';
@@ -76,6 +93,10 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
     for (const word of line.split(/\s+/)) {
       const sigil = word[0];
       const value = word.slice(1);
+      if (value && sigil === '~' && parseEstimate(word)) {
+        draft.estimate = parseEstimate(word);
+        continue;
+      }
       if (value && sigil === '!') {
         const p = priorities.find((t) => t.name.toLowerCase().startsWith(value.toLowerCase()));
         if (p) {

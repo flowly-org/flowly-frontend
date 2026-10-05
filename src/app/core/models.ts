@@ -721,3 +721,28 @@ export interface DonetickAccount {
   };
   created_at: string;
 }
+
+export interface TaskTemplate {
+  id: number;
+  name: string;
+  description: string;
+  /** Tasks in the bulk-add format (@+N = days after the start, ~30m, indented [ ] checklist items). */
+  body: string;
+  project: number | null;
+  count: number;
+}
+
+export interface SearchResult {
+  type: 'task' | 'project' | 'template' | 'wiki';
+  id: number;
+  workspace: number;
+  workspace_name: string;
+  title: string;
+  snippet?: string;
+  ref?: string;
+  done?: boolean;
+  planned_date?: string | null;
+  project?: string | null;
+  color?: string;
+  url?: string;
+}

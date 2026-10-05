@@ -101,6 +101,8 @@ export class BulkAdd implements OnInit {
       priority: d.priority?.id ?? null,
       tags: d.tags.map((t) => t.id),
       planned_date: d.date === undefined ? defaultDate : d.date,
+      ...(d.estimate ? { estimate_minutes: d.estimate } : {}),
+      ...(d.checklist.length ? { checklist: d.checklist } : {}),
       assignee: this.assignToMe() ? me : null,
       ...(d.done && done ? { status: done } : {}),
     }));

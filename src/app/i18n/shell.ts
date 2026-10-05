@@ -2,6 +2,9 @@ import type { Dict } from './index';
 
 export const SHELL: Dict = {
   it: {
+    "Search": "Cerca",
+    "Search tasks, comments, projects, wiki…": "Cerca attività, commenti, progetti, wiki…",
+    "Nothing found.": "Nessun risultato.",
     "Personality": "Personalità",
     "Friendly": "Amichevole",
     "Warm and upbeat, short and clear.": "Caloroso e positivo, breve e chiaro.",
@@ -215,6 +218,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Errore del server ({status}). Riprova.",
   },
   es: {
+    "Search": "Buscar",
+    "Search tasks, comments, projects, wiki…": "Buscar tareas, comentarios, proyectos, wiki…",
+    "Nothing found.": "No se encontró nada.",
     "Personality": "Personalidad",
     "Friendly": "Amable",
     "Warm and upbeat, short and clear.": "Cálido y positivo, breve y claro.",
@@ -428,6 +434,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Error del servidor ({status}). Inténtalo de nuevo.",
   },
   fr: {
+    "Search": "Rechercher",
+    "Search tasks, comments, projects, wiki…": "Rechercher tâches, commentaires, projets, wiki…",
+    "Nothing found.": "Rien trouvé.",
     "Personality": "Personnalité",
     "Friendly": "Amical",
     "Warm and upbeat, short and clear.": "Chaleureux et positif, court et clair.",
@@ -641,6 +650,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Erreur du serveur ({status}). Réessaie.",
   },
   de: {
+    "Search": "Suchen",
+    "Search tasks, comments, projects, wiki…": "Aufgaben, Kommentare, Projekte, Wiki durchsuchen…",
+    "Nothing found.": "Nichts gefunden.",
     "Personality": "Persönlichkeit",
     "Friendly": "Freundlich",
     "Warm and upbeat, short and clear.": "Herzlich und positiv, kurz und klar.",
@@ -854,6 +866,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Serverfehler ({status}). Bitte versuche es erneut.",
   },
   pt: {
+    "Search": "Pesquisar",
+    "Search tasks, comments, projects, wiki…": "Pesquisar tarefas, comentários, projetos, wiki…",
+    "Nothing found.": "Nada encontrado.",
     "Personality": "Personalidade",
     "Friendly": "Simpático",
     "Warm and upbeat, short and clear.": "Caloroso e positivo, curto e claro.",
