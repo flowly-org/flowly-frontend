@@ -23,6 +23,7 @@ import { I18nService } from '../../core/i18n.service';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { ToastService } from '../../core/toast.service';
 import { WorkspaceStore } from '../../core/workspace.store';
+import { setViewMode } from '../../core/view-mode';
 import {
   Column,
   GroupBy,
@@ -101,6 +102,12 @@ export class DayBoard {
   protected templatesOpen = signal(false);
   protected planOpen = signal(false);
   protected readonly me = this.auth.user()?.id ?? null;
+
+  /** The simplified view (the phone layout, also on a computer); remembered until "Full version". */
+  protected simpleView() {
+    setViewMode('compact');
+    this.router.navigate(['/m']);
+  }
 
   protected togglePlan() {
     this.planOpen.set(!this.planOpen());

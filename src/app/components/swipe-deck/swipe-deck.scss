@@ -192,3 +192,30 @@ footer {
     color: var(--accent-ink);
   }
 }
+
+.keys {
+  display: none;
+}
+
+/* With a mouse and keyboard: a narrower card, and the arrow keys mentioned. */
+@media (hover: hover) and (min-width: 720px) {
+  .stage {
+    width: min(460px, calc(100% - 36px));
+    margin: 8px auto;
+  }
+
+  header,
+  footer {
+    width: min(560px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+
+  .keys {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+  }
+}

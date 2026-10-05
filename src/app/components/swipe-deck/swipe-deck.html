@@ -43,7 +43,7 @@
   @if (!finished()) {
     <footer>
       <button type="button" class="round keep" [attr.aria-label]="'Keep to do' | t" (click)="decide('keep')">✕</button>
-      <span class="hint">{{ '← to do · done →' | t }}</span>
+      <span class="hint">{{ '← to do · done →' | t }}<span class="keys">{{ 'drag the card, or use the ← → keys' | t }}</span></span>
       <button type="button" class="round done" [attr.aria-label]="'Mark done' | t" (click)="decide('done')">✓</button>
     </footer>
   }

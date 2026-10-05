@@ -403,3 +403,42 @@
   text-transform: uppercase;
   color: var(--accent);
 }
+
+/* Simple view on a computer: a centered column instead of a stretched phone layout. */
+@media (min-width: 720px) {
+  :host {
+    background: var(--surface-2, var(--bg));
+  }
+
+  .screen {
+    width: min(680px, 100%);
+    margin: 0 auto;
+    background: var(--bg);
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    box-shadow: 0 0 40px rgb(0 0 0 / 4%);
+  }
+
+  .bar {
+    border-radius: 0;
+  }
+
+  .dock,
+  .sheet {
+    left: 50%;
+    right: auto;
+    width: min(680px, 100%);
+    transform: translateX(-50%);
+    box-sizing: border-box;
+  }
+
+  .dock {
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+
+  .row:hover .body .title {
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+  }
+}

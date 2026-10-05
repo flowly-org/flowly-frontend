@@ -114,7 +114,7 @@
           }
         </div>
         <a class="btn ghost block menu-link" routerLink="/settings" (click)="menuOpen.set(false)"><app-icon name="settings" [size]="16" /> {{ 'Settings & concierge' | t }}</a>
-        <button class="btn ghost block menu-link compact-link" type="button" (click)="menuOpen.set(false); compactView()"><app-icon name="phone" [size]="16" /> {{ 'Compact view' | t }}</button>
+        <button class="btn ghost block menu-link compact-link" type="button" (click)="menuOpen.set(false); compactView()"><app-icon name="phone" [size]="16" /> {{ 'Simple view' | t }}</button>
         <a class="btn ghost block menu-link" routerLink="/apps" (click)="menuOpen.set(false)"><app-icon name="download" [size]="16" /> {{ 'Get the apps' | t }}</a>
         <button class="btn ghost block menu-link" type="button" (click)="menuOpen.set(false); guide.show()"><app-icon name="help" [size]="16" /> {{ 'Getting started guide' | t }}</button>
         @if (auth.user()?.is_staff) {

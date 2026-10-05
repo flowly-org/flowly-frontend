@@ -3,6 +3,9 @@ import type { Dict } from './index';
 /** Board, task card, task dialog and its tabs, bulk add. */
 export const BOARD: Dict = {
   it: {
+    "Simple view": "Vista semplice",
+    "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Solo la lista di oggi, il timer e la revisione a swipe: una vista più tranquilla (Versione completa ti riporta qui)",
+    "drag the card, or use the ← → keys": "trascina la scheda o usa i tasti ← →",
     "Waits for": "Aspetta",
     "+ a task it waits for…": "+ un'attività che aspetta…",
     "Add a task it waits for": "Aggiungi un'attività che aspetta",
@@ -458,6 +461,9 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} attività",
   },
   es: {
+    "Simple view": "Vista sencilla",
+    "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Solo la lista de hoy, el temporizador y la revisión deslizando: una vista más tranquila (Versión completa te devuelve aquí)",
+    "drag the card, or use the ← → keys": "arrastra la tarjeta o usa las teclas ← →",
     "Waits for": "Espera a",
     "+ a task it waits for…": "+ una tarea que espera…",
     "Add a task it waits for": "Añadir una tarea que espera",
@@ -913,6 +919,9 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tareas",
   },
   fr: {
+    "Simple view": "Vue simple",
+    "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Seulement la liste du jour, le minuteur et la revue par balayage : une vue plus calme (Version complète te ramène ici)",
+    "drag the card, or use the ← → keys": "glisse la carte ou utilise les touches ← →",
     "Waits for": "Attend",
     "+ a task it waits for…": "+ une tâche attendue…",
     "Add a task it waits for": "Ajouter une tâche attendue",
@@ -1368,6 +1377,9 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tâches",
   },
   de: {
+    "Simple view": "Einfache Ansicht",
+    "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Nur die Liste von heute, der Timer und die Wisch-Übersicht: eine ruhigere Ansicht (Vollversion bringt dich zurück)",
+    "drag the card, or use the ← → keys": "Karte ziehen oder die Tasten ← → nutzen",
     "Waits for": "Wartet auf",
     "+ a task it waits for…": "+ eine Aufgabe, auf die sie wartet…",
     "Add a task it waits for": "Aufgabe hinzufügen, auf die sie wartet",
@@ -1823,6 +1835,9 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} Aufgaben",
   },
   pt: {
+    "Simple view": "Vista simples",
+    "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Só a lista de hoje, o temporizador e a revisão a deslizar: uma vista mais calma (Versão completa traz-te de volta)",
+    "drag the card, or use the ← → keys": "arrasta o cartão ou usa as teclas ← →",
     "Waits for": "Espera por",
     "+ a task it waits for…": "+ uma tarefa de que depende…",
     "Add a task it waits for": "Adicionar uma tarefa de que depende",

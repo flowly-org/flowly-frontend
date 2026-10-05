@@ -64,6 +64,7 @@
         </select>
       </label>
     }
+    <button class="btn" type="button" (click)="simpleView()" [title]="'Just today\'s list, the timer and swipe review: a calmer view (Full version brings you back)' | t">{{ 'Simple view' | t }}</button>
     <button class="btn" type="button" [class.active]="planOpen()" (click)="togglePlan()" [title]="'Block time for your tasks in the day' | t">{{ 'Plan' | t }}</button>
     <button class="btn" type="button" (click)="templatesOpen.set(true)" [title]="'Create a set of tasks from a template' | t">{{ 'Templates' | t }}</button>
     <button class="btn" type="button" (click)="bulk.set('day')" [title]="'Paste a list to add many tasks at once' | t">{{ 'Bulk add' | t }}</button>
