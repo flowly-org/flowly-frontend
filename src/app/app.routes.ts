@@ -78,7 +78,8 @@ export const routes: Routes = [
             loadComponent: () => import('./pages/day-board/day-board').then((m) => m.DayBoard),
             data: { mode: 'workspace' },
           },
-          { path: 'timeline', loadComponent: () => import('./pages/timeline/timeline-page').then((m) => m.TimelinePage) },
+          { path: 'sprints', loadComponent: () => import('./pages/sprints/sprints-page').then((m) => m.SprintsPage) },
+      { path: 'timeline', loadComponent: () => import('./pages/timeline/timeline-page').then((m) => m.TimelinePage) },
       { path: 'projects', loadComponent: () => import('./pages/projects/projects-page').then((m) => m.ProjectsPage) },
           { path: 'tags', loadComponent: () => import('./pages/tags/tags-page').then((m) => m.TagsPage) },
           {

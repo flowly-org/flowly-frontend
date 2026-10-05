@@ -63,6 +63,14 @@ import { WorkspaceStore } from '../../core/workspace.store';
           </div>
         </section>
 
+        <section class="panel">
+          <h2>{{ 'Agile rituals' | t }}</h2>
+          <div class="row">
+            <div class="grow muted">{{ 'Opt in to sprints, an async daily standup and retrospectives, for the whole workspace or a single project.' | t }}</div>
+            <a class="btn small" [routerLink]="['../sprints']">{{ (store.current()?.agile ? 'Open sprints' : 'Set up') | t }}</a>
+          </div>
+        </section>
+
         @if (store.current()?.my_role === 'owner') {
           <section class="panel">
             <h2>{{ 'Danger zone' | t }}</h2>

@@ -2,6 +2,10 @@ import type { Dict } from './index';
 
 export const ADMIN: Dict = {
   it: {
+    "Agile rituals": "Rituali agili",
+    "Opt in to sprints, an async daily standup and retrospectives, for the whole workspace or a single project.": "Attiva sprint, standup quotidiano asincrono e retrospettive, per tutto il workspace o un singolo progetto.",
+    "Open sprints": "Apri gli sprint",
+    "Set up": "Configura",
     "Friday": "Venerdì",
     "Sunday": "Domenica",
     "Off": "No",
@@ -409,6 +413,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Uguale ai messaggi dell'utente",
   },
   es: {
+    "Agile rituals": "Rituales ágiles",
+    "Opt in to sprints, an async daily standup and retrospectives, for the whole workspace or a single project.": "Activa sprints, un standup diario asíncrono y retrospectivas, para todo el espacio o un solo proyecto.",
+    "Open sprints": "Abrir sprints",
+    "Set up": "Configurar",
     "Friday": "Viernes",
     "Sunday": "Domingo",
     "Off": "No",
@@ -816,6 +824,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Igual que los mensajes del usuario",
   },
   fr: {
+    "Agile rituals": "Rituels agiles",
+    "Opt in to sprints, an async daily standup and retrospectives, for the whole workspace or a single project.": "Active les sprints, un standup quotidien asynchrone et des rétrospectives, pour tout l'espace ou un seul projet.",
+    "Open sprints": "Ouvrir les sprints",
+    "Set up": "Configurer",
     "Friday": "Vendredi",
     "Sunday": "Dimanche",
     "Off": "Non",
@@ -1223,6 +1235,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Comme les messages de l'utilisateur",
   },
   de: {
+    "Agile rituals": "Agile Rituale",
+    "Opt in to sprints, an async daily standup and retrospectives, for the whole workspace or a single project.": "Sprints, ein asynchrones Daily Standup und Retrospektiven einschalten, für den ganzen Workspace oder ein einzelnes Projekt.",
+    "Open sprints": "Sprints öffnen",
+    "Set up": "Einrichten",
     "Friday": "Freitag",
     "Sunday": "Sonntag",
     "Off": "Aus",
@@ -1630,6 +1646,10 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Wie die Nachrichten des Benutzers",
   },
   pt: {
+    "Agile rituals": "Rituais ágeis",
+    "Opt in to sprints, an async daily standup and retrospectives, for the whole workspace or a single project.": "Liga sprints, um standup diário assíncrono e retrospetivas, para todo o espaço ou um só projeto.",
+    "Open sprints": "Abrir sprints",
+    "Set up": "Configurar",
     "Friday": "Sexta-feira",
     "Sunday": "Domingo",
     "Off": "Não",

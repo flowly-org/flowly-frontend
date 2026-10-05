@@ -41,6 +41,8 @@ export interface Workspace {
   id: number;
   name: string;
   color: string;
+  /** Agile rituals switched on somewhere in the workspace. */
+  agile?: boolean;
   time_tracking: boolean;
   billing_enabled: boolean;
   plan?: 'standard' | 'enterprise';
@@ -815,4 +817,57 @@ export interface WeekReview {
     slipping: { id: number; workspace: number; title: string; planned_date: string | null; due_date: string | null; where: string }[];
     next_week: { tasks: number; estimated_minutes: number; capacity_minutes: number };
   };
+}
+
+export interface AgileSetup {
+  id: number;
+  project: number | null;
+  enabled: boolean;
+  sprint_weeks: number;
+  sprint_start: number;
+  carry_over: boolean;
+  standup: boolean;
+  standup_time: string;
+  standup_days: number[];
+  retro: boolean;
+  timezone: string;
+  label?: string;
+  sprint?: SprintBrief;
+}
+
+export interface SprintNumbers {
+  committed: number;
+  done: number;
+  open: number;
+  committed_minutes: number;
+  done_minutes: number;
+}
+
+export interface SprintBrief {
+  id: number;
+  number: number;
+  name: string;
+  goal: string;
+  start: string;
+  end: string;
+  status: 'planned' | 'active' | 'closed';
+  review: Partial<SprintNumbers> & { carried_over?: number; carried_titles?: string[]; done_titles?: string[]; velocity_minutes?: number };
+  numbers?: SprintNumbers;
+}
+
+export interface StandupText {
+  yesterday: string;
+  today: string;
+  blockers: string;
+}
+
+export interface SprintPage extends SprintBrief {
+  setup: AgileSetup;
+  label: string;
+  tasks: Task[];
+  backlog: Task[];
+  burndown: { unit: 'minutes' | 'tasks'; total: number; days: { date: string; remaining: number | null; ideal: number }[] };
+  capacity: { minutes: number; people: number; workdays: number };
+  standup: { date: string; entries: (StandupText & { user: number; name: string; updated_at: string })[]; mine: StandupText; answered: boolean };
+  retro: { id: number; kind: 'went_well' | 'improve' | 'idea'; text: string; votes: number; voted: boolean; mine: boolean; task: number | null }[];
 }

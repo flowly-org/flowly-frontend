@@ -29,6 +29,9 @@
 
     @if (store.navId(); as id) {
       <a [routerLink]="['/w', id, 'board']" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Board' | t" [attr.data-tip]="'Board' | t"><app-icon name="board" /><span class="label">{{ 'Board' | t }}</span></a>
+      @if (store.current()?.agile) {
+        <a [routerLink]="['/w', id, 'sprints']" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Sprints' | t" [attr.data-tip]="'Sprints' | t"><app-icon name="sprints" /><span class="label">{{ 'Sprints' | t }}</span></a>
+      }
       <a [routerLink]="['/w', id, 'timeline']" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Timeline' | t" [attr.data-tip]="'Timeline' | t"><app-icon name="timeline" /><span class="label">{{ 'Timeline' | t }}</span></a>
       <a [routerLink]="['/w', id, 'projects']" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Projects' | t" [attr.data-tip]="'Projects' | t"><app-icon name="projects" /><span class="label">{{ 'Projects' | t }}</span></a>
       <a [routerLink]="['/w', id, 'tags']" routerLinkActive="active" class="nav-item" [attr.aria-label]="'Tags' | t" [attr.data-tip]="'Tags' | t"><app-icon name="tags" /><span class="label">{{ 'Tags' | t }}</span></a>

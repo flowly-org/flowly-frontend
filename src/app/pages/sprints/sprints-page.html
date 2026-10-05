@@ -1,0 +1,253 @@
+<div class="page wide">
+  <header>
+    <div>
+      <h1>{{ 'Sprints' | t }}</h1>
+      <p class="muted">{{ 'Agile rituals for a team: sprint planning, a daily async standup, the burndown and a retrospective.' | t }}</p>
+    </div>
+    @if (setups()?.length) {
+      <div class="controls">
+        <select [ngModel]="setup()?.id" (ngModelChange)="pickSetup(+$event)" [attr.aria-label]="'Team' | t">
+          @for (s of setups(); track s.id) {
+            <option [ngValue]="s.id">{{ s.label }}</option>
+          }
+        </select>
+        @if (history().length > 1) {
+          <select [ngModel]="sprintId()" (ngModelChange)="sprintId.set(+$event)" [attr.aria-label]="'Sprint' | t">
+            @for (h of history(); track h.id) {
+              <option [ngValue]="h.id">{{ h.name }} · {{ formatShort(h.start) }} @if (h.status !== 'active') { ({{ h.status | t }}) }</option>
+            }
+          </select>
+        }
+        @if (store.canManage()) {
+          <button class="btn small" type="button" (click)="editing.set(setup() ? { ...setup()! } : null)">⚙ {{ 'Settings' | t }}</button>
+          <button class="btn ghost small" type="button" (click)="newSetup()">＋ {{ 'Another team' | t }}</button>
+        }
+      </div>
+    }
+  </header>
+
+  @if (editing(); as e) {
+    <section class="panel setup">
+      <h2>{{ (e.id ? 'Sprint settings' : 'Set up agile rituals') | t }}</h2>
+      <div class="grid">
+        @if (!e.id) {
+          <label>{{ 'For' | t }}
+            <select [(ngModel)]="e.project">
+              <option [ngValue]="null">{{ 'The whole workspace' | t }}</option>
+              @for (p of store.activeProjects(); track p.id) {
+                <option [ngValue]="p.id">{{ 'Project: {name}' | t: { name: p.name } }}</option>
+              }
+            </select>
+          </label>
+        }
+        <label>{{ 'Sprint length' | t }}
+          <select [(ngModel)]="e.sprint_weeks">
+            @for (w of [1, 2, 3, 4]; track w) {
+              <option [ngValue]="w">{{ (w === 1 ? '1 week' : '{n} weeks') | t: { n: w } }}</option>
+            }
+          </select>
+        </label>
+        <label>{{ 'Sprints start on' | t }}
+          <select [(ngModel)]="e.sprint_start">
+            @for (d of days; track $index; let i = $index) {
+              <option [ngValue]="i">{{ d | t }}</option>
+            }
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" [(ngModel)]="e.carry_over" /> {{ 'Move unfinished tasks to the next sprint' | t }}</label>
+        <label class="check"><input type="checkbox" [(ngModel)]="e.standup" /> {{ 'Daily async standup' | t }}</label>
+        @if (e.standup) {
+          <label>{{ 'Standup at' | t }} <input type="time" [(ngModel)]="e.standup_time" /></label>
+          <div class="days">
+            @for (d of days; track $index; let i = $index) {
+              <button type="button" [class.on]="e.standup_days?.includes(i)" (click)="toggleDay(e, i)">{{ d | t }}</button>
+            }
+          </div>
+        }
+        <label class="check"><input type="checkbox" [(ngModel)]="e.retro" /> {{ 'Retrospective board' | t }}</label>
+      </div>
+      <p class="muted small">{{ 'Everyone in the workspace gets the standup prompt (in Flowly, and on Telegram when Flo is linked: they can just reply). The team summary and the sprint review go to the workspace\'s Telegram group or Slack channel when one is connected.' | t }}</p>
+      <div class="actions">
+        @if (e.id) {
+          <button class="btn ghost danger small" type="button" (click)="disable($any(e))">{{ 'Switch off' | t }}</button>
+        }
+        <span class="spacer"></span>
+        <button class="btn" type="button" (click)="editing.set(null)">{{ 'Cancel' | t }}</button>
+        <button class="btn primary" type="button" [disabled]="busy()" (click)="saveSetup()">{{ (e.id ? 'Save' : 'Start the first sprint') | t }}</button>
+      </div>
+    </section>
+  }
+
+  @if (setups() && !setups()!.length && !editing()) {
+    <section class="panel empty-state">
+      <p>{{ 'Agile rituals are off in this workspace.' | t }}</p>
+      @if (store.canManage()) {
+        <button class="btn primary" type="button" (click)="newSetup()">{{ 'Set up sprints' | t }}</button>
+      } @else {
+        <p class="muted small">{{ 'An owner or admin can switch them on for the workspace or a project.' | t }}</p>
+      }
+    </section>
+  }
+
+  @if (page(); as p) {
+    <section class="panel head">
+      <div class="title">
+        <strong>{{ p.name }}</strong>
+        <span class="muted">{{ formatShort(p.start) }} – {{ formatShort(p.end) }} · {{ p.status | t }}</span>
+      </div>
+      <input class="goal" [(ngModel)]="goal" (blur)="saveGoal()" (keydown.enter)="saveGoal()" [placeholder]="'Sprint goal…' | t" [disabled]="p.status === 'closed'" />
+      @if (p.numbers; as n) {
+        <div class="progress">
+          <div class="bar"><span [style.width.%]="n.committed ? (100 * n.done) / n.committed : 0"></span></div>
+          <span class="small">{{ '{done}/{total} done' | t: { done: n.done, total: n.committed } }}
+            @if (committedMinutes()) { · {{ formatMinutes(committedMinutes()) }} {{ 'committed' | t }} / {{ formatMinutes(p.capacity.minutes) }} {{ 'capacity' | t }} }</span>
+        </div>
+      }
+      <div class="head-actions">
+        @if (p.status === 'active' && store.canManage()) {
+          <button class="btn small" type="button" (click)="planNext()">{{ 'Plan the next sprint' | t }}</button>
+          <button class="btn small" type="button" [disabled]="busy()" (click)="close()">{{ 'Close sprint' | t }}</button>
+        }
+      </div>
+    </section>
+
+    @if (p.status === 'closed') {
+      <section class="panel review">
+        <h2>{{ 'Sprint review' | t }}</h2>
+        <p>{{ 'Done {done}/{total} tasks.' | t: { done: p.review.done ?? 0, total: p.review.committed ?? 0 } }}
+          @if (p.review.carried_over) { {{ '{n} carried over.' | t: { n: p.review.carried_over } }} }
+          @if (p.review.velocity_minutes) { {{ 'Velocity: about {v} per sprint.' | t: { v: formatMinutes(p.review.velocity_minutes) } }} }</p>
+        @if (p.review.done_titles?.length) {
+          <p class="muted small">✓ {{ p.review.done_titles!.join(' · ') }}</p>
+        }
+      </section>
+    }
+
+    <nav class="tabs" role="tablist">
+      @for (t of [['board', 'Board'], ['planning', 'Planning'], ['burndown', 'Burndown'], ['standup', 'Standup'], ['retro', 'Retro']]; track t[0]) {
+        @if ((t[0] !== 'standup' || p.setup.standup) && (t[0] !== 'retro' || p.setup.retro)) {
+          <button type="button" role="tab" [class.on]="tab() === t[0]" (click)="tab.set($any(t[0]))">{{ t[1] | t }}</button>
+        }
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('board') {
+        <div class="cols">
+          @for (c of columns(); track c.status.id) {
+            <section class="col">
+              <h3><span class="dot" [style.background]="c.status.color"></span>{{ c.status.name }} <span class="muted">{{ c.tasks.length }}</span></h3>
+              @for (t of c.tasks; track t.id) {
+                <div class="card" [class.blocked]="t.blocked">
+                  <button type="button" class="link" (click)="openTask(t)">@if (t.blocked) { ⛓ } {{ t.title }}</button>
+                  <div class="meta">
+                    @if (t.estimate_minutes) { <span>≈ {{ formatMinutes(t.estimate_minutes) }}</span> }
+                    <select [ngModel]="t.status" (ngModelChange)="setStatus(t, +$event)" [attr.aria-label]="'Status' | t">
+                      @for (s of columns(); track s.status.id) {
+                        <option [ngValue]="s.status.id">{{ s.status.name }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              } @empty {
+                <p class="muted small">—</p>
+              }
+            </section>
+          }
+        </div>
+      }
+      @case ('planning') {
+        <div class="plan">
+          <section class="panel">
+            <h2>{{ 'Backlog' | t }} <span class="muted">{{ p.backlog.length }}</span></h2>
+            @for (t of p.backlog; track t.id) {
+              <div class="row">
+                <span class="grow">{{ t.title }} @if (t.estimate_minutes) { <span class="muted small">≈ {{ formatMinutes(t.estimate_minutes) }}</span> }</span>
+                @if (p.status !== 'closed') { <button class="btn small" type="button" (click)="move(t, true)">{{ 'Add' | t }} →</button> }
+              </div>
+            } @empty {
+              <p class="muted small pad">{{ 'Nothing left in the backlog.' | t }}</p>
+            }
+          </section>
+          <section class="panel">
+            <h2>{{ p.name }} <span class="muted">{{ p.tasks.length }} · {{ formatMinutes(committedMinutes()) }} / {{ formatMinutes(p.capacity.minutes) }}</span></h2>
+            <div class="cap"><span [class.over]="committedMinutes() > p.capacity.minutes" [style.width.%]="p.capacity.minutes ? (100 * committedMinutes()) / p.capacity.minutes : 0"></span></div>
+            @for (t of p.tasks; track t.id) {
+              <div class="row">
+                @if (p.status !== 'closed') { <button class="btn ghost small" type="button" (click)="move(t, false)">← </button> }
+                <span class="grow">{{ t.title }} @if (t.estimate_minutes) { <span class="muted small">≈ {{ formatMinutes(t.estimate_minutes) }}</span> }</span>
+              </div>
+            } @empty {
+              <p class="muted small pad">{{ 'Add tasks from the backlog.' | t }}</p>
+            }
+            <p class="muted small pad">{{ 'Capacity: {people} people × {days} working days × their daily hours × 70%.' | t: { people: p.capacity.people, days: p.capacity.workdays } }}</p>
+          </section>
+        </div>
+      }
+      @case ('burndown') {
+        <section class="panel burn">
+          <svg viewBox="-70 -10 710 200" role="img" [attr.aria-label]="'Burndown' | t">
+            <line x1="0" y1="160" x2="600" y2="160" class="axis" />
+            <line x1="0" y1="0" x2="0" y2="160" class="axis" />
+            <text x="-6" y="4" text-anchor="end" class="lab">{{ burnLabel(p.burndown.total) }}</text>
+            <text x="-6" y="160" text-anchor="end" class="lab">0</text>
+            <text x="0" y="178" class="lab">{{ formatShort(p.start) }}</text>
+            <text x="600" y="178" text-anchor="end" class="lab">{{ formatShort(p.end) }}</text>
+            <path [attr.d]="idealPath()" class="ideal" />
+            <path [attr.d]="burnPath()" class="actual" />
+          </svg>
+          <p class="muted small pad">{{ (p.burndown.unit === 'minutes' ? 'Remaining estimated work (tasks without an estimate count 30 min); dashed: the ideal pace.' : 'Remaining tasks; dashed: the ideal pace.') | t }}</p>
+        </section>
+      }
+      @case ('standup') {
+        <div class="plan">
+          <section class="panel">
+            <h2>{{ 'My standup' | t }} <span class="muted small">{{ formatShort(p.standup.date) }}</span></h2>
+            <div class="form">
+              <label>{{ 'Yesterday' | t }} <textarea rows="3" [(ngModel)]="p.standup.mine.yesterday"></textarea></label>
+              <label>{{ 'Today' | t }} <textarea rows="3" [(ngModel)]="p.standup.mine.today"></textarea></label>
+              <label>{{ 'Blockers' | t }} <textarea rows="2" [(ngModel)]="p.standup.mine.blockers"></textarea></label>
+              <button class="btn primary" type="button" (click)="postStandup()">{{ (p.standup.answered ? 'Update' : 'Post') | t }}</button>
+              @if (!p.standup.answered) { <p class="muted small">{{ 'Drafted from your tasks: edit and post.' | t }}</p> }
+            </div>
+          </section>
+          <section class="panel">
+            <h2>{{ 'The team today' | t }}</h2>
+            @for (e of p.standup.entries; track e.user) {
+              <div class="entry">
+                <strong>{{ e.name }}</strong>
+                @if (e.yesterday) { <p>✓ {{ e.yesterday }}</p> }
+                @if (e.today) { <p>→ {{ e.today }}</p> }
+                @if (e.blockers) { <p class="danger-text">⚠ {{ e.blockers }}</p> }
+              </div>
+            } @empty {
+              <p class="muted small pad">{{ 'No updates yet today.' | t }}</p>
+            }
+          </section>
+        </div>
+      }
+      @case ('retro') {
+        <div class="retro">
+          @for (c of retroCols; track c.kind) {
+            <section class="panel">
+              <h2>{{ c.icon }} {{ c.label | t }}</h2>
+              @for (r of retroItems(c.kind); track r.id) {
+                <div class="note">
+                  <span class="grow">{{ r.text }}</span>
+                  <button type="button" class="vote" [class.on]="r.voted" (click)="vote(r.id, r.voted)" [attr.aria-label]="'Vote' | t">▲ {{ r.votes }}</button>
+                  @if (!r.task && c.kind !== 'went_well') {
+                    <button type="button" class="btn ghost small" (click)="action(r.id)" [title]="'Make it an action item in the next sprint' | t">→ {{ 'Action' | t }}</button>
+                  } @else if (r.task) {
+                    <span class="muted small">✓ {{ 'action item' | t }}</span>
+                  }
+                  @if (r.mine) { <button type="button" class="x" [attr.aria-label]="'Remove' | t" (click)="removeRetro(r.id)">✕</button> }
+                </div>
+              }
+              <input [(ngModel)]="retroDraft[c.kind]" (keydown.enter)="addRetro(c.kind)" [placeholder]="'+ Add…' | t" />
+            </section>
+          }
+        </div>
+      }
+    }
+  }
+</div>

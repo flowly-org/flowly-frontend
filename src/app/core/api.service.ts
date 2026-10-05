@@ -8,6 +8,11 @@ import {
   WorkspaceMcp,
   DonetickAccount,
   DayLoad,
+  AgileSetup,
+  SprintBrief,
+  SprintNumbers,
+  SprintPage,
+  StandupText,
   InsightStats,
   WeekReview,
   DayBlocks,
@@ -307,6 +312,48 @@ export class ApiService {
     let params = new HttpParams().set('scope', scope).set('weeks', weeks);
     if (id) params = params.set('id', id);
     return this.run(this.http.get<InsightStats>(this.url('insights/'), { params }));
+  }
+  agileSetups(wsId: number) {
+    return this.run(this.http.get<AgileSetup[]>(this.ws(wsId, 'agile/')));
+  }
+  saveAgileSetup(wsId: number, data: Partial<AgileSetup>, id?: number) {
+    return this.run(id ? this.http.patch<AgileSetup>(this.ws(wsId, `agile/${id}/`), data) : this.http.post<AgileSetup>(this.ws(wsId, 'agile/'), data));
+  }
+  disableAgile(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `agile/${id}/`)));
+  }
+  sprints(wsId: number, setupId: number) {
+    return this.run(this.http.get<SprintBrief[]>(this.ws(wsId, `agile/${setupId}/sprints/`)));
+  }
+  planNextSprint(wsId: number, setupId: number) {
+    return this.run(this.http.post<SprintBrief>(this.ws(wsId, `agile/${setupId}/sprints/`), {}));
+  }
+  sprint(wsId: number, id: number) {
+    return this.run(this.http.get<SprintPage>(this.ws(wsId, `sprints/${id}/`)));
+  }
+  updateSprint(wsId: number, id: number, data: { goal: string }) {
+    return this.run(this.http.patch<SprintBrief>(this.ws(wsId, `sprints/${id}/`), data));
+  }
+  sprintTasks(wsId: number, id: number, add: number[], remove: number[]) {
+    return this.run(this.http.post<SprintNumbers>(this.ws(wsId, `sprints/${id}/tasks/`), { add, remove }));
+  }
+  closeSprint(wsId: number, id: number) {
+    return this.run(this.http.post<SprintBrief>(this.ws(wsId, `sprints/${id}/close/`), {}));
+  }
+  postStandup(wsId: number, setupId: number, data: StandupText) {
+    return this.run(this.http.post<StandupText>(this.ws(wsId, `agile/${setupId}/standup/`), data));
+  }
+  addRetro(wsId: number, sprintId: number, kind: string, text: string) {
+    return this.run(this.http.post<{ id: number }>(this.ws(wsId, `sprints/${sprintId}/retro/`), { kind, text }));
+  }
+  voteRetro(wsId: number, id: number, vote: boolean) {
+    return this.run(this.http.patch<{ votes: number; voted: boolean }>(this.ws(wsId, `retro/${id}/`), { vote }));
+  }
+  deleteRetro(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `retro/${id}/`)));
+  }
+  retroAction(wsId: number, id: number) {
+    return this.run(this.http.post<{ task: number; sprint: number }>(this.ws(wsId, `retro/${id}/`), {}));
   }
   myContext() {
     return this.run(this.http.get<WorkspaceContext[]>(this.url('my/context/')));
