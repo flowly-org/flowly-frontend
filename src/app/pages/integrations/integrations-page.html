@@ -181,6 +181,15 @@
                     </select>
                   </label>
                 </div>
+                <label>
+                  {{ 'Read emails with AI' | t }}
+                  <select name="ai" [(ngModel)]="f.config['ai']">
+                    <option value="off">{{ 'Off: one task per email' | t }}</option>
+                    <option value="auto">{{ 'Long or forwarded emails: one task per action item' | t }}</option>
+                    <option value="always">{{ 'Every email: one task per action item' | t }}</option>
+                  </select>
+                  <small class="muted">{{ 'AI finds the action items, who should do them and by when. It uses the sender\'s Flowly Pro, or the workspace\'s own AI provider; otherwise the email becomes a single task as usual.' | t }}</small>
+                </label>
               }
               @case ('donetick') {
                 <div class="grid2">

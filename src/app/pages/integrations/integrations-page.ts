@@ -193,7 +193,7 @@ export class IntegrationsPage implements OnInit {
       kind === 'github'
         ? { sync_labels: true, status_labels: false, create_issues: false, schedule: 'backlog', repo: '' }
         : kind === 'email'
-          ? { allowed_senders: 'members', schedule: 'backlog' }
+          ? { allowed_senders: 'members', schedule: 'backlog', ai: 'auto' }
           : kind === 'incoming_webhook'
             ? { schedule: 'backlog', require_signature: false }
             : kind === 'openrouter'

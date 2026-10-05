@@ -287,6 +287,7 @@ export class MobileDay {
       planned_date: d.date === undefined ? this.date() : d.date,
       ...(d.estimate ? { estimate_minutes: d.estimate } : {}),
       ...(d.checklist.length ? { checklist: d.checklist } : {}),
+      ...(d.assignee ? { assignee: d.assignee } : {}),
       assignee: me,
       ...(d.done && done ? { status: done } : {}),
     }));

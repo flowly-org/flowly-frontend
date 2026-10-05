@@ -280,6 +280,9 @@ export class ApiService {
     return this.run(this.http.patch<Task>(this.ws(wsId, `tasks/${id}/`), data));
   }
   /** Photo of a to-do list → text in the bulk-add format (nothing is created). */
+  tasksFromNotes(wsId: number, text: string) {
+    return this.run(this.http.post<{ text: string }>(this.ws(wsId, 'tasks/from-notes/'), { text }));
+  }
   tasksFromPhoto(wsId: number, image: Blob) {
     const form = new FormData();
     form.append('image', image, 'list.jpg');

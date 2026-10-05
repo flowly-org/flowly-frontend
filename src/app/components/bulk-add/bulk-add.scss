@@ -242,3 +242,27 @@ footer {
   border-radius: 8px;
   background: color-mix(in srgb, var(--warn) 10%, var(--surface));
 }
+
+.notes-box {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 10px;
+  padding: 10px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.notes-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.chip.assignee {
+  --chip: var(--brand, var(--accent));
+}

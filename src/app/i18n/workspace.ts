@@ -2,6 +2,11 @@ import type { Dict } from './index';
 
 export const WORKSPACE: Dict = {
   it: {
+    "Read emails with AI": "Leggi le email con l'IA",
+    "Off: one task per email": "No: un'attività per email",
+    "Long or forwarded emails: one task per action item": "Email lunghe o inoltrate: un'attività per azione",
+    "Every email: one task per action item": "Ogni email: un'attività per azione",
+    "AI finds the action items, who should do them and by when. It uses the sender's Flowly Pro, or the workspace's own AI provider; otherwise the email becomes a single task as usual.": "L'IA trova le azioni, chi deve farle ed entro quando. Usa il Flowly Pro del mittente o il fornitore IA del workspace; altrimenti l'email diventa un'unica attività come al solito.",
     "Wiki address": "Indirizzo della wiki",
     "Only this category (optional)": "Solo questa categoria (facoltativo)",
     "Bot username (only for private wikis)": "Nome utente del bot (solo per wiki private)",
@@ -442,6 +447,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} aperte",
   },
   es: {
+    "Read emails with AI": "Leer los correos con IA",
+    "Off: one task per email": "No: una tarea por correo",
+    "Long or forwarded emails: one task per action item": "Correos largos o reenviados: una tarea por acción",
+    "Every email: one task per action item": "Cada correo: una tarea por acción",
+    "AI finds the action items, who should do them and by when. It uses the sender's Flowly Pro, or the workspace's own AI provider; otherwise the email becomes a single task as usual.": "La IA encuentra las tareas, quién debe hacerlas y para cuándo. Usa el Flowly Pro del remitente o el proveedor de IA del espacio; si no, el correo se convierte en una sola tarea como siempre.",
     "Wiki address": "Dirección de la wiki",
     "Only this category (optional)": "Solo esta categoría (opcional)",
     "Bot username (only for private wikis)": "Usuario del bot (solo para wikis privadas)",
@@ -882,6 +892,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} abiertas",
   },
   fr: {
+    "Read emails with AI": "Lire les e-mails avec l'IA",
+    "Off: one task per email": "Non : une tâche par e-mail",
+    "Long or forwarded emails: one task per action item": "E-mails longs ou transférés : une tâche par action",
+    "Every email: one task per action item": "Chaque e-mail : une tâche par action",
+    "AI finds the action items, who should do them and by when. It uses the sender's Flowly Pro, or the workspace's own AI provider; otherwise the email becomes a single task as usual.": "L'IA trouve les actions, qui doit les faire et pour quand. Elle utilise le Flowly Pro de l'expéditeur ou le fournisseur IA de l'espace ; sinon l'e-mail devient une seule tâche comme d'habitude.",
     "Wiki address": "Adresse du wiki",
     "Only this category (optional)": "Seulement cette catégorie (facultatif)",
     "Bot username (only for private wikis)": "Nom d'utilisateur du bot (seulement pour les wikis privés)",
@@ -1322,6 +1337,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} ouvertes",
   },
   de: {
+    "Read emails with AI": "E-Mails mit KI lesen",
+    "Off: one task per email": "Aus: eine Aufgabe pro E-Mail",
+    "Long or forwarded emails: one task per action item": "Lange oder weitergeleitete E-Mails: eine Aufgabe pro Punkt",
+    "Every email: one task per action item": "Jede E-Mail: eine Aufgabe pro Punkt",
+    "AI finds the action items, who should do them and by when. It uses the sender's Flowly Pro, or the workspace's own AI provider; otherwise the email becomes a single task as usual.": "Die KI findet die Aufgaben, wer sie machen soll und bis wann. Sie nutzt das Flowly Pro des Absenders oder den KI-Anbieter des Workspaces; sonst wird die E-Mail wie gewohnt zu einer Aufgabe.",
     "Wiki address": "Wiki-Adresse",
     "Only this category (optional)": "Nur diese Kategorie (optional)",
     "Bot username (only for private wikis)": "Bot-Benutzername (nur für private Wikis)",
@@ -1762,6 +1782,11 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} offen",
   },
   pt: {
+    "Read emails with AI": "Ler os e-mails com IA",
+    "Off: one task per email": "Não: uma tarefa por e-mail",
+    "Long or forwarded emails: one task per action item": "E-mails longos ou reencaminhados: uma tarefa por ação",
+    "Every email: one task per action item": "Cada e-mail: uma tarefa por ação",
+    "AI finds the action items, who should do them and by when. It uses the sender's Flowly Pro, or the workspace's own AI provider; otherwise the email becomes a single task as usual.": "A IA encontra as ações, quem as deve fazer e até quando. Usa o Flowly Pro do remetente ou o fornecedor de IA do espaço; caso contrário o e-mail torna-se uma única tarefa como habitual.",
     "Wiki address": "Endereço da wiki",
     "Only this category (optional)": "Só esta categoria (opcional)",
     "Bot username (only for private wikis)": "Utilizador do bot (só para wikis privadas)",

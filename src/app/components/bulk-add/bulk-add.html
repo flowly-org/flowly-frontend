@@ -51,7 +51,27 @@
             📷 {{ 'From a photo' | t }}
             <input type="file" accept="image/*" (change)="onPhoto($event)" [disabled]="!!reading()" hidden />
           </label>
+          <button type="button" class="btn small" (click)="notes.set(notes() ? null : { text: '', busy: false })"
+            [title]="'Paste meeting notes or a transcript; AI finds the action items, who does them and by when' | t">
+            📝 {{ 'From meeting notes' | t }}
+          </button>
         </span>
+        @if (notes(); as n) {
+          <div class="notes-box">
+            <textarea [ngModel]="n.text" (ngModelChange)="notes.set({ text: $event, busy: n.busy })" rows="8" [disabled]="n.busy"
+              [placeholder]="'Paste the notes, minutes or transcript of the meeting…' | t" [attr.aria-label]="'Meeting notes' | t"></textarea>
+            <div class="notes-actions">
+              <label class="btn ghost small">
+                {{ 'Open a file' | t }} (.txt, .md, .vtt, .srt)
+                <input type="file" accept=".txt,.md,.vtt,.srt,text/plain,text/markdown,text/vtt" (change)="onNotesFile($event)" hidden />
+              </label>
+              <span class="spacer"></span>
+              <button type="button" class="btn primary small" [disabled]="n.busy || n.text.trim().length < 20" (click)="readNotes()">
+                {{ (n.busy ? 'Finding the action items…' : 'Find the action items') | t }}
+              </button>
+            </div>
+          </div>
+        }
         @if (reading(); as src) {
           <span class="reading" role="status">
             <img [src]="src" alt="" />
@@ -60,6 +80,8 @@
           </span>
         } @else if (fromPhoto()) {
           <span class="photo-note">{{ 'Read from your photo: check the list, fix anything that was misread, then add.' | t }}</span>
+        } @else if (fromNotes()) {
+          <span class="photo-note">{{ 'Action items from your notes: check who does what (=Name) and when, then add.' | t }}</span>
         }
         <textarea
           [ngModel]="text()"
@@ -71,7 +93,7 @@
         ></textarea>
         <span class="syntax muted">
           <code>!high</code> {{ 'priority' | t }} · <code>#tag</code> · <code>+Project</code> · <code>&#64;tomorrow</code> <code>&#64;fri</code> <code>&#64;2026-10-05</code> <code>&#64;backlog</code> ·
-          <code>~30m</code> {{ 'estimate' | t }} · <code>[x]</code> {{ 'done' | t }} · {{ 'indented lines become notes' | t }} · {{ 'indented' | t }} <code>[ ]</code> {{ 'checklist' | t }}
+          <code>~30m</code> {{ 'estimate' | t }} · <code>=Anna</code> {{ 'assignee' | t }} · <code>[x]</code> {{ 'done' | t }} · {{ 'indented lines become notes' | t }} · {{ 'indented' | t }} <code>[ ]</code> {{ 'checklist' | t }}
         </span>
       </div>
 
@@ -90,6 +112,15 @@
               }
               @for (t of d.tags; track t.id) {
                 <span class="chip" [style.--chip]="t.color">{{ t.name }}</span>
+              }
+              @if (d.assigneeName) {
+                <span class="chip assignee">→ {{ d.assigneeName }}</span>
+              }
+              @if (d.estimate) {
+                <span class="muted">≈ {{ d.estimate }}m</span>
+              }
+              @if (d.checklist.length) {
+                <span class="muted">☑ {{ d.checklist.length }}</span>
               }
               @if (d.notes) {
                 <span class="muted" [title]="d.notes">{{ '+ notes' | t }}</span>

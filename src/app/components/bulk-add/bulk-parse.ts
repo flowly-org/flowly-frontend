@@ -8,7 +8,7 @@
  * Bullets (-, *, •, +, 1., 1)), checkboxes ([ ], [x]) and blank lines are understood; an indented [ ] line is a
  * checklist item of the task above.
  * Tokens: !priority  #tag  +project  @today|@tomorrow|@backlog|@mon…@sun|@YYYY-MM-DD|@+3 (days after the start)
- *         ~30m|~1h|~1h30 (estimate)
+ *         ~30m|~1h|~1h30 (estimate)  =Anna (assignee: a member's name, first name or email)
  */
 import { addDays, parseIsoDate, toIsoDate } from '../../core/dates';
 import { ChecklistItem, Project, Tag, WorkspaceContext } from '../../core/models';
@@ -26,6 +26,9 @@ export interface Draft {
   warnings: { key: string; value: string }[];
   estimate: number | null;
   checklist: ChecklistItem[];
+  /** User id from an =Name token. */
+  assignee: number | null;
+  assigneeName: string | null;
 }
 
 /** "~30m", "~1h", "~1h30", "~1.5h", "~90" → minutes. */
@@ -71,6 +74,20 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
     return !group || group.kind === 'custom';
   }) ?? [];
   const projects = ctx?.projects.filter((p) => !p.archived) ?? [];
+  const members = (ctx?.members ?? []).map((m) => m.user);
+  const findMember = (value: string) => {
+    const key = norm(value);
+    const tests = [
+      (u: { full_name: string; email: string }) => norm(u.full_name || '') === key,
+      (u: { full_name: string; email: string }) => norm(u.email.split('@')[0].replace(/\./g, ' ')) === key || u.email.toLowerCase() === value.toLowerCase(),
+      (u: { full_name: string; email: string }) => norm((u.full_name || '').split(' ')[0]) === key,
+    ];
+    for (const test of tests) {
+      const found = members.filter(test);
+      if (found.length === 1) return found[0];
+    }
+    return null;
+  };
 
   for (const raw of lines) {
     if (!raw.trim()) continue;
@@ -83,7 +100,7 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
       else last.notes = (last.notes ? last.notes + '\n' : '') + line;
       continue;
     }
-    const draft: Draft = { title: '', notes: '', done: false, priority: null, tags: [], project: null, date: undefined, warnings: [], estimate: null, checklist: [] };
+    const draft: Draft = { title: '', notes: '', done: false, priority: null, tags: [], project: null, date: undefined, warnings: [], estimate: null, checklist: [], assignee: null, assigneeName: null };
     const box = line.match(CHECKBOX);
     if (box) {
       draft.done = box[1].toLowerCase() === 'x';
@@ -96,6 +113,15 @@ export function parseList(text: string, ctx: WorkspaceContext | undefined, today
       if (value && sigil === '~' && parseEstimate(word)) {
         draft.estimate = parseEstimate(word);
         continue;
+      }
+      if (value && sigil === '=') {
+        const member = findMember(value);
+        if (member) {
+          draft.assignee = member.id;
+          draft.assigneeName = member.full_name || member.email;
+          continue;
+        }
+        draft.warnings.push({ key: 'No member “{value}”: left in the title', value });
       }
       if (value && sigil === '!') {
         const p = priorities.find((t) => t.name.toLowerCase().startsWith(value.toLowerCase()));

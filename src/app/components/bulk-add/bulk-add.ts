@@ -42,6 +42,9 @@ export class BulkAdd implements OnInit {
   /** Reading a photo: its preview URL while the model works. */
   protected reading = signal<string | null>(null);
   protected fromPhoto = signal(false);
+  /** Meeting notes / transcript being turned into action items. */
+  protected notes = signal<{ text: string; busy: boolean } | null>(null);
+  protected fromNotes = signal(false);
   protected error = signal<string | null>(null);
 
   protected ctx = computed(() => this.data.ctx(this.wsId()));
@@ -87,6 +90,41 @@ export class BulkAdd implements OnInit {
     }
   }
 
+  protected async onNotesFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      this.error.set(this.i18n.t('That file is too large (max 2 MB).'));
+      return;
+    }
+    let text = await file.text();
+    // Subtitles (.vtt, .srt): keep the spoken lines only.
+    if (/\.(vtt|srt)$/i.test(file.name)) {
+      text = text.split(/\r?\n/).filter((l) => l.trim() && !/^(WEBVTT|\d+$|\d{2}:\d{2})/.test(l.trim()) && !l.includes('-->')).join('\n');
+    }
+    this.notes.set({ text, busy: false });
+  }
+
+  protected async readNotes() {
+    const n = this.notes();
+    if (!n || n.text.trim().length < 20) return;
+    this.notes.set({ ...n, busy: true });
+    this.error.set(null);
+    try {
+      const { text } = await this.api.tasksFromNotes(this.wsId(), n.text);
+      const current = this.text().trim();
+      this.text.set(current ? `${current}\n${text}` : text);
+      this.fromNotes.set(true);
+      this.assignToMe.set(false);
+      this.notes.set(null);
+    } catch (err) {
+      this.error.set(errorMessage(err, this.i18n.t('Could not read the notes.')));
+      this.notes.set({ ...n, busy: false });
+    }
+  }
+
   async create() {
     const drafts = this.drafts();
     if (!drafts.length) return;
@@ -103,7 +141,7 @@ export class BulkAdd implements OnInit {
       planned_date: d.date === undefined ? defaultDate : d.date,
       ...(d.estimate ? { estimate_minutes: d.estimate } : {}),
       ...(d.checklist.length ? { checklist: d.checklist } : {}),
-      assignee: this.assignToMe() ? me : null,
+      assignee: d.assignee ?? (this.assignToMe() ? me : null),
       ...(d.done && done ? { status: done } : {}),
     }));
     this.busy.set(true);
