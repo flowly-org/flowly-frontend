@@ -57,12 +57,13 @@ export class AuthService {
     await this.loadMe();
   }
 
-  async register(email: string, password: string, fullName: string): Promise<void> {
+  async register(email: string, password: string, fullName: string, code = ''): Promise<void> {
     const res = await firstValueFrom(
       this.http.post<AuthResponse>(`${this.config.apiUrl}/auth/register/`, {
         email,
         password,
         full_name: fullName,
+        ...(code.trim() ? { code: code.trim() } : {}),
         language: document.documentElement.lang || 'en',
       }),
     );
@@ -81,6 +82,22 @@ export class AuthService {
       this.clear();
       return null;
     }
+  }
+
+  /** What an invite code gives (public; for the sign-up form). */
+  checkCode(code: string) {
+    return firstValueFrom(
+      this.http.get<{ valid: boolean; plan?: 'pro' | 'pro_plus'; forever?: boolean; days?: number | null; detail?: string }>(
+        `${this.config.apiUrl}/auth/code/`, { params: { code } }),
+    );
+  }
+
+  async redeemCode(code: string) {
+    const res = await firstValueFrom(
+      this.http.post<{ plan: string; forever: boolean; user: User; stripe_subscription: boolean }>(`${this.config.apiUrl}/auth/redeem/`, { code }),
+    );
+    this.user.set(res.user);
+    return res;
   }
 
   async updateProfile(data: Partial<Pick<User, 'full_name' | 'github_login' | 'language' | 'home_location' | 'adhd_mode' | 'focus'>>): Promise<void> {

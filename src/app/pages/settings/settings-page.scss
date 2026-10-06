@@ -506,3 +506,44 @@ label.grow {
   .hours { display: flex; align-items: center; gap: 6px; }
   input[type='time'] { width: auto; }
 }
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 4px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  width: fit-content;
+  max-width: 100%;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 9px;
+    font: inherit;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover { color: var(--ink); }
+
+    &.on {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+    }
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    scrollbar-width: none;
+  }
+}

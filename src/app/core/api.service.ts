@@ -8,6 +8,7 @@ import {
   WorkspaceMcp,
   DonetickAccount,
   DayLoad,
+  InviteCodeRow,
   AgileSetup,
   SprintBrief,
   SprintNumbers,
@@ -570,6 +571,18 @@ export class ApiService {
   }
   deleteAdminGithubApp() {
     return this.run(this.http.delete<void>(this.url('admin/github-app/')));
+  }
+  inviteCodes() {
+    return this.run(this.http.get<InviteCodeRow[]>(this.url('admin/codes/')));
+  }
+  createInviteCode(data: Partial<InviteCodeRow>) {
+    return this.run(this.http.post<InviteCodeRow>(this.url('admin/codes/'), data));
+  }
+  updateInviteCode(id: number, data: Partial<InviteCodeRow>) {
+    return this.run(this.http.patch<InviteCodeRow>(this.url(`admin/codes/${id}/`), data));
+  }
+  deleteInviteCode(id: number) {
+    return this.run(this.http.delete<void>(this.url(`admin/codes/${id}/`)));
   }
   adminUsers(q = '') {
     const params = q ? new HttpParams().set('q', q) : undefined;

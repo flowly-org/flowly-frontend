@@ -49,3 +49,12 @@ label {
   color: var(--muted);
   text-align: center;
 }
+
+.code-ok {
+  margin: -4px 0 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--success, #16a34a) 12%, transparent);
+  color: var(--ink);
+  font-size: 0.9rem;
+}

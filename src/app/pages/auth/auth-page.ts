@@ -30,6 +30,29 @@ export class AuthPage {
   protected email = '';
   protected password = '';
   protected fullName = '';
+  protected code = this.route.snapshot.queryParamMap.get('code') ?? '';
+  protected codeInfo = signal<{ valid: boolean; plan?: string; forever?: boolean; days?: number | null; detail?: string } | null>(null);
+  private codeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    if (this.code) this.checkCode(this.code);
+  }
+
+  protected checkCode(value: string) {
+    this.code = value;
+    if (this.codeTimer) clearTimeout(this.codeTimer);
+    if (value.trim().length < 6) {
+      this.codeInfo.set(null);
+      return;
+    }
+    this.codeTimer = setTimeout(async () => {
+      try {
+        this.codeInfo.set(await this.auth.checkCode(value.trim()));
+      } catch {
+        this.codeInfo.set(null);
+      }
+    }, 350);
+  }
   protected busy = signal(false);
   protected error = signal<string | null>(null);
 
@@ -37,7 +60,7 @@ export class AuthPage {
     this.busy.set(true);
     this.error.set(null);
     try {
-      if (this.isRegister()) await this.auth.register(this.email, this.password, this.fullName);
+      if (this.isRegister()) await this.auth.register(this.email, this.password, this.fullName, this.code);
       else await this.auth.login(this.email, this.password);
       const next = this.route.snapshot.queryParamMap.get('next');
       this.router.navigateByUrl(next && next.startsWith('/') && !next.startsWith('//') ? next : '/');

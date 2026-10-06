@@ -2,6 +2,9 @@ import type { Dict } from './index';
 
 export const SHELL: Dict = {
   it: {
+    "Invite code (optional)": "Codice invito (facoltativo)",
+    "forever, free": "per sempre, gratis",
+    "free for {n} days": "gratis per {n} giorni",
     "Simple view": "Vista semplice",
     "Sprints": "Sprint",
     "Timeline": "Timeline",
@@ -223,6 +226,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Errore del server ({status}). Riprova.",
   },
   es: {
+    "Invite code (optional)": "Código de invitación (opcional)",
+    "forever, free": "para siempre, gratis",
+    "free for {n} days": "gratis durante {n} días",
     "Simple view": "Vista sencilla",
     "Sprints": "Sprints",
     "Timeline": "Cronograma",
@@ -444,6 +450,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Error del servidor ({status}). Inténtalo de nuevo.",
   },
   fr: {
+    "Invite code (optional)": "Code d'invitation (facultatif)",
+    "forever, free": "pour toujours, gratuit",
+    "free for {n} days": "gratuit pendant {n} jours",
     "Simple view": "Vue simple",
     "Sprints": "Sprints",
     "Timeline": "Chronologie",
@@ -665,6 +674,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Erreur du serveur ({status}). Réessaie.",
   },
   de: {
+    "Invite code (optional)": "Einladungscode (optional)",
+    "forever, free": "für immer, kostenlos",
+    "free for {n} days": "{n} Tage kostenlos",
     "Simple view": "Einfache Ansicht",
     "Sprints": "Sprints",
     "Timeline": "Zeitleiste",
@@ -886,6 +898,9 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Serverfehler ({status}). Bitte versuche es erneut.",
   },
   pt: {
+    "Invite code (optional)": "Código de convite (opcional)",
+    "forever, free": "para sempre, grátis",
+    "free for {n} days": "grátis durante {n} dias",
     "Simple view": "Vista simples",
     "Sprints": "Sprints",
     "Timeline": "Cronograma",

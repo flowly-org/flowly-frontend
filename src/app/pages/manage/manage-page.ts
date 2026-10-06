@@ -6,7 +6,7 @@ import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LocalDatePipe, TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
-import { AdminUser, AdminWorkspace, InstanceSettingRow } from '../../core/models';
+import { AdminUser, AdminWorkspace, InstanceSettingRow, InviteCodeRow } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
 const GROUP_CHECKS: Record<string, { service: string; label: string }> = {
@@ -27,7 +27,7 @@ export class ManagePage implements OnInit {
   protected auth = inject(AuthService);
   private i18n = inject(I18nService);
 
-  protected tab = signal<'overview' | 'users' | 'workspaces' | 'settings' | 'github'>('overview');
+  protected tab = signal<'overview' | 'users' | 'codes' | 'workspaces' | 'settings' | 'github'>('overview');
   protected gh = signal<Record<string, any> | null>(null);
   protected ghForm: Record<string, string> = {};
   protected ghManual = signal(false);
@@ -35,6 +35,57 @@ export class ManagePage implements OnInit {
   protected ghAppName = 'Flowly';
   protected ghOrg = '';
   protected overview = signal<Record<string, any> | null>(null);
+  protected codes = signal<InviteCodeRow[]>([]);
+  protected codeForm = { code: '', plan: 'pro_plus' as 'pro' | 'pro_plus', days: null as number | null, max_uses: null as number | null, valid_until: '', note: '' };
+  protected openCode = signal<number | null>(null);
+
+  protected async loadCodes() {
+    try {
+      this.codes.set(await this.api.inviteCodes());
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected async createCode() {
+    const f = this.codeForm;
+    try {
+      const c = await this.api.createInviteCode({
+        ...(f.code.trim() ? { code: f.code.trim() } : {}), plan: f.plan, days: f.days || null, max_uses: f.max_uses || null,
+        valid_until: f.valid_until ? new Date(f.valid_until + 'T23:59:59').toISOString() : null, note: f.note.trim(),
+      });
+      this.codeForm = { code: '', plan: 'pro_plus', days: null, max_uses: null, valid_until: '', note: '' };
+      this.codes.update((list) => [c, ...list]);
+      this.copyCode(c.link);
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected async toggleCode(c: InviteCodeRow) {
+    try {
+      const saved = await this.api.updateInviteCode(c.id, { active: !c.active });
+      this.codes.update((list) => list.map((x) => (x.id === c.id ? { ...x, active: saved.active } : x)));
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected async removeCode(c: InviteCodeRow) {
+    try {
+      await this.api.deleteInviteCode(c.id);
+      this.codes.update((list) => list.filter((x) => x.id !== c.id));
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected async copyCode(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.toast.show(this.i18n.t('Sign-up link copied: send it to the people it\'s for.'));
+    } catch {}
+  }
   protected rows = signal<InstanceSettingRow[]>([]);
   protected users = signal<AdminUser[]>([]);
   protected workspaces = signal<AdminWorkspace[]>([]);

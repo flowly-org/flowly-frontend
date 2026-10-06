@@ -13,6 +13,9 @@ export interface User {
   has_pro?: boolean;
   has_pro_plus?: boolean;
   is_bot?: boolean;
+  /** "manual" (an admin), "stripe" (a subscription) or "code" (an invite code). */
+  plan_source?: string;
+  plan_expires_at?: string | null;
   /** Opt-in ADHD mode. */
   adhd_mode?: boolean;
   focus?: Partial<FocusOptions>;
@@ -693,7 +696,7 @@ export interface PlanInfo {
   prices: { month: { amount: number; currency: string; tax: string }; year: { amount: number; currency: string; tax: string } } | null;
   plan: 'free' | 'pro' | 'pro_plus';
   has_pro: boolean;
-  source: 'manual' | 'stripe';
+  source: 'manual' | 'stripe' | 'code';
   expires_at: string | null;
   subscription: StripeSub | null;
   can_manage: boolean;
@@ -870,4 +873,19 @@ export interface SprintPage extends SprintBrief {
   capacity: { minutes: number; people: number; workdays: number };
   standup: { date: string; entries: (StandupText & { user: number; name: string; updated_at: string })[]; mine: StandupText; answered: boolean };
   retro: { id: number; kind: 'went_well' | 'improve' | 'idea'; text: string; votes: number; voted: boolean; mine: boolean; task: number | null }[];
+}
+
+export interface InviteCodeRow {
+  id: number;
+  code: string;
+  plan: 'pro' | 'pro_plus';
+  days: number | null;
+  max_uses: number | null;
+  uses: number;
+  valid_until: string | null;
+  active: boolean;
+  note: string;
+  created_at: string;
+  link: string;
+  redeemed_by: { email: string; name: string; at: string }[];
 }

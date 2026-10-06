@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -11,6 +11,17 @@ import { ApiTokenRow, CalendarOverview, DonetickAccount, FocusOptions, User, Wor
 import { NotificationService } from '../../core/notification.service';
 import { Theme, ThemeService } from '../../core/theme.service';
 import { ToastService } from '../../core/toast.service';
+
+type SettingsTab = 'account' | 'flo' | 'focus' | 'calendars' | 'connections' | 'invoicing';
+
+/** Where each section lives (old #fragment links keep working). */
+const TAB_OF: Record<string, SettingsTab> = {
+  plan: 'account', profile: 'account', concierge: 'flo', focus: 'focus', calendars: 'calendars',
+  assistants: 'connections', donetick: 'connections', invoicing: 'invoicing',
+};
+const FRAGMENT_OF: Record<SettingsTab, string> = {
+  account: 'plan', flo: 'concierge', focus: 'focus', calendars: 'calendars', connections: 'assistants', invoicing: 'invoicing',
+};
 
 interface ChatLine {
   role: 'user' | 'assistant';
@@ -32,6 +43,21 @@ export class SettingsPage implements OnInit {
   private notifications = inject(NotificationService);
   protected i18n = inject(I18nService);
   protected readonly languages = LANGUAGES;
+  protected tab = signal<SettingsTab>('account');
+  protected readonly tabs: { key: SettingsTab; label: string; icon: string }[] = [
+    { key: 'account', label: 'Account', icon: '👤' },
+    { key: 'flo', label: 'Flo', icon: '🤖' },
+    { key: 'focus', label: 'Focus', icon: '🎯' },
+    { key: 'calendars', label: 'Calendars', icon: '📅' },
+    { key: 'connections', label: 'Connections', icon: '🔌' },
+    { key: 'invoicing', label: 'Invoicing', icon: '🧾' },
+  ];
+  private router = inject(Router);
+
+  protected openTab(key: SettingsTab) {
+    this.tab.set(key);
+    this.router.navigate([], { fragment: FRAGMENT_OF[key], replaceUrl: true, queryParamsHandling: 'preserve' });
+  }
 
   protected fullName = this.auth.user()?.full_name ?? '';
   protected githubLogin = this.auth.user()?.github_login ?? '';
@@ -186,7 +212,14 @@ export class SettingsPage implements OnInit {
     if (result === 'connected') this.toast.show(this.i18n.t('Google Calendar connected.'));
     if (result === 'error') this.toast.error(this.i18n.t('Could not connect Google Calendar. Please try again.'));
     const target = result ? 'calendars' : this.route.snapshot.fragment;
-    if (target) setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 100);
+    if (target && TAB_OF[target]) this.tab.set(TAB_OF[target]);
+    // Links to another section while already here (e.g. from the guide).
+    this.route.fragment.subscribe((f) => {
+      if (f && TAB_OF[f]) this.tab.set(TAB_OF[f]);
+    });
+    if (target && !Object.values(FRAGMENT_OF).includes(target)) {
+      setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
     try {
       const cfg = await this.api.publicConfig();
       this.mcpUrl.set(cfg.mcp_url.startsWith('http') ? cfg.mcp_url : `${window.location.origin}/api/mcp/`);
@@ -458,6 +491,20 @@ export class SettingsPage implements OnInit {
   setOpt(key: keyof FocusOptions, event: Event) {
     const value = Number((event.target as HTMLInputElement).value);
     if (Number.isFinite(value)) this.setFocus({ focus: { [key]: value } });
+  }
+
+  protected inviteCode = '';
+
+  async redeem() {
+    try {
+      const res = await this.auth.redeemCode(this.inviteCode.trim());
+      this.inviteCode = '';
+      this.toast.show(this.i18n.t(res.forever ? 'Welcome to {plan}, forever!' : 'Welcome to {plan}!', { plan: res.plan === 'pro_plus' ? 'Flowly Pro Plus' : 'Flowly Pro' }));
+      if (res.stripe_subscription) this.toast.show(this.i18n.t('You still have a paid subscription: cancel it with “Manage subscription” so you are not charged.'));
+      await this.loadPlan();
+    } catch (err) {
+      this.toast.error(errorMessage(err));
+    }
   }
 
   async saveProfile() {

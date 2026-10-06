@@ -6,7 +6,15 @@
     </div>
   </header>
 
-  <section class="panel">
+  <nav class="tabs settings-tabs" role="tablist">
+    @for (t of tabs; track t.key) {
+      <button type="button" role="tab" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="openTab(t.key)">
+        <span aria-hidden="true">{{ t.icon }}</span> {{ t.label | t }}
+      </button>
+    }
+  </nav>
+
+  <section [hidden]="tab() !== 'account'" class="panel">
     <h2>{{ 'Profile' | t }}</h2>
     <form class="inline-form" (ngSubmit)="saveProfile()">
       <input name="fullName" [(ngModel)]="fullName" [placeholder]="'Your name' | t" [attr.aria-label]="'Your name' | t" />
@@ -16,7 +24,7 @@
     </form>
   </section>
 
-  <section class="panel" id="plan">
+  <section [hidden]="tab() !== 'account'" class="panel" id="plan">
     <h2>{{ 'Plan' | t }}</h2>
     @if (plan(); as p) {
       <div class="plan-box">
@@ -27,6 +35,8 @@
                 · {{ (sub.cancel_at_period_end ? 'ends {date}' : 'renews {date}') | t: { date: (sub.current_period_end | ldate: 'mediumDate') } }}
                 @if (sub.status === 'past_due') { · <span class="danger-text">{{ 'payment failed: update your card' | t }}</span> }
               </span>
+            } @else if (p.source === 'code') {
+              <span class="muted small"> · {{ 'with an invite code' | t }}@if (p.expires_at) { · {{ 'until {date}' | t: { date: (p.expires_at | ldate: 'mediumDate') } }} } @else { · {{ 'forever' | t }} }</span>
             } @else if (p.source === 'manual') {
               <span class="muted small"> · {{ 'granted by an administrator' | t }}@if (p.expires_at) { · {{ 'until {date}' | t: { date: (p.expires_at | ldate: 'mediumDate') } }} }</span>
             }
@@ -70,9 +80,13 @@
         }
       </div>
     }
+    <form class="inline-form redeem" (ngSubmit)="redeem()">
+      <input name="inviteCode" [(ngModel)]="inviteCode" [placeholder]="'Have an invite code?' | t" autocomplete="off" [attr.aria-label]="'Invite code' | t" />
+      <button class="btn" type="submit" [disabled]="!inviteCode.trim()">{{ 'Redeem' | t }}</button>
+    </form>
   </section>
 
-  <section class="panel">
+  <section [hidden]="tab() !== 'account'" class="panel">
     <h2>{{ 'Appearance' | t }}</h2>
     <div class="inline-form">
       <label class="lang">
@@ -92,7 +106,7 @@
     </div>
   </section>
 
-  <section class="panel" id="focus">
+  <section [hidden]="tab() !== 'focus'" class="panel" id="focus">
     <h2>{{ 'ADHD mode' | t }}</h2>
     <label class="row toggle-row">
       <input type="checkbox" [checked]="focus.on()" (change)="setFocus({ adhd_mode: $any($event.target).checked })" />
@@ -132,7 +146,7 @@
     }
   </section>
 
-  <section class="panel">
+  <section [hidden]="tab() !== 'account'" class="panel">
     <h2>{{ 'Notifications' | t }}</h2>
     <div class="row">
       <div class="grow">
@@ -147,7 +161,7 @@
     </div>
   </section>
 
-  <section class="panel" id="calendars">
+  <section [hidden]="tab() !== 'calendars'" class="panel" id="calendars">
     <h2>{{ 'Calendars' | t }}</h2>
     <p class="intro muted">
       {{ "Your calendar events appear above the day board as background: they aren't tasks. Flowly flags the few that may need preparation (tickets, travel, a trip away from home), and the concierge checks them in the morning brief." | t }}
@@ -252,7 +266,7 @@
     }
   </section>
 
-  <section class="panel" id="donetick">
+  <section [hidden]="tab() !== 'connections'" class="panel" id="donetick">
     <h2>{{ 'Donetick' | t }}</h2>
     <p class="muted small pad-x">{{ 'Bring your chores from a self-hosted Donetick into Flowly. Each chore\'s labels decide the workspace and project it lands in; done in one is done in the other. (Workspace admins can also connect Donetick to a whole workspace or project under Integrations.)' | t }}</p>
     @for (a of donetick(); track a.id) {
@@ -352,7 +366,7 @@
     </form>
   </section>
 
-  <section class="panel" id="invoicing">
+  <section [hidden]="tab() !== 'invoicing'" class="panel" id="invoicing">
     <h2>{{ 'Invoicing' | t }}</h2>
     <p class="intro muted">{{ 'Who issues your invoices. These details are yours and apply to every invoice you create, in any workspace.' | t }}</p>
     @if (invoicing(); as inv) {
@@ -425,7 +439,7 @@
     }
   </section>
 
-  <section class="panel" id="assistants">
+  <section [hidden]="tab() !== 'connections'" class="panel" id="assistants">
     <h2>{{ 'Claude, ChatGPT & API' | t }}</h2>
     <p class="intro muted">
       {{ 'Flowly is an MCP server, so AI assistants can read your day, add and update tasks, comment and track time, with your permissions. Workspaces with an exclusive AI endpoint stay hidden.' | t }}
@@ -497,7 +511,7 @@
   </section>
 
   @if (state(); as s) {
-    <section class="panel concierge" id="concierge">
+    <section [hidden]="tab() !== 'flo'" class="panel concierge" id="concierge">
       <h2>
         <span class="group-title">{{ 'Concierge' | t }} <span class="plan" [class.pro]="s.has_pro">{{ s.has_pro ? 'PRO' : 'FREE' }}</span></span>
       </h2>

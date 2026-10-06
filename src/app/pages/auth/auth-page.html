@@ -31,6 +31,20 @@
           [autocomplete]="isRegister() ? 'new-password' : 'current-password'"
         />
       </label>
+      @if (isRegister()) {
+        <label>
+          {{ 'Invite code (optional)' | t }}
+          <input name="code" [ngModel]="code" (ngModelChange)="checkCode($event)" autocomplete="off" autocapitalize="characters" placeholder="FLOWLY-XXXX-XXXX" />
+        </label>
+        @if (codeInfo(); as c) {
+          @if (c.valid) {
+            <p class="code-ok">🎁 {{ (c.plan === 'pro_plus' ? 'Flowly Pro Plus' : 'Flowly Pro') }} ·
+              {{ c.forever ? ('forever, free' | t) : ('free for {n} days' | t: { n: c.days }) }}</p>
+          } @else {
+            <p class="form-error">{{ c.detail }}</p>
+          }
+        }
+      }
       @if (error()) {
         <p class="form-error" role="alert">{{ error() }}</p>
       }

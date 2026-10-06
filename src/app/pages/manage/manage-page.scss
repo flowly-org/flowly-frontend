@@ -307,3 +307,22 @@
   gap: 6px;
   align-items: end;
 }
+
+.code-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 14px;
+  padding: 0 16px 16px;
+
+  label { display: grid; gap: 4px; font-size: 0.85rem; }
+  label.grow { flex: 1 1 200px; }
+  select, input { width: auto; }
+  label.grow input { width: 100%; }
+}
+
+.code-row.off { opacity: 0.55; }
+.code { font-weight: 700; letter-spacing: 0.04em; }
+.who { margin: 0 16px 10px 32px; padding: 0; list-style: none; font-size: 0.88rem; }
+.who li { padding: 3px 0; }
+.pad { padding: 0 16px 10px; }
