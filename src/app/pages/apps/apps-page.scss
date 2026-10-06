@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 980px;
+  max-width: var(--page-width);
   margin: 0 auto;
   padding: calc(14px + env(safe-area-inset-top, 0px)) 0 14px;
 }
@@ -27,7 +27,7 @@
 }
 
 .content {
-  max-width: 980px;
+  max-width: var(--page-width);
   margin: 0 auto;
 }
 

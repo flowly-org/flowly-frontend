@@ -1,4 +1,6 @@
 :root {
+  /* One width for every page that is not full-bleed (settings, review, integrations…). */
+  --page-width: 1100px;
   --bg: #f6f7f9;
   --surface: #ffffff;
   --surface-2: #f1f3f6;
@@ -204,7 +206,7 @@ textarea {
 
 .page {
   padding: 24px 16px 48px;
-  max-width: 880px;
+  max-width: var(--page-width);
   margin: 0 auto;
   width: 100%;
 
