@@ -69,7 +69,7 @@
         <button type="button" class="kind-card" [class.on]="form()?.kind === k.kind && !form()?.id" [class.locked]="k.enterprise && !enterprise()"
           [disabled]="k.enterprise && !enterprise()" (click)="startNew(k.kind)"
           [title]="(k.enterprise && !enterprise() ? 'Available with the Enterprise plan: ask your Flowly administrator.' : '') | t">
-          <span class="kind-icon" [attr.data-kind]="k.kind" aria-hidden="true">{{ k.icon }}</span>
+          <span class="kind-icon" [attr.data-kind]="k.kind" aria-hidden="true">@if (k.icon) { <app-icon [name]="k.icon" [size]="16" /> }</span>
           <strong>{{ k.label | t }} @if (k.enterprise) {<span class="ent-badge">Enterprise</span>}</strong>
           <span class="muted">{{ k.blurb | t }}</span>
         </button>
@@ -81,7 +81,7 @@
         <h2>{{ 'Connected' | t }} <span class="muted">{{ visible().length }}</span></h2>
         @for (item of visible(); track item.id) {
           <div class="row item" [class.selected]="form()?.id === item.id">
-            <span class="kind-icon small" [attr.data-kind]="item.kind" aria-hidden="true">{{ kindInfo(item.kind).icon }}</span>
+            <span class="kind-icon small" [attr.data-kind]="item.kind" aria-hidden="true">@if (kindInfo(item.kind).icon) { <app-icon [name]="kindInfo(item.kind).icon" [size]="14" /> }</span>
             <button class="grow item-main" type="button" (click)="edit(item)">
               <strong>{{ item.name }}</strong>
               <span class="muted">{{ kindInfo(item.kind).label | t }} · {{ projectName(item.project) }}</span>
@@ -103,7 +103,7 @@
         <section class="panel editor">
           <h2>
             <span class="group-title">
-              <span class="kind-icon small" [attr.data-kind]="f.kind" aria-hidden="true">{{ kindInfo(f.kind).icon }}</span>
+              <span class="kind-icon small" [attr.data-kind]="f.kind" aria-hidden="true">@if (kindInfo(f.kind).icon) { <app-icon [name]="kindInfo(f.kind).icon" [size]="14" /> }</span>
               {{ f.id ? f.name : ('New {kind} integration' | t: { kind: (kindInfo(f.kind).label | t) }) }}
             </span>
             <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="close()">✕</button>
@@ -428,9 +428,9 @@
             <div class="details">
               @if (item.kind === 'donetick') {
                 @if (item.info['error']) {
-                  <p class="danger-text">⚠ {{ item.info['error'] }}</p>
+                  <p class="danger-text"><app-icon name="alert" [size]="15" /> {{ item.info['error'] }}</p>
                 } @else if (item.info['synced_at']) {
-                  <p class="linked-ok">✅ {{ '{n} chores, synced {when}.' | t: { n: item.info['chores'], when: (item.info['synced_at'] | ldate: 'MMM d, HH:mm') } }}</p>
+                  <p class="linked-ok"><app-icon name="check-circle" [size]="15" /> {{ '{n} chores, synced {when}.' | t: { n: item.info['chores'], when: (item.info['synced_at'] | ldate: 'MMM d, HH:mm') } }}</p>
                 }
                 <h3>{{ 'Instant updates' | t }}</h3>
                 <p class="hint muted">{{ 'In Donetick, open Settings → Webhook (circle admins) and paste this address. Without it, changes still arrive within 10 minutes.' | t }}</p>
@@ -441,9 +441,9 @@
               }
               @if (item.kind === 'wiki') {
                 @if (item.info['error']) {
-                  <p class="danger-text">⚠ {{ item.info['error'] }}</p>
+                  <p class="danger-text"><app-icon name="alert" [size]="15" /> {{ item.info['error'] }}</p>
                 } @else if (item.info['synced_at']) {
-                  <p class="linked-ok">✅ {{ '{n} pages, synced {when}.' | t: { n: item.info['pages'], when: (item.info['synced_at'] | ldate: 'MMM d, HH:mm') } }}</p>
+                  <p class="linked-ok"><app-icon name="check-circle" [size]="15" /> {{ '{n} pages, synced {when}.' | t: { n: item.info['pages'], when: (item.info['synced_at'] | ldate: 'MMM d, HH:mm') } }}</p>
                 } @else {
                   <p class="muted">{{ 'Not synced yet: it will be within a few minutes, or press “Sync now”.' | t }}</p>
                 }
@@ -453,7 +453,7 @@
               }
               @if (item.kind === 'telegram_group') {
                 @if (item.info['linked']) {
-                  <p class="linked-ok">✅ {{ 'Linked to the Telegram group “{title}”.' | t: { title: item.info['title'] || '…' } }}</p>
+                  <p class="linked-ok"><app-icon name="check-circle" [size]="15" /> {{ 'Linked to the Telegram group “{title}”.' | t: { title: item.info['title'] || '…' } }}</p>
                   <p class="hint muted">{{ 'To move it to another group, send /unlink there (owners and admins), then delete and add the integration again.' | t }}</p>
                 } @else {
                   <h3>{{ 'Link your group' | t }}</h3>
@@ -471,7 +471,7 @@
                 <p class="hint muted">{{ 'In the group: /today, /mine, /ask …, or reply to the bot. Send a photo of a written list with the caption /tasks. People who linked Flowly with the bot in a private chat can change tasks; everyone else can only read. Private tasks never show in the group.' | t }}</p>
               }
               @if (item.kind === 'slack_bot') {
-                <p class="linked-ok">✅ {{ 'Connected to the Slack workspace “{team}”.' | t: { team: item.info['team'] || '…' } }}</p>
+                <p class="linked-ok"><app-icon name="check-circle" [size]="15" /> {{ 'Connected to the Slack workspace “{team}”.' | t: { team: item.info['team'] || '…' } }}</p>
                 <p class="hint muted">{{ 'In Slack: mention @Flowly, send it a direct message, or use /flowly today, /flowly mine. People are recognised by their Slack email: members of this Flowly workspace can change tasks, others can only read. Private tasks never show.' | t }}</p>
                 <button class="btn small" type="button" (click)="reconnectSlack()">{{ 'Reconnect Slack' | t }}</button>
               }

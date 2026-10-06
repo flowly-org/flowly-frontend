@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Icon } from '../icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -9,14 +10,14 @@ import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-task-share',
-  imports: [FormsModule, TranslatePipe],
+  imports: [Icon, FormsModule, TranslatePipe],
   template: `
     <fieldset class="visibility">
       <legend>{{ 'Who can see this task' | t }}</legend>
       @for (v of visibilities; track v.value) {
         <label class="option" [class.on]="visibility() === v.value">
           <input type="radio" name="visibility" [checked]="visibility() === v.value" (change)="setVisibility(v.value)" />
-          <span class="icon" aria-hidden="true">{{ v.icon }}</span>
+          <span class="icon" aria-hidden="true"><app-icon [name]="v.icon" [size]="16" /></span>
           <span><strong>{{ v.label | t }}</strong><span class="muted help">{{ v.help | t }}</span></span>
         </label>
       }

@@ -1,7 +1,7 @@
 @if (visible()) {
   <section class="cal" [attr.aria-label]="'Calendar' | t">
     <div class="row">
-      <span class="label" [title]="'Events from your calendars: background, not tasks' | t">📅 {{ 'Calendar' | t }}</span>
+      <span class="label" [title]="'Events from your calendars: background, not tasks' | t"><app-icon name="calendar" [size]="14" /> {{ 'Calendar' | t }}</span>
       <div class="chips">
         @for (e of events(); track e.id) {
           <button type="button" class="chip" [class.prep]="e.needs_prep && !covered(e)" [class.on]="selected()?.id === e.id"
@@ -14,7 +14,7 @@
               <span class="where">· {{ e.location.split(',')[0] }}</span>
             }
             @if (icon(e)) {
-              <span class="flag" [title]="reasonLabel(e) | t">{{ icon(e) }}</span>
+              <span class="flag" [title]="reasonLabel(e) | t"><app-icon [name]="icon(e)" [size]="13" /></span>
             }
             @if (e.tasks.length) {
               <span class="linked" [title]="'Linked tasks' | t">✓{{ e.tasks.length }}</span>
@@ -36,7 +36,7 @@
         @for (e of prepList(); track e.id) {
           <li>
             <button type="button" class="link-btn" (click)="open(e)">
-              <span class="flag">{{ icon(e) }}</span>
+              <span class="flag"><app-icon [name]="icon(e)" [size]="13" /></span>
               <strong>{{ e.title }}</strong>
               <span class="muted">{{ e.start_date | ldate: 'EEE d MMM' }}@if (e.location) { · {{ e.location.split(',')[0] }} }</span>
             </button>
@@ -70,7 +70,7 @@
         </div>
 
         @if (e.needs_prep) {
-          <p class="reason">{{ icon(e) }} {{ 'May need preparation' | t }}: {{ reasonLabel(e) | t }}</p>
+          <p class="reason"><app-icon [name]="icon(e)" [size]="14" /> {{ 'May need preparation' | t }}: {{ reasonLabel(e) | t }}</p>
         } @else {
           <p class="reason muted">{{ 'Background only: nothing to prepare.' | t }}</p>
         }

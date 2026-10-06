@@ -14,7 +14,7 @@
         <ul>
           @for (s of items(); track s.key) {
             <li [class.done]="s.done">
-              <span class="icon" aria-hidden="true">{{ s.done ? '✓' : s.text.icon }}</span>
+              <span class="icon" aria-hidden="true"><app-icon [name]="s.done ? 'check' : s.text.icon" [size]="16" /></span>
               <div class="text">
                 <span class="title">
                   {{ s.text.title | t }}

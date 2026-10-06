@@ -39,7 +39,7 @@
     <p class="small muted">{{ 'Lists and sections become tags (group “List”); members are matched by name or email. Importing the same board again only adds what is new.' | t }}</p>
 
     @if (result(); as r) {
-      <p class="linked-ok">✅ {{ '{n} tasks imported into “{project}”.' | t: { n: r.created, project: r.project_name } }}
+      <p class="linked-ok"><app-icon name="check-circle" [size]="15" /> {{ '{n} tasks imported into “{project}”.' | t: { n: r.created, project: r.project_name } }}
         @if (r.skipped) { {{ '{n} were already there.' | t: { n: r.skipped } }} }</p>
     }
 

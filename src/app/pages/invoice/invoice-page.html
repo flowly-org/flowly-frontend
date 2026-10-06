@@ -21,10 +21,10 @@
           @if (pay.paid_at) {
             <span class="paid-badge">✓ {{ 'Paid online' | t }}</span>
           } @else {
-            <button class="btn small" type="button" (click)="copy(pay.url)" [title]="pay.url">🔗 {{ 'Copy pay link' | t }}</button>
+            <button class="btn small" type="button" (click)="copy(pay.url)" [title]="pay.url"><app-icon name="link" [size]="14" /> {{ 'Copy pay link' | t }}</button>
           }
         } @else if (inv.status !== 'paid') {
-          <button class="btn small" type="button" [disabled]="payBusy()" (click)="createPayLink()" [title]="'A Stripe link your client can pay by card; the invoice is marked paid automatically' | t">💳 {{ 'Pay online link' | t }}</button>
+          <button class="btn small" type="button" [disabled]="payBusy()" (click)="createPayLink()" [title]="'A Stripe link your client can pay by card; the invoice is marked paid automatically' | t"><app-icon name="billing" [size]="14" /> {{ 'Pay online link' | t }}</button>
         }
       }
       <button class="btn small" type="button" (click)="downloadCsv()">CSV</button>

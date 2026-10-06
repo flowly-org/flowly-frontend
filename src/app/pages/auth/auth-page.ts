@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -12,7 +13,7 @@ import { I18nService } from '../../core/i18n.service';
 
 @Component({
   selector: 'app-auth-page',
-  imports: [FormsModule, RouterLink, Logo, TranslatePipe],
+  imports: [Icon, FormsModule, RouterLink, Logo, TranslatePipe],
   templateUrl: './auth-page.html',
   styleUrl: './auth-page.scss',
 })

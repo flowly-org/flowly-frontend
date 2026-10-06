@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Icon } from '../icon/icon';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
@@ -13,7 +14,7 @@ import { ToastService } from '../../core/toast.service';
 /** ADHD mode: the one task to do now, with a focus timer, "not now" and "break it down"; the rest folded away. */
 @Component({
   selector: 'app-now-card',
-  imports: [TranslatePipe],
+  imports: [Icon, TranslatePipe],
   templateUrl: './now-card.html',
   styleUrl: './now-card.scss',
 })

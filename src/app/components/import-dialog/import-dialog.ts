@@ -1,4 +1,5 @@
 import { Component, inject, input, output, signal } from '@angular/core';
+import { Icon } from '../icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -12,7 +13,7 @@ type Source = 'trello' | 'asana';
 /** Import a Trello board (JSON export) or an Asana project (CSV export, or token + link) into the workspace. */
 @Component({
   selector: 'app-import-dialog',
-  imports: [FormsModule, TranslatePipe],
+  imports: [Icon, FormsModule, TranslatePipe],
   templateUrl: './import-dialog.html',
   styleUrl: '../templates-dialog/templates-dialog.scss',
   host: { '(document:keydown.escape)': 'closed.emit()' },

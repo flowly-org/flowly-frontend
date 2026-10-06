@@ -10,7 +10,7 @@
 <div class="body" (click)="open.emit(task())" (keydown.enter)="open.emit(task())" tabindex="0" role="button">
   <div class="title">
     @if (visibilityIcon(); as icon) {
-      <span class="vis" [title]="visibilityLabel()">{{ icon }}</span>
+      <span class="vis" [title]="visibilityLabel()"><app-icon [name]="icon" [size]="13" /></span>
     }
     {{ task().title }}
   </div>
@@ -35,10 +35,10 @@
       <span class="badge" [class.late]="d.late" [class.today]="d.today" [title]="'Due date' | t">⚑ {{ d.label }}</span>
     }
     @if (task().blocked) {
-      <span class="badge late" [title]="'Waits for: {list}' | t: { list: blockedTitles() }">⛓</span>
+      <span class="badge late" [title]="'Waits for: {list}' | t: { list: blockedTitles() }"><app-icon name="link" [size]="12" /></span>
     }
     @if (checklist(); as c) {
-      <span class="badge" [class.complete]="c.done === c.total" [title]="'Checklist' | t">☑ {{ c.done }}/{{ c.total }}</span>
+      <span class="badge" [class.complete]="c.done === c.total" [title]="'Checklist' | t"><app-icon name="checkbox" [size]="12" /> {{ c.done }}/{{ c.total }}</span>
     }
     @if (task().estimate_minutes) {
       <span class="badge" [title]="'Estimate' | t">≈ {{ formatMinutes(task().estimate_minutes!) }}</span>
@@ -47,10 +47,10 @@
       <span class="badge" [title]="'Repeats' | t">↻</span>
     }
     @if (task().comment_count) {
-      <button type="button" class="badge count-badge" [title]="'Discussion' | t" (click)="openTab($event, 'discussion')" (mousedown)="$event.stopPropagation()">💬 {{ task().comment_count }}</button>
+      <button type="button" class="badge count-badge" [title]="'Discussion' | t" (click)="openTab($event, 'discussion')" (mousedown)="$event.stopPropagation()"><app-icon name="message" [size]="12" /> {{ task().comment_count }}</button>
     }
     @if (task().attachment_count) {
-      <button type="button" class="badge count-badge" [title]="'Documents' | t" (click)="openTab($event, 'files')" (mousedown)="$event.stopPropagation()">📎 {{ task().attachment_count }}</button>
+      <button type="button" class="badge count-badge" [title]="'Documents' | t" (click)="openTab($event, 'files')" (mousedown)="$event.stopPropagation()"><app-icon name="paperclip" [size]="12" /> {{ task().attachment_count }}</button>
     }
     @if (showAssignee() && assignee(); as u) {
       <span class="avatar assignee" [title]="u.full_name || u.email">{{ initials(u.full_name || u.email) }}</span>

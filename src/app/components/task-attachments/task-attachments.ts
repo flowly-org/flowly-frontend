@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Icon } from '../icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -11,7 +12,7 @@ import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-task-attachments',
-  imports: [FormsModule, LocalDatePipe, TranslatePipe],
+  imports: [Icon, FormsModule, LocalDatePipe, TranslatePipe],
   templateUrl: './task-attachments.html',
   styleUrl: './task-attachments.scss',
 })
@@ -45,14 +46,14 @@ export class TaskAttachments implements OnInit {
   }
 
   protected icon(a: Attachment): string {
-    if (a.kind === 'google_drive') return 'G';
-    if (a.kind === 'onedrive') return '☁';
-    if (a.kind === 'link') return '🔗';
+    if (a.kind === 'google_drive') return 'cloud';
+    if (a.kind === 'onedrive') return 'cloud';
+    if (a.kind === 'link') return 'link';
     const t = a.content_type;
-    if (t.startsWith('image/')) return '🖼';
-    if (t === 'application/pdf') return 'PDF';
-    if (t.includes('sheet') || t.includes('excel') || t.includes('csv')) return '▦';
-    return '📄';
+    if (t.startsWith('image/')) return 'image';
+    if (t === 'application/pdf') return 'file';
+    if (t.includes('sheet') || t.includes('excel') || t.includes('csv')) return 'file';
+    return 'file';
   }
 
   protected size(bytes: number | null): string {

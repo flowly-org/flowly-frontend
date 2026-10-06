@@ -70,7 +70,7 @@ function burst() {
   const layer = document.createElement('div');
   layer.setAttribute('aria-hidden', 'true');
   Object.assign(layer.style, { position: 'fixed', left: '50%', bottom: '30%', width: '0', height: '0', zIndex: '9999', pointerEvents: 'none' });
-  const bits = ['🎉', '✨', '⭐', '✅', '💪', '🌟'];
+  const bits = ['✦', '✓', '★', '✧', '✶', '•'];
   for (let i = 0; i < 16; i++) {
     const s = document.createElement('span');
     s.textContent = bits[i % bits.length];

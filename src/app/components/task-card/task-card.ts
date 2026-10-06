@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output } from '@angular/core';
+import { Icon } from '../icon/icon';
 
 import { BoardData } from '../../core/board-data';
 import { TimerService } from '../../core/timer.service';
@@ -9,7 +10,7 @@ import { Tag, Task, VISIBILITIES, formatMinutes } from '../../core/models';
 
 @Component({
   selector: 'app-task-card',
-  imports: [TranslatePipe],
+  imports: [Icon, TranslatePipe],
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
   host: { '[class.done]': 'done()', '[class.timing]': 'timing()' },

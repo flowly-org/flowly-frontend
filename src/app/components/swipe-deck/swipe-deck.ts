@@ -1,4 +1,5 @@
 import { Component, ElementRef, computed, input, output, signal, viewChild } from '@angular/core';
+import { Icon } from '../icon/icon';
 
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { Task } from '../../core/models';
@@ -19,7 +20,7 @@ const FLING = 0.6; // px/ms
  */
 @Component({
   selector: 'app-swipe-deck',
-  imports: [TranslatePipe],
+  imports: [Icon, TranslatePipe],
   templateUrl: './swipe-deck.html',
   styleUrl: './swipe-deck.scss',
   host: { '(document:keydown)': 'onKey($event)' },

@@ -9,7 +9,7 @@
   <nav class="tabs settings-tabs" role="tablist">
     @for (t of tabs; track t.key) {
       <button type="button" role="tab" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="openTab(t.key)">
-        <span aria-hidden="true">{{ t.icon }}</span> {{ t.label | t }}
+        <app-icon [name]="t.icon" [size]="16" /> {{ t.label | t }}
       </button>
     }
   </nav>
@@ -274,7 +274,7 @@
         <span class="grow">
           <strong>{{ a.name }}</strong> <span class="muted small">{{ a.base_url }}</span>
           <span class="block small" [class.danger-text]="a.info.error" [class.muted]="!a.info.error">
-            @if (a.info.error) { ⚠ {{ a.info.error }} }
+            @if (a.info.error) { <app-icon name="alert" [size]="14" /> {{ a.info.error }} }
             @else if (a.info.synced_at) { {{ '{n} chores, synced {when}.' | t: { n: a.info.chores, when: (a.info.synced_at | ldate: 'MMM d, HH:mm') } }} }
           </span>
         </span>
@@ -397,7 +397,7 @@
         <fieldset class="wide fmt">
           <legend>{{ 'Online payments from your clients (Stripe)' | t }}</legend>
           @if (inv.profile.stripe_connected) {
-            <p class="check-line">✅ {{ 'Connected: {account}' | t: { account: inv.profile.stripe_account || 'Stripe' } }}
+            <p class="check-line"><app-icon name="check-circle" [size]="15" /> {{ 'Connected: {account}' | t: { account: inv.profile.stripe_account || 'Stripe' } }}
               <button class="btn ghost small" type="button" (click)="disconnectStripe()">{{ 'Disconnect' | t }}</button></p>
           } @else {
             <label class="wide-fmt">

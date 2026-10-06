@@ -9,9 +9,9 @@
     <button class="btn" type="button" (click)="fromGoogle()"><span class="src g">G</span> Google Drive</button>
   }
   @if (config()?.microsoft) {
-    <button class="btn" type="button" (click)="fromOneDrive()"><span class="src ms">☁</span> OneDrive / SharePoint</button>
+    <button class="btn" type="button" (click)="fromOneDrive()"><span class="src ms"><app-icon name="cloud" [size]="15" /></span> OneDrive / SharePoint</button>
   }
-  <button class="btn" type="button" (click)="showLinkForm.set(!showLinkForm())">🔗 {{ 'Add link' | t }}</button>
+  <button class="btn" type="button" (click)="showLinkForm.set(!showLinkForm())"><app-icon name="link" [size]="15" /> {{ 'Add link' | t }}</button>
 </div>
 
 @if (showLinkForm()) {
@@ -36,7 +36,7 @@
         @if (a.meta['iconUrl']) {
           <img [src]="a.meta['iconUrl']" alt="" width="16" height="16" />
         } @else {
-          {{ icon(a) }}
+          <app-icon [name]="icon(a)" [size]="18" />
         }
       </span>
       <button type="button" class="name" (click)="open(a)" [title]="a.kind === 'file' ? ('Open file' | t) : a.url">{{ a.name }}</button>

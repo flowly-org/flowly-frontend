@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, output, signal } from '@angular/core';
+import { Icon } from '../icon/icon';
 import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../core/api.service';
@@ -18,16 +19,16 @@ interface StepText {
 }
 
 const STEPS: Record<string, StepText> = {
-  task: { icon: '✓', title: 'Plan your day', why: 'Add tasks with + New task, or paste a list with Bulk add.', action: 'Open My day', link: '/day' },
-  project: { icon: '▤', title: 'Create projects', why: 'Projects become swimlanes on your board.', action: 'Add a project', link: '/w/:ws/projects' },
-  tags: { icon: '#', title: 'Add your own tags', why: 'Group the day by context (calls, errands…) instead of by project.', action: 'Add tags', link: '/w/:ws/tags' },
-  team: { icon: '👥', title: 'Invite your team', why: 'Share a workspace: send an invite link to colleagues.', action: 'Invite people', link: '/w/:ws/members' },
-  calendar: { icon: '📅', title: 'Connect your calendar', why: 'Events show as background; tickets and trips get flagged for preparation.', action: 'Connect Google Calendar', link: '/settings', fragment: 'calendars' },
-  home: { icon: '🏠', title: 'Set your home town', why: 'So Flowly can tell when an event is a trip.', action: 'Set home', link: '/settings', fragment: 'calendars' },
-  integration: { icon: '⇄', title: 'Bring work in', why: 'Turn emails, GitHub issues or webhooks into tasks, and send updates to Slack.', action: 'Add an integration', link: '/w/:ws/integrations' },
-  concierge: { icon: '🤖', title: 'Meet your concierge', why: 'A Telegram assistant that briefs you each morning and handles tasks by chat.', action: 'Link Telegram', link: '/settings', fragment: 'concierge', pro: true },
-  assistant: { icon: '✦', title: 'Use Flowly from Claude or ChatGPT', why: 'Let your AI assistant read your day and add tasks.', action: 'Connect an assistant', link: '/settings', fragment: 'assistants' },
-  time: { icon: '⏱', title: 'Track time', why: 'Start a timer from any task; bill the hours if you need to.', action: 'Open time', link: '/w/:ws/time' },
+  task: { icon: 'task', title: 'Plan your day', why: 'Add tasks with + New task, or paste a list with Bulk add.', action: 'Open My day', link: '/day' },
+  project: { icon: 'projects', title: 'Create projects', why: 'Projects become swimlanes on your board.', action: 'Add a project', link: '/w/:ws/projects' },
+  tags: { icon: 'tags', title: 'Add your own tags', why: 'Group the day by context (calls, errands…) instead of by project.', action: 'Add tags', link: '/w/:ws/tags' },
+  team: { icon: 'members', title: 'Invite your team', why: 'Share a workspace: send an invite link to colleagues.', action: 'Invite people', link: '/w/:ws/members' },
+  calendar: { icon: 'calendar', title: 'Connect your calendar', why: 'Events show as background; tickets and trips get flagged for preparation.', action: 'Connect Google Calendar', link: '/settings', fragment: 'calendars' },
+  home: { icon: 'home', title: 'Set your home town', why: 'So Flowly can tell when an event is a trip.', action: 'Set home', link: '/settings', fragment: 'calendars' },
+  integration: { icon: 'integrations', title: 'Bring work in', why: 'Turn emails, GitHub issues or webhooks into tasks, and send updates to Slack.', action: 'Add an integration', link: '/w/:ws/integrations' },
+  concierge: { icon: 'bot', title: 'Meet your concierge', why: 'A Telegram assistant that briefs you each morning and handles tasks by chat.', action: 'Link Telegram', link: '/settings', fragment: 'concierge', pro: true },
+  assistant: { icon: 'sparkles', title: 'Use Flowly from Claude or ChatGPT', why: 'Let your AI assistant read your day and add tasks.', action: 'Connect an assistant', link: '/settings', fragment: 'assistants' },
+  time: { icon: 'time', title: 'Track time', why: 'Start a timer from any task; bill the hours if you need to.', action: 'Open time', link: '/w/:ws/time' },
 };
 
 /**
@@ -36,7 +37,7 @@ const STEPS: Record<string, StepText> = {
  */
 @Component({
   selector: 'app-guide',
-  imports: [RouterLink, TranslatePipe],
+  imports: [Icon, RouterLink, TranslatePipe],
   templateUrl: './guide.html',
   styleUrl: './guide.scss',
 })

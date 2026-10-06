@@ -9,7 +9,7 @@
       <button type="button" class="btn primary small" [disabled]="busy() || !p.placed.length" (click)="autoPlan(true)">{{ 'Add these blocks' | t }}</button>
     } @else {
       <button type="button" class="btn small" [disabled]="busy()" (click)="autoPlan(false)"
-        [title]="'Fit the day\'s tasks into the free time around your meetings, using their estimates' | t">✨ {{ 'Auto-plan' | t }}</button>
+        [title]="'Fit the day\'s tasks into the free time around your meetings, using their estimates' | t"><app-icon name="sparkles" [size]="14" /> {{ 'Auto-plan' | t }}</button>
     }
   </div>
 

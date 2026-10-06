@@ -84,7 +84,7 @@
         </div>
         @for (n of notifications.items(); track n.id) {
           <button type="button" class="notif" [class.unread]="!n.read_at" (click)="openNotification(n)">
-            <span class="notif-icon" aria-hidden="true">{{ icons[n.kind] ?? '🔔' }}</span>
+            <span class="notif-icon" aria-hidden="true"><app-icon [name]="icons[n.kind] ?? 'bell'" [size]="16" /></span>
             <span class="notif-text">
               <span class="notif-title">{{ n.title }}</span>
               @if (n.body) {
@@ -129,7 +129,7 @@
               [attr.aria-pressed]="theme.theme() === opt.value"
               (click)="theme.set(opt.value)"
             >
-              <span aria-hidden="true">{{ opt.icon }}</span> {{ opt.label | t }}
+              <app-icon [name]="opt.icon" [size]="15" /> {{ opt.label | t }}
             </button>
           }
         </div>

@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { RouterLink } from '@angular/router';
 
 import { Logo } from '../../components/logo/logo';
@@ -27,12 +28,12 @@ interface AppCard {
 
 const CARDS: AppCard[] = [
   {
-    platform: 'mac', icon: '⌘', name: 'macOS', what: 'Tray time tracker for Apple silicon and Intel Macs.',
+    platform: 'mac', icon: 'monitor', name: 'macOS', what: 'Tray time tracker for Apple silicon and Intel Macs.',
     downloads: [{ file: 'Flowly-macOS-universal.dmg', label: 'Download for Mac' }],
     firstRun: 'First time: right-click Flowly in Applications and choose Open (the app is not signed yet).',
   },
   {
-    platform: 'windows', icon: '⊞', name: 'Windows', what: 'Tray time tracker for Windows 10 and 11.',
+    platform: 'windows', icon: 'monitor', name: 'Windows', what: 'Tray time tracker for Windows 10 and 11.',
     downloads: [
       { file: 'Flowly-Windows-x64-setup.exe', label: 'Download installer' },
       { file: 'Flowly-Windows-x64.msi', label: '.msi', note: 'for managed PCs' },
@@ -40,7 +41,7 @@ const CARDS: AppCard[] = [
     firstRun: 'If SmartScreen warns you: More info → Run anyway (the app is not signed yet).',
   },
   {
-    platform: 'linux', icon: '🐧', name: 'Linux', what: 'Tray time tracker for x86-64 desktops.',
+    platform: 'linux', icon: 'monitor', name: 'Linux', what: 'Tray time tracker for x86-64 desktops.',
     downloads: [
       { file: 'Flowly-Linux-x86_64.AppImage', label: 'AppImage' },
       { file: 'Flowly-Linux-amd64.deb', label: '.deb', note: 'Debian, Ubuntu' },
@@ -49,7 +50,7 @@ const CARDS: AppCard[] = [
     firstRun: 'AppImage: make it executable (chmod +x) and run it. A tray icon appears.',
   },
   {
-    platform: 'android', icon: '🤖', name: 'Android', what: 'Your day, tasks and timer on your phone.',
+    platform: 'android', icon: 'phone', name: 'Android', what: 'Your day, tasks and timer on your phone.',
     downloads: [{ file: 'Flowly-Android.apk', label: 'Download APK' }],
     firstRun: 'Open the file and allow installing from your browser or file manager when asked.',
   },
@@ -68,7 +69,7 @@ function detect(): Platform {
 /** Public page listing every way to use Flowly: desktop and mobile apps, the web app, chat and AI assistants. */
 @Component({
   selector: 'app-apps-page',
-  imports: [RouterLink, Logo, TranslatePipe, LocalDatePipe],
+  imports: [Icon, RouterLink, Logo, TranslatePipe, LocalDatePipe],
   templateUrl: './apps-page.html',
   styleUrl: './apps-page.scss',
 })

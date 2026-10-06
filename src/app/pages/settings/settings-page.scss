@@ -519,6 +519,9 @@ label.grow {
   max-width: 100%;
 
   button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     border: 0;
     background: transparent;
     padding: 7px 14px;

@@ -143,10 +143,10 @@ export interface WorkspaceContext {
 export type Visibility = 'private' | 'team' | 'shareable' | 'public';
 
 export const VISIBILITIES: { value: Visibility; label: string; icon: string; help: string }[] = [
-  { value: 'private', label: 'Private', icon: '🔒', help: 'Only you and the assignee.' },
-  { value: 'team', label: 'Team', icon: '👥', help: 'Everyone in the workspace.' },
-  { value: 'shareable', label: 'Shareable', icon: '🔗', help: 'The team, plus people you invite by email (they can view and comment).' },
-  { value: 'public', label: 'Public', icon: '🌐', help: 'Anyone with the link can view it, no account needed.' },
+  { value: 'private', label: 'Private', icon: 'lock', help: 'Only you and the assignee.' },
+  { value: 'team', label: 'Team', icon: 'members', help: 'Everyone in the workspace.' },
+  { value: 'shareable', label: 'Shareable', icon: 'link', help: 'The team, plus people you invite by email (they can view and comment).' },
+  { value: 'public', label: 'Public', icon: 'globe', help: 'Anyone with the link can view it, no account needed.' },
 ];
 
 export interface Task {

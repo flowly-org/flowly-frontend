@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Icon } from '../icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -8,7 +9,7 @@ import { I18nService } from '../../core/i18n.service';
 import { CalendarEvent, CalendarTaskRef, PrepReason } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
-const ICONS: Record<PrepReason, string> = { '': '', away: '🧳', travel: '🚆', tickets: '🎟️', event: '🎁', manual: '⚑' };
+const ICONS: Record<PrepReason, string> = { '': '', away: 'luggage', travel: 'train', tickets: 'ticket', event: 'gift', manual: 'flag' };
 const REASONS: Record<PrepReason, string> = {
   '': '',
   away: 'Away from home',
@@ -32,7 +33,7 @@ const SUGGESTED_TITLE: Record<PrepReason, string> = {
  */
 @Component({
   selector: 'app-calendar-strip',
-  imports: [FormsModule, TranslatePipe, LocalDatePipe],
+  imports: [Icon, FormsModule, TranslatePipe, LocalDatePipe],
   templateUrl: './calendar-strip.html',
   styleUrl: './calendar-strip.scss',
 })
@@ -86,7 +87,7 @@ export class CalendarStrip {
   }
 
   protected icon(e: CalendarEvent) {
-    return e.needs_prep ? ICONS[e.reason] || '⚑' : '';
+    return e.needs_prep ? ICONS[e.reason] || 'flag' : '';
   }
 
   protected reasonLabel(e: CalendarEvent) {

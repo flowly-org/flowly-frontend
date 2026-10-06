@@ -41,9 +41,9 @@ export class Shell {
   protected auth = inject(AuthService);
   protected theme = inject(ThemeService);
   protected readonly themes: { value: Theme; label: string; icon: string }[] = [
-    { value: 'light', label: 'Light', icon: '☀' },
-    { value: 'dark', label: 'Dark', icon: '☾' },
-    { value: 'auto', label: 'Auto', icon: '◐' },
+    { value: 'light', label: 'Light', icon: 'day' },
+    { value: 'dark', label: 'Dark', icon: 'moon' },
+    { value: 'auto', label: 'Auto', icon: 'contrast' },
   ];
   private api = inject(ApiService);
   private router = inject(Router);
@@ -57,7 +57,7 @@ export class Shell {
   protected notifications = inject(NotificationService);
   protected timer = inject(TimerService);
   protected readonly formatDuration = formatDuration;
-  protected readonly icons: Record<string, string> = { urgent: '🔴', assigned: '📌', comment: '💬', brief: '☀', shared: '🔗' };
+  protected readonly icons: Record<string, string> = { urgent: 'alert', assigned: 'pin', comment: 'message', brief: 'day', shared: 'link' };
 
   /** Colour of the workspace being viewed (default accent on My day). */
   protected readonly brandColor = computed(() => {

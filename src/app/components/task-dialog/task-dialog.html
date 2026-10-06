@@ -28,7 +28,7 @@
         <button type="button" role="tab" [class.on]="tab() === 'time'" [attr.aria-selected]="tab() === 'time'" (click)="tab.set('time')">{{ 'Time' | t }}</button>
       }
       <button type="button" role="tab" [class.on]="tab() === 'share'" [attr.aria-selected]="tab() === 'share'" (click)="tab.set('share')">
-        {{ 'Share' | t }} <span class="vis-icon" aria-hidden="true">{{ view()?.visibility?.icon }}</span>
+        {{ 'Share' | t }} @if (view()?.visibility?.icon; as vi) { <span class="vis-icon" aria-hidden="true"><app-icon [name]="vi" [size]="13" /></span> }
       </button>
     </nav>
     @if (tab() === 'time') {
@@ -87,7 +87,7 @@
           <dt>{{ 'Waits for' | t }}</dt>
           <dd class="reminders deps">
             @for (b of blockers(); track b.id) {
-              <span class="chip dep" [class.sent]="b.done">{{ b.done ? '✓' : '⛓' }} {{ b.title }}
+              <span class="chip dep" [class.sent]="b.done"><app-icon [name]="b.done ? 'check' : 'link'" [size]="12" /> {{ b.title }}
                 <button type="button" class="x" [attr.aria-label]="'Remove' | t" (click)="removeBlocker(b.id)">✕</button></span>
             }
             <span class="dep-add">
@@ -119,7 +119,7 @@
             <dd class="tag-list">@for (tag of v.tags; track tag!.id) {<span class="chip" [style.--chip]="tag!.color">{{ tag!.name }}</span>}</dd>
           }
           <dt>{{ 'Visibility' | t }}</dt>
-          <dd><button type="button" class="link-btn" (click)="tab.set('share')">{{ v.visibility.icon }} {{ v.visibility.label | t }}</button></dd>
+          <dd><button type="button" class="link-btn" (click)="tab.set('share')"><app-icon [name]="v.visibility.icon" [size]="13" /> {{ v.visibility.label | t }}</button></dd>
         </dl>
         @if (!v.status?.is_done) {
           <app-task-delegate [task]="t" (finished)="touched.emit(t.id)" (openDiscussion)="tab.set('discussion')" />

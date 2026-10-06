@@ -23,7 +23,7 @@
 
     @if (platform === 'ios') {
       <section class="card highlight top-card">
-        <div class="card-head"><span class="icon" aria-hidden="true">📱</span><h2>iPhone &amp; iPad</h2></div>
+        <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="phone" [size]="20" /></span><h2>iPhone &amp; iPad</h2></div>
         <p>{{ 'The App Store version is coming. Meanwhile, add Flowly to your home screen:' | t }}</p>
         <p class="muted small">{{ 'In Safari open {url}, tap Share, then Add to Home Screen.' | t: { url: webUrl } }}</p>
       </section>
@@ -33,7 +33,7 @@
       @for (c of cards(); track c.platform) {
         <section class="card" [class.highlight]="c.platform === platform">
           <div class="card-head">
-            <span class="icon" aria-hidden="true">{{ c.icon }}</span>
+            <span class="icon" aria-hidden="true"><app-icon [name]="c.icon" [size]="20" /></span>
             <h2>{{ c.name }}</h2>
             @if (c.platform === platform) {
               <span class="badge">{{ 'This device' | t }}</span>
@@ -59,7 +59,7 @@
 
       @if (platform !== 'ios') {
         <section class="card">
-          <div class="card-head"><span class="icon" aria-hidden="true">📱</span><h2>iPhone &amp; iPad</h2><span class="badge soon">{{ 'Coming soon' | t }}</span></div>
+          <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="phone" [size]="20" /></span><h2>iPhone &amp; iPad</h2><span class="badge soon">{{ 'Coming soon' | t }}</span></div>
           <p class="muted">{{ 'The App Store version is coming. Meanwhile, add Flowly to your home screen:' | t }}</p>
           <p class="first-run small">{{ 'In Safari open {url}, tap Share, then Add to Home Screen.' | t: { url: webUrl } }}</p>
         </section>
@@ -69,17 +69,17 @@
     <h2 class="section">{{ 'More ways to use Flowly' | t }}</h2>
     <div class="grid">
       <section class="card">
-        <div class="card-head"><span class="icon" aria-hidden="true">🌐</span><h2>{{ 'Web app' | t }}</h2></div>
+        <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="globe" [size]="20" /></span><h2>{{ 'Web app' | t }}</h2></div>
         <p class="muted">{{ 'Everything, in any browser. Chrome and Edge can install it as an app from the address bar.' | t }}</p>
         <div class="downloads"><a class="btn" [href]="webUrl">{{ 'Open the web app' | t }}</a></div>
       </section>
       <section class="card">
-        <div class="card-head"><span class="icon" aria-hidden="true">💬</span><h2>{{ 'Telegram concierge' | t }}</h2><span class="badge soon">PRO</span></div>
+        <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="message" [size]="20" /></span><h2>{{ 'Telegram concierge' | t }}</h2><span class="badge soon">PRO</span></div>
         <p class="muted">{{ 'A personal assistant that briefs you each morning and adds or moves tasks by chat.' | t }}</p>
         <div class="downloads"><a class="btn" routerLink="/settings" fragment="concierge">{{ 'Link Telegram' | t }}</a></div>
       </section>
       <section class="card">
-        <div class="card-head"><span class="icon" aria-hidden="true">✦</span><h2>Claude &amp; ChatGPT</h2></div>
+        <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="sparkles" [size]="20" /></span><h2>Claude &amp; ChatGPT</h2></div>
         <p class="muted">{{ 'Add Flowly as a connector so your AI assistant can read your day and manage tasks.' | t }}</p>
         <div class="downloads"><a class="btn" routerLink="/settings" fragment="assistants">{{ 'Connect an assistant' | t }}</a></div>
       </section>

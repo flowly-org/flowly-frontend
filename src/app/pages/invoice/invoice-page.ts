@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, input, signal } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -11,7 +12,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-invoice-page',
-  imports: [FormsModule, RouterLink, TranslatePipe, LocalDatePipe],
+  imports: [Icon, FormsModule, RouterLink, TranslatePipe, LocalDatePipe],
   templateUrl: './invoice-page.html',
   styleUrl: './invoice-page.scss',
 })

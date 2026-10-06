@@ -19,7 +19,7 @@
       <button type="button" class="btn" (click)="done.emit(task)">✓ {{ 'Done' | t }}</button>
       <button type="button" class="btn" [disabled]="splitting()" (click)="breakDown(task)"
         [title]="(flo() ? 'Flo splits it into tiny steps' : 'Open the task to split it into steps') | t">
-        {{ splitting() ? ('Splitting…' | t) : ('🪓 Break it down' | t) }}
+        {{ splitting() ? ('Splitting…' | t) : ('Break it down' | t) }}
       </button>
       @if (queue().length > 1) {
         <button type="button" class="btn ghost" (click)="notNow(task)">{{ 'Not now' | t }}</button>
@@ -37,6 +37,6 @@
       </p>
     }
   } @else {
-    <p class="clear">🎉 {{ 'All clear for today. Nothing else needs you right now.' | t }}</p>
+    <p class="clear"><app-icon name="check-circle" [size]="18" /> {{ 'All clear for today. Nothing else needs you right now.' | t }}</p>
   }
 </section>

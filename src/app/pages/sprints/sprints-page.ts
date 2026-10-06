@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -16,7 +17,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 /** Agile rituals (opt-in): sprint board, planning, burndown, async standup and retrospective. */
 @Component({
   selector: 'app-sprints-page',
-  imports: [FormsModule, TranslatePipe],
+  imports: [Icon, FormsModule, TranslatePipe],
   templateUrl: './sprints-page.html',
   styleUrl: './sprints-page.scss',
 })
@@ -52,9 +53,9 @@ export class SprintsPage {
   protected readonly burnPath = computed(() => this.path('remaining'));
   protected readonly idealPath = computed(() => this.path('ideal'));
   protected readonly retroCols = [
-    { kind: 'went_well', label: 'Went well', icon: '👍' },
-    { kind: 'improve', label: 'To improve', icon: '🔧' },
-    { kind: 'idea', label: 'Ideas', icon: '💡' },
+    { kind: 'went_well', label: 'Went well', icon: 'thumbs-up' },
+    { kind: 'improve', label: 'To improve', icon: 'tool' },
+    { kind: 'idea', label: 'Ideas', icon: 'bulb' },
   ];
 
   constructor() {

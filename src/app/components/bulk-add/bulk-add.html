@@ -48,12 +48,12 @@
         <span class="editor-head">
           <span class="muted">{{ 'One task per line. Paste a bulleted list, or type:' | t }}</span>
           <label class="btn small photo-btn" [class.disabled]="reading()" [title]="'Take or pick a photo of a written to-do list; AI turns it into tasks you can check before adding' | t">
-            📷 {{ 'From a photo' | t }}
+            <app-icon name="camera" [size]="15" /> {{ 'From a photo' | t }}
             <input type="file" accept="image/*" (change)="onPhoto($event)" [disabled]="!!reading()" hidden />
           </label>
           <button type="button" class="btn small" (click)="notes.set(notes() ? null : { text: '', busy: false })"
             [title]="'Paste meeting notes or a transcript; AI finds the action items, who does them and by when' | t">
-            📝 {{ 'From meeting notes' | t }}
+            <app-icon name="notes" [size]="15" /> {{ 'From meeting notes' | t }}
           </button>
         </span>
         @if (notes(); as n) {
@@ -120,7 +120,7 @@
                 <span class="muted">≈ {{ d.estimate }}m</span>
               }
               @if (d.checklist.length) {
-                <span class="muted">☑ {{ d.checklist.length }}</span>
+                <span class="muted"><app-icon name="checkbox" [size]="12" /> {{ d.checklist.length }}</span>
               }
               @if (d.notes) {
                 <span class="muted" [title]="d.notes">{{ '+ notes' | t }}</span>

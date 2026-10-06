@@ -34,7 +34,7 @@
           <div class="label group" [style.height.px]="ROW"><span class="dot" [style.background]="r.color"></span>{{ r.label }}</div>
         } @else {
           <button type="button" class="label task" [style.height.px]="ROW" [class.done]="r.task!.completed_at" (click)="open(r.task!)" [title]="r.label">
-            @if (r.task!.blocked) { <span class="chain" [title]="'Waiting for another task' | t">⛓</span> }
+            @if (r.task!.blocked) { <span class="chain" [title]="'Waiting for another task' | t"><app-icon name="link" [size]="12" /></span> }
             {{ r.label }}
           </button>
         }

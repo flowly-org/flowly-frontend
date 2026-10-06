@@ -1,4 +1,5 @@
 import { Component, ElementRef, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
+import { Icon } from '../icon/icon';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { BoardData } from '../../core/board-data';
@@ -15,7 +16,7 @@ const STEP = 15 * 60 * 1000;
  */
 @Component({
   selector: 'app-day-plan',
-  imports: [TranslatePipe],
+  imports: [Icon, TranslatePipe],
   templateUrl: './day-plan.html',
   styleUrl: './day-plan.scss',
 })

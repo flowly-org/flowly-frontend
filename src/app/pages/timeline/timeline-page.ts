@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -34,7 +35,7 @@ interface Row {
 /** Gantt view of a workspace: dated tasks as bars (planned → due), dependencies as arrows; drag to reschedule. */
 @Component({
   selector: 'app-timeline-page',
-  imports: [FormsModule, TranslatePipe],
+  imports: [Icon, FormsModule, TranslatePipe],
   templateUrl: './timeline-page.html',
   styleUrl: './timeline-page.scss',
 })

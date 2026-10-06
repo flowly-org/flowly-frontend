@@ -1,5 +1,6 @@
 import { JsonPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -21,18 +22,18 @@ interface KindInfo {
 
 export const KINDS: KindInfo[] = [
   { kind: 'github', label: 'GitHub', icon: '', blurb: 'Issues become tasks; closing or reopening a task updates the issue.' },
-  { kind: 'slack', label: 'Slack', icon: '#', blurb: 'Post task events to a Slack channel.' },
-  { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: '↗', blurb: 'POST signed JSON to your URL when tasks change.' },
-  { kind: 'incoming_webhook', label: 'Incoming webhook', icon: '↘', blurb: 'A secret URL any system can call to create or update tasks.' },
-  { kind: 'email', label: 'Email in', icon: '✉', blurb: 'Email an address to create a task.' },
-  { kind: 'donetick', label: 'Donetick', icon: '✔', blurb: 'Two-way sync with your self-hosted Donetick: chores become tasks, done is done in both.' },
-  { kind: 'wiki', label: 'Wiki', icon: '📖', blurb: 'Link a GitHub wiki, a docs folder or a MediaWiki: Flo and the AI agent use it as team knowledge.' },
-  { kind: 'telegram_group', label: 'Telegram group', icon: '✈', enterprise: true,
+  { kind: 'slack', label: 'Slack', icon: 'hash', blurb: 'Post task events to a Slack channel.' },
+  { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: 'arrow-out', blurb: 'POST signed JSON to your URL when tasks change.' },
+  { kind: 'incoming_webhook', label: 'Incoming webhook', icon: 'arrow-in', blurb: 'A secret URL any system can call to create or update tasks.' },
+  { kind: 'email', label: 'Email in', icon: 'mail', blurb: 'Email an address to create a task.' },
+  { kind: 'donetick', label: 'Donetick', icon: 'check-circle', blurb: 'Two-way sync with your self-hosted Donetick: chores become tasks, done is done in both.' },
+  { kind: 'wiki', label: 'Wiki', icon: 'wiki', blurb: 'Link a GitHub wiki, a docs folder or a MediaWiki: Flo and the AI agent use it as team knowledge.' },
+  { kind: 'telegram_group', label: 'Telegram group', icon: 'send', enterprise: true,
     blurb: "Flowly in your team's Telegram group: today's plan, updates, questions and photos of lists." },
-  { kind: 'slack_bot', label: 'Slack app', icon: '◆', enterprise: true,
+  { kind: 'slack_bot', label: 'Slack app', icon: 'message', enterprise: true,
     blurb: 'Flowly in your Slack: @Flowly questions, /flowly, a morning brief and updates in a channel.' },
-  { kind: 'openrouter', label: 'OpenRouter', icon: '✦', enterprise: true, blurb: "Use the workspace's own OpenRouter key and model for AI features." },
-  { kind: 'openai_compatible', label: 'Custom AI endpoint', icon: '⚙', enterprise: true, blurb: 'Any OpenAI-compatible API, e.g. an on-premises model server.' },
+  { kind: 'openrouter', label: 'OpenRouter', icon: 'sparkles', enterprise: true, blurb: "Use the workspace's own OpenRouter key and model for AI features." },
+  { kind: 'openai_compatible', label: 'Custom AI endpoint', icon: 'settings', enterprise: true, blurb: 'Any OpenAI-compatible API, e.g. an on-premises model server.' },
 ];
 
 interface Form {
@@ -58,7 +59,7 @@ const TEAM_KINDS: IntegrationKind[] = ['telegram_group', 'slack_bot'];
 
 @Component({
   selector: 'app-integrations-page',
-  imports: [FormsModule, JsonPipe, TranslatePipe, LocalDatePipe],
+  imports: [Icon, FormsModule, JsonPipe, TranslatePipe, LocalDatePipe],
   templateUrl: './integrations-page.html',
   styleUrl: './integrations-page.scss',
 })

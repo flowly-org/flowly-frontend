@@ -32,7 +32,7 @@
       }
     } @else {
       <div class="summary">
-        <div class="big">{{ doneCount() ? '🎉' : '👍' }}</div>
+        <div class="big"><app-icon [name]="doneCount() ? 'check-circle' : 'thumbs-up'" [size]="44" [stroke]="1.5" /></div>
         <h2>{{ 'All reviewed' | t }}</h2>
         <p>{{ '{done} done · {kept} still to do' | t: { done: doneCount(), kept: keptCount() } }}</p>
         <button type="button" class="btn-pill primary" (click)="closed.emit()">{{ 'Back to my day' | t }}</button>

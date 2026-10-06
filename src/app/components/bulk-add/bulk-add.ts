@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Icon } from '../icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -13,7 +14,7 @@ import { parseList } from './bulk-parse';
 
 @Component({
   selector: 'app-bulk-add',
-  imports: [FormsModule, TranslatePipe],
+  imports: [Icon, FormsModule, TranslatePipe],
   templateUrl: './bulk-add.html',
   styleUrl: './bulk-add.scss',
   host: { '(document:keydown.escape)': 'closed.emit()' },

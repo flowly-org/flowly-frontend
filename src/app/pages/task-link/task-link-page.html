@@ -37,7 +37,7 @@
               <span class="muted">/ {{ v.task.project.name }}</span>
             }
             <span class="spacer"></span>
-            <span class="vis" [title]="visibility(v).help | t">{{ visibility(v).icon }} {{ visibility(v).label | t }}</span>
+            <span class="vis" [title]="visibility(v).help | t"><app-icon [name]="visibility(v).icon" [size]="13" /> {{ visibility(v).label | t }}</span>
           </div>
           <h1 [class.done]="v.task.status.is_done">{{ v.task.title }}</h1>
           <div class="chips">

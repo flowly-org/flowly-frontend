@@ -38,7 +38,7 @@
         </label>
         @if (codeInfo(); as c) {
           @if (c.valid) {
-            <p class="code-ok">🎁 {{ (c.plan === 'pro_plus' ? 'Flowly Pro Plus' : 'Flowly Pro') }} ·
+            <p class="code-ok"><app-icon name="gift" [size]="15" /> {{ (c.plan === 'pro_plus' ? 'Flowly Pro Plus' : 'Flowly Pro') }} ·
               {{ c.forever ? ('forever, free' | t) : ('free for {n} days' | t: { n: c.days }) }}</p>
           } @else {
             <p class="form-error">{{ c.detail }}</p>

@@ -19,7 +19,7 @@
           </select>
         }
         @if (store.canManage()) {
-          <button class="btn small" type="button" (click)="editing.set(setup() ? { ...setup()! } : null)">⚙ {{ 'Settings' | t }}</button>
+          <button class="btn small" type="button" (click)="editing.set(setup() ? { ...setup()! } : null)"><app-icon name="settings" [size]="14" /> {{ 'Settings' | t }}</button>
           <button class="btn ghost small" type="button" (click)="newSetup()">＋ {{ 'Another team' | t }}</button>
         }
       </div>
@@ -139,7 +139,7 @@
               <h3><span class="dot" [style.background]="c.status.color"></span>{{ c.status.name }} <span class="muted">{{ c.tasks.length }}</span></h3>
               @for (t of c.tasks; track t.id) {
                 <div class="card" [class.blocked]="t.blocked">
-                  <button type="button" class="link" (click)="openTask(t)">@if (t.blocked) { ⛓ } {{ t.title }}</button>
+                  <button type="button" class="link" (click)="openTask(t)">@if (t.blocked) { <app-icon name="link" [size]="12" /> } {{ t.title }}</button>
                   <div class="meta">
                     @if (t.estimate_minutes) { <span>≈ {{ formatMinutes(t.estimate_minutes) }}</span> }
                     <select [ngModel]="t.status" (ngModelChange)="setStatus(t, +$event)" [attr.aria-label]="'Status' | t">
@@ -218,7 +218,7 @@
                 <strong>{{ e.name }}</strong>
                 @if (e.yesterday) { <p>✓ {{ e.yesterday }}</p> }
                 @if (e.today) { <p>→ {{ e.today }}</p> }
-                @if (e.blockers) { <p class="danger-text">⚠ {{ e.blockers }}</p> }
+                @if (e.blockers) { <p class="danger-text"><app-icon name="alert" [size]="14" /> {{ e.blockers }}</p> }
               </div>
             } @empty {
               <p class="muted small pad">{{ 'No updates yet today.' | t }}</p>
@@ -230,7 +230,7 @@
         <div class="retro">
           @for (c of retroCols; track c.kind) {
             <section class="panel">
-              <h2>{{ c.icon }} {{ c.label | t }}</h2>
+              <h2><app-icon [name]="c.icon" [size]="16" /> {{ c.label | t }}</h2>
               @for (r of retroItems(c.kind); track r.id) {
                 <div class="note">
                   <span class="grow">{{ r.text }}</span>

@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -30,7 +31,7 @@ interface ChatLine {
 
 @Component({
   selector: 'app-settings-page',
-  imports: [FormsModule, TranslatePipe, LocalDatePipe],
+  imports: [FormsModule, Icon, TranslatePipe, LocalDatePipe],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.scss',
 })
@@ -45,12 +46,12 @@ export class SettingsPage implements OnInit {
   protected readonly languages = LANGUAGES;
   protected tab = signal<SettingsTab>('account');
   protected readonly tabs: { key: SettingsTab; label: string; icon: string }[] = [
-    { key: 'account', label: 'Account', icon: '👤' },
-    { key: 'flo', label: 'Flo', icon: '🤖' },
-    { key: 'focus', label: 'Focus', icon: '🎯' },
-    { key: 'calendars', label: 'Calendars', icon: '📅' },
-    { key: 'connections', label: 'Connections', icon: '🔌' },
-    { key: 'invoicing', label: 'Invoicing', icon: '🧾' },
+    { key: 'account', label: 'Account', icon: 'user' },
+    { key: 'flo', label: 'Flo', icon: 'bot' },
+    { key: 'focus', label: 'Focus', icon: 'target' },
+    { key: 'calendars', label: 'Calendars', icon: 'calendar' },
+    { key: 'connections', label: 'Connections', icon: 'integrations' },
+    { key: 'invoicing', label: 'Invoicing', icon: 'billing' },
   ];
   private router = inject(Router);
 

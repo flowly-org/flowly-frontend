@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -15,7 +16,7 @@ import { ToastService } from '../../core/toast.service';
 /** /t/<ref>: members jump to the task on its board; shared and public viewers get a read-only page. */
 @Component({
   selector: 'app-task-link-page',
-  imports: [RouterLink, FormsModule, Logo, TranslatePipe, LocalDatePipe],
+  imports: [Icon, RouterLink, FormsModule, Logo, TranslatePipe, LocalDatePipe],
   templateUrl: './task-link-page.html',
   styleUrl: './task-link-page.scss',
 })
