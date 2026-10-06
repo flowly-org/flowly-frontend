@@ -2,6 +2,7 @@ import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -58,7 +59,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, DayPlan, TranslatePipe],
+  imports: [Icon, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, DayPlan, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',

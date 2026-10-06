@@ -150,6 +150,46 @@
   background: var(--surface-2);
 }
 
+// Icon buttons in the toolbar, grouped like the top bar.
+.tools {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 8px;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover { color: var(--ink); background: var(--surface-2); }
+  &:focus-visible { outline: 2px solid var(--brand, var(--accent)); outline-offset: 1px; }
+  &.on {
+    color: var(--brand, var(--accent));
+    background: color-mix(in srgb, var(--brand, var(--accent)) 12%, transparent);
+  }
+}
+
+.segmented button {
+  display: inline-flex;
+  align-items: center;
+}
+
+.new-task {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .count {
   font-size: 0.75rem;
   color: var(--muted);

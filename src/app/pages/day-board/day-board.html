@@ -28,47 +28,50 @@
   </div>
 
   <div class="controls">
-    <label class="field">
-      <span>{{ 'Swimlanes' | t }}</span>
-      <select [ngModel]="groupBy()" (ngModelChange)="groupBy.set($event)">
+    <label class="field tip" [attr.data-tip]="'Swimlanes' | t">
+      <app-icon name="lanes" [size]="16" />
+      <select [ngModel]="groupBy()" (ngModelChange)="groupBy.set($event)" [attr.aria-label]="'Swimlanes' | t">
         @for (opt of groupChoices(); track opt.value) {
           <option [value]="opt.value">{{ opt.label }}</option>
         }
       </select>
     </label>
-
-    <div class="segmented" role="group" [attr.aria-label]="'Whose tasks' | t">
-      <button type="button" [class.on]="scope() === 'me'" [attr.aria-pressed]="scope() === 'me'" (click)="scope.set('me')">{{ 'Mine' | t }}</button>
-      <button type="button" [class.on]="scope() === 'all'" [attr.aria-pressed]="scope() === 'all'" (click)="scope.set('all')">{{ 'Everyone' | t }}</button>
-    </div>
-
-    <label class="toggle" [title]="'Show unfinished tasks planned for earlier days' | t">
-      <input type="checkbox" [ngModel]="includeOverdue()" (ngModelChange)="includeOverdue.set($event)" />
-      {{ 'Carry over' | t }}
-    </label>
-    <label class="toggle">
-      <input type="checkbox" [ngModel]="hideEmpty()" (ngModelChange)="hideEmpty.set($event)" />
-      {{ 'Hide empty lanes' | t }}
-    </label>
-
-    <button class="btn" type="button" [class.active]="showBacklog()" (click)="showBacklog.set(!showBacklog())">
-      {{ 'Backlog' | t }} <span class="count">{{ backlog().length }}</span>
-    </button>
     @if (mode === 'global' && data.multi()) {
-      <label class="field" [title]="'Workspace new tasks are added to' | t">
-        <span>{{ 'Add to' | t }}</span>
-        <select [ngModel]="newTaskWs()" (ngModelChange)="targetWs.set(+$event)">
+      <label class="field tip" [attr.data-tip]="'Workspace new tasks are added to' | t">
+        <app-icon name="plus" [size]="16" />
+        <select [ngModel]="newTaskWs()" (ngModelChange)="targetWs.set(+$event)" [attr.aria-label]="'Add to' | t">
           @for (c of contexts(); track c.id) {
             <option [ngValue]="c.id">{{ c.name }}</option>
           }
         </select>
       </label>
     }
-    <button class="btn" type="button" (click)="simpleView()" [title]="'Just today\'s list, the timer and swipe review: a calmer view (Full version brings you back)' | t">{{ 'Simple view' | t }}</button>
-    <button class="btn" type="button" [class.active]="planOpen()" (click)="togglePlan()" [title]="'Block time for your tasks in the day' | t">{{ 'Plan' | t }}</button>
-    <button class="btn" type="button" (click)="templatesOpen.set(true)" [title]="'Create a set of tasks from a template' | t">{{ 'Templates' | t }}</button>
-    <button class="btn" type="button" (click)="bulk.set('day')" [title]="'Paste a list to add many tasks at once' | t">{{ 'Bulk add' | t }}</button>
-    <button class="btn primary" type="button" (click)="openNew()">{{ '+ New task' | t }}</button>
+
+    <div class="segmented" role="group" [attr.aria-label]="'Whose tasks' | t">
+      <button type="button" class="tip" [class.on]="scope() === 'me'" [attr.aria-pressed]="scope() === 'me'" (click)="scope.set('me')"
+        [attr.data-tip]="'Mine' | t" [attr.aria-label]="'Mine' | t"><app-icon name="user" [size]="16" /></button>
+      <button type="button" class="tip" [class.on]="scope() === 'all'" [attr.aria-pressed]="scope() === 'all'" (click)="scope.set('all')"
+        [attr.data-tip]="'Everyone' | t" [attr.aria-label]="'Everyone' | t"><app-icon name="members" [size]="16" /></button>
+    </div>
+
+    <div class="tools" role="group" [attr.aria-label]="'View' | t">
+      <button type="button" class="tool tip" [class.on]="includeOverdue()" [attr.aria-pressed]="includeOverdue()" (click)="includeOverdue.set(!includeOverdue())"
+        [attr.data-tip]="'Carry over: show unfinished tasks from earlier days' | t" [attr.aria-label]="'Carry over' | t"><app-icon name="history" /></button>
+      <button type="button" class="tool tip" [class.on]="hideEmpty()" [attr.aria-pressed]="hideEmpty()" (click)="hideEmpty.set(!hideEmpty())"
+        [attr.data-tip]="'Hide empty lanes' | t" [attr.aria-label]="'Hide empty lanes' | t"><app-icon name="eye-off" /></button>
+      <button type="button" class="tool tip" [class.on]="showBacklog()" [attr.aria-pressed]="showBacklog()" (click)="showBacklog.set(!showBacklog())"
+        [attr.data-tip]="'Backlog' | t" [attr.aria-label]="'Backlog' | t"><app-icon name="inbox" />@if (backlog().length) { <span class="count">{{ backlog().length }}</span> }</button>
+      <button type="button" class="tool tip" [class.on]="planOpen()" [attr.aria-pressed]="planOpen()" (click)="togglePlan()"
+        [attr.data-tip]="'Plan: block time for your tasks' | t" [attr.aria-label]="'Plan' | t"><app-icon name="calendar" /></button>
+    </div>
+
+    <div class="tools" role="group" [attr.aria-label]="'Add' | t">
+      <button type="button" class="tool tip" (click)="templatesOpen.set(true)" [attr.data-tip]="'Templates' | t" [attr.aria-label]="'Templates' | t"><app-icon name="template" /></button>
+      <button type="button" class="tool tip" (click)="bulk.set('day')" [attr.data-tip]="'Bulk add: paste a list' | t" [attr.aria-label]="'Bulk add' | t"><app-icon name="list" /></button>
+      <button type="button" class="tool tip" (click)="simpleView()" [attr.data-tip]="'Simple view' | t" [attr.aria-label]="'Simple view' | t"><app-icon name="cards" /></button>
+    </div>
+
+    <button class="btn primary new-task" type="button" (click)="openNew()"><app-icon name="plus" [size]="16" [stroke]="2.2" /> {{ 'New task' | t }}</button>
   </div>
 </div>
 

@@ -3,6 +3,10 @@ import type { Dict } from './index';
 /** Board, task card, task dialog and its tabs, bulk add. */
 export const BOARD: Dict = {
   it: {
+    "Carry over: show unfinished tasks from earlier days": "Riporta: mostra le attività non finite dei giorni prima",
+    "Plan: block time for your tasks": "Pianifica: blocca tempo per le tue attività",
+    "Bulk add: paste a list": "Aggiunta multipla: incolla un elenco",
+    "View": "Vista",
     "Simple view": "Vista semplice",
     "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Solo la lista di oggi, il timer e la revisione a swipe: una vista più tranquilla (Versione completa ti riporta qui)",
     "drag the card, or use the ← → keys": "trascina la scheda o usa i tasti ← →",
@@ -461,6 +465,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} attività",
   },
   es: {
+    "Carry over: show unfinished tasks from earlier days": "Arrastrar: muestra las tareas sin terminar de días anteriores",
+    "Plan: block time for your tasks": "Planificar: reserva tiempo para tus tareas",
+    "Bulk add: paste a list": "Añadir en bloque: pega una lista",
+    "View": "Vista",
     "Simple view": "Vista sencilla",
     "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Solo la lista de hoy, el temporizador y la revisión deslizando: una vista más tranquila (Versión completa te devuelve aquí)",
     "drag the card, or use the ← → keys": "arrastra la tarjeta o usa las teclas ← →",
@@ -919,6 +927,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tareas",
   },
   fr: {
+    "Carry over: show unfinished tasks from earlier days": "Reporter : afficher les tâches non terminées des jours précédents",
+    "Plan: block time for your tasks": "Planifier : bloquer du temps pour vos tâches",
+    "Bulk add: paste a list": "Ajout groupé : collez une liste",
+    "View": "Affichage",
     "Simple view": "Vue simple",
     "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Seulement la liste du jour, le minuteur et la revue par balayage : une vue plus calme (Version complète te ramène ici)",
     "drag the card, or use the ← → keys": "glisse la carte ou utilise les touches ← →",
@@ -1377,6 +1389,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tâches",
   },
   de: {
+    "Carry over: show unfinished tasks from earlier days": "Übertragen: unerledigte Aufgaben früherer Tage zeigen",
+    "Plan: block time for your tasks": "Planen: Zeit für deine Aufgaben blocken",
+    "Bulk add: paste a list": "Mehrere hinzufügen: Liste einfügen",
+    "View": "Ansicht",
     "Simple view": "Einfache Ansicht",
     "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Nur die Liste von heute, der Timer und die Wisch-Übersicht: eine ruhigere Ansicht (Vollversion bringt dich zurück)",
     "drag the card, or use the ← → keys": "Karte ziehen oder die Tasten ← → nutzen",
@@ -1835,6 +1851,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} Aufgaben",
   },
   pt: {
+    "Carry over: show unfinished tasks from earlier days": "Transportar: mostrar tarefas não concluídas de dias anteriores",
+    "Plan: block time for your tasks": "Planear: reservar tempo para as suas tarefas",
+    "Bulk add: paste a list": "Adicionar em massa: cole uma lista",
+    "View": "Vista",
     "Simple view": "Vista simples",
     "Just today's list, the timer and swipe review: a calmer view (Full version brings you back)": "Só a lista de hoje, o temporizador e a revisão a deslizar: uma vista mais calma (Versão completa traz-te de volta)",
     "drag the card, or use the ← → keys": "arrasta o cartão ou usa as teclas ← →",
