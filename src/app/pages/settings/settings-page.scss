@@ -236,8 +236,8 @@ label.grow {
 .cal-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
-  padding: 4px 0 0 2px;
+  gap: 6px 18px;
+  padding: 2px 16px 6px;
 
   .toggle {
     display: inline-flex;
@@ -483,7 +483,7 @@ label.grow {
 #calendars > .cal-add,
 #calendars > .cal-form,
 #calendars > .feed-title,
-#calendars > p,
+#calendars > p:not(.intro),
 #calendars > .copy-row,
 #calendars > button {
   margin-left: 16px;
@@ -492,6 +492,11 @@ label.grow {
 
 #calendars > button {
   margin-bottom: 14px;
+}
+
+/* The Home field has a caption above it: line the Save button up with the input. */
+#calendars > .inline-form {
+  align-items: flex-end;
 }
 
 #calendars > .hours-row {
