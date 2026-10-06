@@ -54,6 +54,7 @@ import {
   Invitation,
   Membership,
   Project,
+  RelocateSummary,
   Role,
   Tag,
   TagGroup,
@@ -147,6 +148,16 @@ export class ApiService {
   }
   deleteProject(wsId: number, id: number) {
     return this.run(this.http.delete<void>(this.ws(wsId, `projects/${id}/`)));
+  }
+
+  /** Move a project to another workspace (`dry_run` only reports what would happen). */
+  moveProject(wsId: number, id: number, workspace: number, dryRun = false) {
+    return this.run(this.http.post<RelocateSummary>(this.ws(wsId, `projects/${id}/move/`), { workspace, dry_run: dryRun }));
+  }
+
+  /** Turn a project into a workspace of its own. */
+  promoteProject(wsId: number, id: number, data: { name?: string; members?: 'involved' | 'all' | 'me'; dry_run?: boolean }) {
+    return this.run(this.http.post<RelocateSummary>(this.ws(wsId, `projects/${id}/promote/`), data));
   }
 
   // Tags

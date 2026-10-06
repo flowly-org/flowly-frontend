@@ -889,3 +889,22 @@ export interface InviteCodeRow {
   link: string;
   redeemed_by: { email: string; name: string; at: string }[];
 }
+
+/** What moving or promoting a project does (or did). */
+export interface RelocateSummary {
+  tasks: number;
+  open_tasks: number;
+  time_entries: number;
+  integrations: number;
+  unassigned: number;
+  dropped_links: number;
+  dropped_dependencies: number;
+  invoices_staying: number;
+  people: number;
+  workspace?: number;
+  project?: number;
+  project_name?: string;
+  members?: number;
+  people_by_choice?: { involved: number; all: number; me: number };
+  unassigned_by_choice?: { involved: number; all: number; me: number };
+}

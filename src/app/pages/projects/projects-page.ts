@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ImportDialog } from '../../components/import-dialog/import-dialog';
+import { RelocateDialog } from '../../components/relocate-dialog/relocate-dialog';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { ApiService, errorMessage } from '../../core/api.service';
 import { TranslatePipe } from '../../core/i18n.pipes';
@@ -13,7 +14,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-projects-page',
-  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe, ImportDialog],
+  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe, ImportDialog, RelocateDialog],
   templateUrl: './projects-page.html',
 })
 export class ProjectsPage {
@@ -21,6 +22,7 @@ export class ProjectsPage {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private i18n = inject(I18nService);
+  private router = inject(Router);
 
   protected newName = '';
   protected newColor = PALETTE[this.store.projects().length % PALETTE.length];
@@ -29,6 +31,7 @@ export class ProjectsPage {
   protected editingId = signal<number | null>(null);
   protected editName = '';
   protected confirmingDelete = signal<number | null>(null);
+  protected relocating = signal<{ project: Project; mode: 'move' | 'promote' } | null>(null);
 
   protected readonly active = computed(() => this.store.projects().filter((p) => !p.archived));
   protected readonly archived = computed(() => this.store.projects().filter((p) => p.archived));
@@ -92,6 +95,19 @@ export class ProjectsPage {
       this.toast.show(this.i18n.t('Deleted “{name}”. Its tasks are kept without a project.', { name: p.name }));
     } catch (err) {
       this.toast.error(errorMessage(err));
+    }
+  }
+
+  protected async relocated(r: { project: Project; mode: 'move' | 'promote' }, workspaceId: number) {
+    this.relocating.set(null);
+    await this.store.loadWorkspaces();
+    const ws = this.store.workspaces().find((w) => w.id === workspaceId);
+    if (r.mode === 'promote') {
+      this.toast.show(this.i18n.t('“{name}” is now a workspace.', { name: ws?.name ?? r.project.name }));
+      this.router.navigate(['/w', workspaceId, 'board']);
+    } else {
+      await this.store.refreshProjects();
+      this.toast.show(this.i18n.t('Moved “{name}” to {ws}.', { name: r.project.name, ws: ws?.name ?? '' }));
     }
   }
 }
