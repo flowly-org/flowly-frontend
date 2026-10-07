@@ -86,6 +86,14 @@ export class CalendarStrip {
     }
   }
 
+  protected mapLink(e: CalendarEvent) {
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(e.location);
+  }
+
+  protected inPerson(e: CalendarEvent) {
+    return !/https?:\/\/|meet\.google|zoom\.us|teams\.microsoft|webex|\bonline\b|\bvirtual\b|\bremote\b/i.test(e.location);
+  }
+
   protected icon(e: CalendarEvent) {
     return e.needs_prep ? ICONS[e.reason] || 'flag' : '';
   }

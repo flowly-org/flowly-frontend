@@ -3,6 +3,10 @@ import type { Dict } from './index';
 /** Board, task card, task dialog and its tabs, bulk add. */
 export const BOARD: Dict = {
   it: {
+    "Leave by {time}": "Parti entro le {time}",
+    "Out of town: allow at least {n} min. Leave by {time}.": "Fuori città: calcola almeno {n} min. Parti entro le {time}.",
+    "Leave by {time} (about {n} min to get there).": "Parti entro le {time} (circa {n} min per arrivare).",
+    "Map": "Mappa",
     "Carry over: show unfinished tasks from earlier days": "Riporta: mostra le attività non finite dei giorni prima",
     "Plan: block time for your tasks": "Pianifica: blocca tempo per le tue attività",
     "Bulk add: paste a list": "Aggiunta multipla: incolla un elenco",
@@ -465,6 +469,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} attività",
   },
   es: {
+    "Leave by {time}": "Sal antes de las {time}",
+    "Out of town: allow at least {n} min. Leave by {time}.": "Fuera de la ciudad: calcula al menos {n} min. Sal antes de las {time}.",
+    "Leave by {time} (about {n} min to get there).": "Sal antes de las {time} (unos {n} min para llegar).",
+    "Map": "Mapa",
     "Carry over: show unfinished tasks from earlier days": "Arrastrar: muestra las tareas sin terminar de días anteriores",
     "Plan: block time for your tasks": "Planificar: reserva tiempo para tus tareas",
     "Bulk add: paste a list": "Añadir en bloque: pega una lista",
@@ -927,6 +935,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tareas",
   },
   fr: {
+    "Leave by {time}": "Partez avant {time}",
+    "Out of town: allow at least {n} min. Leave by {time}.": "Hors de la ville : prévoyez au moins {n} min. Partez avant {time}.",
+    "Leave by {time} (about {n} min to get there).": "Partez avant {time} (environ {n} min de trajet).",
+    "Map": "Carte",
     "Carry over: show unfinished tasks from earlier days": "Reporter : afficher les tâches non terminées des jours précédents",
     "Plan: block time for your tasks": "Planifier : bloquer du temps pour vos tâches",
     "Bulk add: paste a list": "Ajout groupé : collez une liste",
@@ -1389,6 +1401,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tâches",
   },
   de: {
+    "Leave by {time}": "Losfahren bis {time}",
+    "Out of town: allow at least {n} min. Leave by {time}.": "Außerhalb: mindestens {n} Min. einplanen. Losfahren bis {time}.",
+    "Leave by {time} (about {n} min to get there).": "Losfahren bis {time} (etwa {n} Min. Anfahrt).",
+    "Map": "Karte",
     "Carry over: show unfinished tasks from earlier days": "Übertragen: unerledigte Aufgaben früherer Tage zeigen",
     "Plan: block time for your tasks": "Planen: Zeit für deine Aufgaben blocken",
     "Bulk add: paste a list": "Mehrere hinzufügen: Liste einfügen",
@@ -1851,6 +1867,10 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} Aufgaben",
   },
   pt: {
+    "Leave by {time}": "Saia até às {time}",
+    "Out of town: allow at least {n} min. Leave by {time}.": "Fora da cidade: conte pelo menos {n} min. Saia até às {time}.",
+    "Leave by {time} (about {n} min to get there).": "Saia até às {time} (cerca de {n} min para chegar).",
+    "Map": "Mapa",
     "Carry over: show unfinished tasks from earlier days": "Transportar: mostrar tarefas não concluídas de dias anteriores",
     "Plan: block time for your tasks": "Planear: reservar tempo para as suas tarefas",
     "Bulk add: paste a list": "Adicionar em massa: cole uma lista",

@@ -18,6 +18,9 @@ export const FOCUS_DEFAULTS: FocusOptions = {
   day_start: '09:00',
   day_end: '18:00',
   block_reminders: true,
+  transfer_minutes: 45,
+  appointment_briefs: 'off',
+  appointment_lead_minutes: 15,
 };
 
 const CHEERS = ['Nice! One down.', 'Done! That counts.', 'Great work. Take the win.', 'Done. Ready for the next small step?'];

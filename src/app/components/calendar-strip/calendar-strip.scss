@@ -195,3 +195,23 @@
 .small {
   font-size: 0.8rem;
 }
+
+.leave {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: var(--warn);
+  font-variant-numeric: tabular-nums;
+}
+
+.leave-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--ink);
+
+  app-icon { color: var(--warn); }
+  a { color: var(--accent); }
+}

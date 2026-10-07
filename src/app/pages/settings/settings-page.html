@@ -187,6 +187,39 @@
         {{ 'Notify me when a time block starts' | t }}</label>
     </div>
     <p class="small muted">{{ 'Used by “Plan” on My day to find free time around your meetings.' | t }}</p>
+    <div class="hours-row">
+      <label>
+        <span class="small muted">{{ 'Travel time in town' | t }}</span>
+        <span class="hours">
+          <input type="number" class="num" min="0" max="240" step="5" [value]="focus.opts().transfer_minutes"
+            (change)="setFocus({ focus: { transfer_minutes: +$any($event.target).value } })" [attr.aria-label]="'Travel time in town' | t" />
+          {{ 'min' | t }}
+        </span>
+      </label>
+      <label>
+        <span class="small muted">{{ 'Appointment briefing from Flo' | t }}</span>
+        <select [value]="focus.opts().appointment_briefs" (change)="setFocus({ focus: { appointment_briefs: $any($event.target).value } })">
+          <option value="off">{{ 'Off' | t }}</option>
+          <option value="in_person">{{ 'Appointments with a place' | t }}</option>
+          <option value="all">{{ 'Every timed event' | t }}</option>
+        </select>
+      </label>
+      @if (focus.opts().appointment_briefs !== 'off') {
+        <label>
+          <span class="small muted">{{ 'Before you need to leave' | t }}</span>
+          <span class="hours">
+            <input type="number" class="num" min="0" max="180" step="5" [value]="focus.opts().appointment_lead_minutes"
+              (change)="setFocus({ focus: { appointment_lead_minutes: +$any($event.target).value } })" [attr.aria-label]="'Before you need to leave' | t" />
+            {{ 'min' | t }}
+          </span>
+        </label>
+      }
+    </div>
+    <p class="small muted">{{ 'Appointments at an address in your home town take this long to reach (twice as long out of town): it counts as busy time, and Flo tells you when to leave. The briefing has the time, the place with a map link, the notes and the linked tasks.' | t }}</p>
+    @if (focus.opts().appointment_briefs !== 'off' && !state()?.telegram?.linked) {
+      <p class="small warn-text">{{ 'Telegram isn\'t linked yet, so briefings appear under the bell.' | t }}
+        <button type="button" class="btn ghost small" (click)="openTab('flo')">{{ 'Link Telegram' | t }}</button></p>
+    }
 
     @if (calendars(); as cal) {
       @for (a of cal.accounts; track a.id) {

@@ -32,6 +32,9 @@ export interface FocusOptions {
   day_start: string;
   day_end: string;
   block_reminders: boolean;
+  transfer_minutes: number;
+  appointment_briefs: 'off' | 'in_person' | 'all';
+  appointment_lead_minutes: number;
 }
 
 export interface AuthResponse {
@@ -650,6 +653,10 @@ export interface CalendarEvent {
   needs_prep: boolean;
   reason: PrepReason;
   confirmed: boolean;
+  /** Travel needed to get there: in the home town, out of town, or none. */
+  travel: 'in_town' | 'away' | '';
+  travel_minutes: number;
+  leave_at: string | null;
   tasks: CalendarTaskRef[];
   suggested?: CalendarTaskRef[];
 }

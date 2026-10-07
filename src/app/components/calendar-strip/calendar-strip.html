@@ -13,6 +13,9 @@
             @if (e.location) {
               <span class="where">· {{ e.location.split(',')[0] }}</span>
             }
+            @if (e.leave_at) {
+              <span class="leave" [title]="'Leave by {time}' | t: { time: (e.leave_at | ldate: 'HH:mm') }"><app-icon name="route" [size]="12" />{{ e.leave_at | ldate: 'HH:mm' }}</span>
+            }
             @if (icon(e)) {
               <span class="flag" [title]="reasonLabel(e) | t"><app-icon [name]="icon(e)" [size]="13" /></span>
             }
@@ -38,7 +41,7 @@
             <button type="button" class="link-btn" (click)="open(e)">
               <span class="flag"><app-icon [name]="icon(e)" [size]="13" /></span>
               <strong>{{ e.title }}</strong>
-              <span class="muted">{{ e.start_date | ldate: 'EEE d MMM' }}@if (e.location) { · {{ e.location.split(',')[0] }} }</span>
+              <span class="muted">@if (e.all_day) { {{ e.start_date | ldate: 'EEE d MMM' }} } @else { {{ e.start | ldate: 'EEE d MMM, HH:mm' }} }@if (e.location) { · {{ e.location.split(',')[0] }} }</span>
             </button>
             @if (covered(e)) {
               <span class="ok small">{{ 'covered' | t }}</span>
@@ -65,6 +68,19 @@
               }
               @if (e.location) { · {{ e.location }} }
             </div>
+            @if (e.leave_at) {
+              <div class="leave-line small">
+                <app-icon name="route" [size]="14" />
+                @if (e.travel === 'away') {
+                  {{ 'Out of town: allow at least {n} min. Leave by {time}.' | t: { n: e.travel_minutes, time: (e.leave_at | ldate: 'HH:mm') } }}
+                } @else {
+                  {{ 'Leave by {time} (about {n} min to get there).' | t: { n: e.travel_minutes, time: (e.leave_at | ldate: 'HH:mm') } }}
+                }
+                <a [href]="mapLink(e)" target="_blank" rel="noopener">{{ 'Map' | t }} ↗</a>
+              </div>
+            } @else if (e.location && !e.all_day && inPerson(e)) {
+              <div class="leave-line small"><a [href]="mapLink(e)" target="_blank" rel="noopener">{{ 'Map' | t }} ↗</a></div>
+            }
           </div>
           <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="selected.set(null)">✕</button>
         </div>
