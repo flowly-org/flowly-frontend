@@ -1,5 +1,6 @@
 import { DecimalPipe, JsonPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 
 import { ApiService, errorMessage } from '../../core/api.service';
@@ -17,7 +18,7 @@ const GROUP_CHECKS: Record<string, { service: string; label: string }> = {
 
 @Component({
   selector: 'app-manage-page',
-  imports: [FormsModule, DecimalPipe, JsonPipe, TranslatePipe, LocalDatePipe],
+  imports: [FormsModule, Icon, DecimalPipe, JsonPipe, TranslatePipe, LocalDatePipe],
   templateUrl: './manage-page.html',
   styleUrl: './manage-page.scss',
 })
@@ -35,6 +36,13 @@ export class ManagePage implements OnInit {
   protected ghAppName = 'Flowly';
   protected ghOrg = '';
   protected overview = signal<Record<string, any> | null>(null);
+  protected readonly funnel = [
+    { key: 'signed_up', label: 'Signed up' },
+    { key: 'first_task', label: 'Created a task' },
+    { key: 'used_flo', label: 'Talked to Flo' },
+    { key: 'telegram', label: 'Linked Telegram' },
+    { key: 'active_7d', label: 'Active this week' },
+  ];
   protected codes = signal<InviteCodeRow[]>([]);
   protected codeForm = { code: '', plan: 'pro_plus' as 'pro' | 'pro_plus', days: null as number | null, max_uses: null as number | null, valid_until: '', note: '' };
   protected openCode = signal<number | null>(null);

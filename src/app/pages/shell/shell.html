@@ -60,6 +60,10 @@
     </div>
   }
 
+  <button class="flo-btn" type="button" (click)="flo.toggle()" [class.on]="flo.open()" [attr.aria-label]="'Ask Flo' | t" [title]="('Ask Flo' | t) + ' (Ctrl+J)'">
+    <app-icon name="bot" [size]="17" /><span class="label">{{ 'Ask Flo' | t }}</span>
+  </button>
+
   <button class="btn ghost icon search-btn" type="button" (click)="searchOpen.set(true)" [attr.aria-label]="'Search' | t" [title]="('Search' | t) + ' (Ctrl+K)'">
     <app-icon name="search" />
   </button>
@@ -145,4 +149,12 @@
 
 @if (searchOpen()) {
   <app-search-palette (closed)="searchOpen.set(false)" />
+}
+
+@if (flo.open()) {
+  <app-flo-panel />
+}
+
+@if (flo.planning()) {
+  <app-flo-plan [inline]="false" (done)="flo.planning.set(false)" (closed)="flo.planning.set(false)" />
 }

@@ -3,6 +3,9 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icon } from '../../components/icon/icon';
+import { FloBrief } from '../../components/flo-brief/flo-brief';
+import { FloPlanComponent } from '../../components/flo-plan/flo-plan';
+import { FloService } from '../../core/flo.service';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -59,7 +62,7 @@ interface Prefs {
  */
 @Component({
   selector: 'app-day-board',
-  imports: [Icon, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, DayPlan, TranslatePipe],
+  imports: [Icon, FloBrief, FloPlanComponent, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable, TaskCard, TaskDialog, BulkAdd, CalendarStrip, NowCard, TemplatesDialog, DayPlan, TranslatePipe],
   providers: [BoardData],
   templateUrl: './day-board.html',
   styleUrl: './day-board.scss',
@@ -74,6 +77,7 @@ export class DayBoard {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private notifications = inject(NotificationService);
+  private flo = inject(FloService);
   protected i18n = inject(I18nService);
   private readonly tr = (text: string, params?: Record<string, string>) => this.i18n.t(text, params);
 
@@ -95,6 +99,8 @@ export class DayBoard {
   protected backlog = signal<Task[]>([]);
   protected backlogQuery = signal('');
   protected loading = signal(false);
+  /** The first load finished (so an empty day really is empty). */
+  protected loaded = signal(false);
 
   protected editing = signal<{ task: Task | null; defaults: TaskInput; tab?: 'details' | 'discussion' | 'files' } | null>(null);
   protected quickAddLane = signal<string | null>(null);
@@ -232,6 +238,10 @@ export class DayBoard {
     effect(() => {
       if (this.notifications.version() > 0) untracked(() => this.reload());
     });
+    // Flo added, moved or finished tasks (chat panel, plan my week).
+    effect(() => {
+      if (this.flo.changed() > 0) untracked(() => this.reload());
+    });
 
     // Fall back if the grouping no longer exists (e.g. its tag group was deleted).
     effect(() => {
@@ -285,6 +295,7 @@ export class DayBoard {
       if (seq !== this.loadSeq) return;
       this.tasks.set(tasks);
       this.backlog.set(backlog);
+      this.loaded.set(true);
     } catch (err) {
       if (seq === this.loadSeq) this.toast.error(errorMessage(err, this.i18n.t('Could not load tasks.')));
     } finally {

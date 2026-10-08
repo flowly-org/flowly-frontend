@@ -1,0 +1,59 @@
+<div class="backdrop" (click)="flo.open.set(false)"></div>
+<aside class="panel-flo" role="dialog" aria-modal="true" aria-labelledby="flo-title">
+  <header>
+    <span class="avatar" aria-hidden="true"><app-icon name="bot" [size]="18" /></span>
+    <h2 id="flo-title">{{ state()?.name || 'Flo' }}</h2>
+    <button class="btn ghost small" type="button" (click)="planWeek()"><app-icon name="sparkles" [size]="14" /> {{ 'Plan my week' | t }}</button>
+    <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="flo.open.set(false)">✕</button>
+  </header>
+
+  <div class="messages" #list>
+    @if (state(); as s) {
+      @if (!messages().length) {
+        <div class="hello">
+          <p><strong>{{ 'Hi, I\'m {name}.' | t: { name: s.name } }}</strong></p>
+          <p class="muted">{{ 'I know your tasks, projects and calendar. Ask me what\'s next, tell me what to add or move, or let me plan your week from a list.' | t }}</p>
+        </div>
+      }
+      @for (m of messages(); track $index) {
+        <div class="msg" [class.me]="m.role === 'user'">
+          @if (m.channel === 'telegram') { <span class="via">Telegram</span> }
+          <div class="bubble">{{ m.content }}</div>
+        </div>
+      }
+      @if (sending()) {
+        <div class="msg"><div class="bubble typing" [attr.aria-label]="'Flo is thinking…' | t"><span></span><span></span><span></span></div></div>
+      }
+    } @else {
+      <p class="muted small">{{ 'Loading…' | t }}</p>
+    }
+  </div>
+
+  @if (state(); as s) {
+    @if (s.available) {
+      @if (!messages().length) {
+        <div class="chips">
+          @for (q of suggestions; track q) {
+            <button type="button" class="chip" (click)="send(i18n.t(q))">{{ q | t }}</button>
+          }
+        </div>
+      }
+      <form class="composer" (ngSubmit)="send()">
+        <textarea #input name="draft" rows="2" [(ngModel)]="draft" (keydown)="keydown($event)"
+          [placeholder]="'Ask Flo, or tell it what to do…' | t" [attr.aria-label]="'Message to Flo' | t"></textarea>
+        <button class="btn primary icon" type="submit" [disabled]="sending() || !draft.trim()" [attr.aria-label]="'Send' | t">
+          <app-icon name="send" [size]="16" />
+        </button>
+      </form>
+    } @else {
+      <div class="locked">
+        <p class="small">{{ s.reason }}</p>
+        <p class="small muted">{{ 'Planning your week from a list works on every plan.' | t }}</p>
+        <div class="row">
+          <button class="btn primary small" type="button" (click)="planWeek()">{{ 'Plan my week' | t }}</button>
+          <a class="btn small" routerLink="/settings" (click)="flo.open.set(false)">{{ 'See plans' | t }}</a>
+        </div>
+      </div>
+    }
+  }
+</aside>

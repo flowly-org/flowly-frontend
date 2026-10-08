@@ -54,6 +54,8 @@ import {
   Invitation,
   Membership,
   Project,
+  FloChat,
+  FloPlan,
   RelocateSummary,
   Role,
   Tag,
@@ -473,6 +475,22 @@ export class ApiService {
   }
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
+  }
+  /** Whether Flo can chat, and the recent conversation (Telegram, web and setup). */
+  floChat() {
+    return this.run(this.http.get<FloChat>(this.url('concierge/chat/')));
+  }
+  /** Today's brief if Flo already wrote it. */
+  floBriefToday() {
+    return this.run(this.http.get<{ brief: string | null; available: boolean; date: string }>(this.url('concierge/brief/')));
+  }
+  /** "What's on your plate?" → a plan to review. */
+  floPropose(text: string, workspace?: number) {
+    return this.run(this.http.post<FloPlan>(this.url('concierge/setup/'), { text, workspace }));
+  }
+  floApply(plan: FloPlan) {
+    return this.run(this.http.post<{ tasks: number; projects: number; workspace: number }>(this.url('concierge/setup/'),
+      { apply: true, plan, workspace: plan.workspace }));
   }
 
   // Plans & Stripe

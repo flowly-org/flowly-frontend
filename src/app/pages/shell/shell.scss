@@ -152,8 +152,39 @@
   }
 }
 
-.search-btn {
+.flo-btn {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px 0 10px;
+  border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 35%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand, var(--accent)) 8%, var(--surface));
+  color: var(--brand, var(--accent));
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover,
+  &.on {
+    background: color-mix(in srgb, var(--brand, var(--accent)) 16%, var(--surface));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand, var(--accent));
+    outline-offset: 1px;
+  }
+}
+
+.timer-pill ~ .flo-btn {
+  margin-left: 0;
+}
+
+.search-btn {
   color: var(--muted);
 
   &:hover {
@@ -161,9 +192,7 @@
   }
 }
 
-.timer-pill ~ .search-btn {
-  margin-left: 0;
-}
+
 
 .bell-wrap {
   position: relative;
@@ -426,6 +455,17 @@
       background: var(--surface);
       color: var(--ink);
       box-shadow: var(--shadow);
+    }
+  }
+}
+
+// Narrow windows: Flo keeps its icon, the label goes.
+@media (max-width: 1200px) {
+  .flo-btn {
+    padding: 0 9px;
+
+    .label {
+      display: none;
     }
   }
 }

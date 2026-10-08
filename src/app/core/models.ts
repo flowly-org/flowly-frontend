@@ -437,6 +437,11 @@ export interface AdminUser {
   last_login: string | null;
   workspaces: number;
   tokens_30d: number;
+  last_seen_at: string | null;
+  tasks: number;
+  flo_messages: number;
+  telegram: boolean;
+  stage: string;
 }
 
 export interface TimeEntry {
@@ -914,4 +919,34 @@ export interface RelocateSummary {
   members?: number;
   people_by_choice?: { involved: number; all: number; me: number };
   unassigned_by_choice?: { involved: number; all: number; me: number };
+}
+
+export interface FloMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  channel: string;
+  at: string;
+}
+
+export interface FloChat {
+  available: boolean;
+  reason: string | null;
+  name: string;
+  messages: FloMessage[];
+}
+
+export interface FloPlanTask {
+  title: string;
+  project: string | null;
+  date: string | null;
+  minutes: number | null;
+  priority: 'high' | null;
+  notes: string;
+}
+
+export interface FloPlan {
+  message: string;
+  workspace: number;
+  projects: { name: string; exists: boolean }[];
+  tasks: FloPlanTask[];
 }

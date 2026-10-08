@@ -87,6 +87,20 @@
         <div class="stat"><span>{{ o['ai_today']['requests'] }}</span>{{ 'AI requests today' | t }}</div>
         <div class="stat"><span>{{ o['ai_today']['tokens'] | number }}</span>{{ 'AI tokens today' | t }}</div>
       </section>
+      @if (o['activation']; as a) {
+        <section class="panel">
+          <h2>{{ 'Activation' | t }}</h2>
+          <div class="funnel">
+            @for (step of funnel; track step.key) {
+              <div class="step">
+                <span class="n">{{ a[step.key] }}</span>
+                <span class="bar"><span [style.width.%]="a['signed_up'] ? (100 * a[step.key]) / a['signed_up'] : 0"></span></span>
+                <span class="small">{{ step.label | t }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
     }
     <section class="panel">
       <h2>{{ 'Service checks' | t }}</h2>
@@ -111,7 +125,7 @@
       <div class="table-wrap">
         <table class="users">
           <thead>
-            <tr><th>{{ 'User' | t }}</th><th>{{ 'Plan' | t }}</th><th>{{ 'Pro until' | t }}</th><th>{{ 'Admin' | t }}</th><th>{{ 'Active' | t }}</th><th>{{ 'Workspaces' | t }}</th><th>{{ 'AI tokens (30d)' | t }}</th><th>{{ 'Joined' | t }}</th></tr>
+            <tr><th>{{ 'User' | t }}</th><th>{{ 'Plan' | t }}</th><th>{{ 'Pro until' | t }}</th><th>{{ 'Admin' | t }}</th><th>{{ 'Active' | t }}</th><th>{{ 'Workspaces' | t }}</th><th>{{ 'AI tokens (30d)' | t }}</th><th>{{ 'Tasks' | t }}</th><th>{{ 'Flo' | t }}</th><th>{{ 'Last seen' | t }}</th><th>{{ 'Joined' | t }}</th></tr>
           </thead>
           <tbody>
             @for (u of users(); track u.id) {
@@ -133,6 +147,9 @@
                 <td><input type="checkbox" [checked]="u.is_active" [disabled]="u.id === auth.user()?.id" (change)="updateUser(u, { is_active: $any($event.target).checked })" [attr.aria-label]="'Active: {email}' | t: { email: u.email }" /></td>
                 <td>{{ u.workspaces }}</td>
                 <td>{{ u.tokens_30d | number }}</td>
+                <td>{{ u.tasks }}</td>
+                <td [title]="u.telegram ? ('Linked to Telegram' | t) : ''">{{ u.flo_messages }}@if (u.telegram) { <app-icon name="send" [size]="12" /> }</td>
+                <td class="nowrap">@if (u.last_seen_at) { {{ u.last_seen_at | ldate: 'MMM d, HH:mm' }} } @else { <span class="muted">{{ 'never' | t }}</span> }</td>
                 <td class="nowrap">{{ u.date_joined | ldate: 'MMM d, y' }}</td>
               </tr>
             }

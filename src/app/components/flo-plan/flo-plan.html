@@ -1,0 +1,69 @@
+@if (!inline()) {
+  <div class="backdrop" (click)="closed.emit()"></div>
+}
+<section class="flo-plan" role="region" [attr.aria-label]="'Plan your week with Flo' | t">
+  <header>
+    <span class="avatar" aria-hidden="true"><app-icon name="bot" [size]="20" /></span>
+    <div class="grow">
+      <h2>{{ (plan() ? 'Here is your week' : "What's on your plate this week?") | t }}</h2>
+      <p class="muted small">
+        @if (plan(); as p) {
+          {{ p.message || ('Check it, remove what you don\'t want, then add it.' | t) }}
+        } @else {
+          {{ 'Tell Flo everything, like you\'d tell a friend: work, home, deadlines, someday things. Flo sorts it into projects and spreads it over the week.' | t }}
+        }
+      </p>
+    </div>
+    @if (!inline()) {
+      <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="closed.emit()">✕</button>
+    }
+  </header>
+
+  @if (plan(); as p) {
+    <div class="days">
+      @for (d of days(); track d.date) {
+        <div class="day">
+          <h3>
+            @if (!d.date) { {{ 'Someday' | t }} }
+            @else if (d.date === today) { {{ 'Today' | t }} }
+            @else { {{ d.date | ldate: 'EEEE d MMM' }} }
+          </h3>
+          @for (t of d.tasks; track t) {
+            <div class="item">
+              <span class="title">{{ t.title }}</span>
+              @if (t.priority) { <span class="high">{{ 'High' | t }}</span> }
+              @if (t.project) { <span class="project" [style.--c]="color(t.project)">{{ t.project }}</span> }
+              @if (t.minutes) { <span class="muted small">≈ {{ t.minutes }} min</span> }
+              <button type="button" class="x" [attr.aria-label]="'Remove' | t" (click)="remove(t)">✕</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+    @if (p.projects.length) {
+      <p class="small muted">
+        {{ 'Projects:' | t }}
+        @for (pr of p.projects; track pr.name; let last = $last) {
+          {{ pr.name }}@if (!pr.exists) {&nbsp;<em>({{ 'new' | t }})</em>}@if (!last) {, }
+        }
+      </p>
+    }
+    <div class="actions">
+      <button class="btn ghost" type="button" [disabled]="busy()" (click)="plan.set(null)">{{ 'Start over' | t }}</button>
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" [disabled]="busy() || !p.tasks.length" (click)="apply()">
+        {{ (busy() ? 'Adding…' : 'Add {n} tasks') | t: { n: p.tasks.length } }}
+      </button>
+    </div>
+  } @else {
+    <textarea [(ngModel)]="text" rows="5" maxlength="6000" [attr.aria-label]="'What\'s on your plate this week?' | t"
+      [placeholder]="'e.g. Finish the ACME proposal by Thursday, call the plumber, dentist Tuesday at 10, gym three times, start learning Spanish…' | t"></textarea>
+    <div class="actions">
+      <span class="small muted">{{ 'Nothing is added until you say so.' | t }}</span>
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" [disabled]="busy() || !text.trim()" (click)="propose()">
+        <app-icon name="sparkles" [size]="16" /> {{ (busy() ? 'Flo is thinking…' : 'Plan my week') | t }}
+      </button>
+    </div>
+  }
+</section>

@@ -75,6 +75,14 @@
   </div>
 </div>
 
+@if (mode === 'global' && isToday()) {
+  <app-flo-brief />
+}
+
+@if (mode === 'global' && isToday() && loaded() && !tasks().length && !backlog().length) {
+  <app-flo-plan class="flo-start" (done)="reload()" />
+}
+
 @if (focus.on() && isToday()) {
   <app-now-card class="now-card" [tasks]="tasks()" [day]="date()" (done)="toggleDone($event)" (open)="openTask($event)" (changed)="refreshTask($event)" />
 }
