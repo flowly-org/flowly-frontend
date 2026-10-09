@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { SsoSettings } from '../../components/sso-settings/sso-settings';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
@@ -10,7 +11,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-workspace-settings',
-  imports: [FormsModule, RouterLink, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, SsoSettings],
   template: `
     <div class="page">
       <header>
@@ -70,6 +71,10 @@ import { WorkspaceStore } from '../../core/workspace.store';
             <a class="btn small" [routerLink]="['../sprints']">{{ (store.current()?.agile ? 'Open sprints' : 'Set up') | t }}</a>
           </div>
         </section>
+
+        @if (store.currentId(); as wsId) {
+          <app-sso-settings [workspace]="wsId" />
+        }
 
         @if (store.current()?.my_role === 'owner') {
           <section class="panel">

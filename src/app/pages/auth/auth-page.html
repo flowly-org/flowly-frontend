@@ -18,8 +18,19 @@
       }
       <label>
         {{ 'Email' | t }}
-        <input name="email" type="email" [(ngModel)]="email" required autocomplete="email" />
+        <input name="email" type="email" [ngModel]="email" (ngModelChange)="onEmail($event)" required autocomplete="email" />
       </label>
+      @if (sso(); as s) {
+        <button class="btn primary block sso-btn" type="button" [disabled]="busy()" (click)="continueWithSso()">
+          <app-icon name="lock" [size]="16" /> {{ 'Continue with {name}' | t: { name: s.label } }}
+        </button>
+        @if (s.required) {
+          <p class="small muted sso-note">{{ 'Your organization signs you in with single sign-on.' | t }}</p>
+        } @else {
+          <p class="or"><span>{{ 'or with your password' | t }}</span></p>
+        }
+      }
+      @if (!sso()?.required) {
       <label>
         {{ 'Password' | t }}
         <input
@@ -31,6 +42,7 @@
           [autocomplete]="isRegister() ? 'new-password' : 'current-password'"
         />
       </label>
+      }
       @if (isRegister()) {
         <label>
           {{ 'Invite code (optional)' | t }}
@@ -48,9 +60,11 @@
       @if (error()) {
         <p class="form-error" role="alert">{{ error() }}</p>
       }
-      <button class="btn primary block" type="submit" [disabled]="busy() || f.invalid">
-        {{ (busy() ? 'Please wait…' : isRegister() ? 'Create account' : 'Sign in') | t }}
-      </button>
+      @if (!sso()?.required) {
+        <button class="btn block" type="submit" [class.primary]="!sso()" [disabled]="busy() || f.invalid">
+          {{ (busy() ? 'Please wait…' : isRegister() ? 'Create account' : 'Sign in') | t }}
+        </button>
+      }
     </form>
 
     <p class="switch">

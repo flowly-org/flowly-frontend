@@ -1,0 +1,120 @@
+<section class="panel" id="sso">
+  <h2>
+    <span>{{ 'Single sign-on' | t }}</span>
+    <span class="badge">Enterprise</span>
+  </h2>
+
+  @if (setup(); as s) {
+    @if (!s.available) {
+      <p class="pad muted">{{ 'Let your team sign in with your company account (Google Workspace, Microsoft Entra ID, Okta, Keycloak and any OpenID Connect provider), and require it for your email domains. Single sign-on is part of the Enterprise plan.' | t }}</p>
+    } @else {
+      <div class="pad steps">
+        <h3><span class="n">1</span> {{ 'Your identity provider' | t }}</h3>
+        <div class="presets" role="group" [attr.aria-label]="'Provider' | t">
+          @for (p of presets; track p.key) {
+            <button type="button" class="chip" [class.on]="preset === p.key" (click)="pickPreset(p.key)">{{ p.label }}</button>
+          }
+        </div>
+        <p class="small muted">{{ hint() | t }}</p>
+        <label class="field">
+          <span class="small muted">{{ 'Redirect URI (paste it in your provider)' | t }}</span>
+          <span class="copy-row">
+            <input readonly [value]="s.callback_url" (focus)="$any($event.target).select()" />
+            <button class="btn small" type="button" (click)="copy(s.callback_url)">{{ 'Copy' | t }}</button>
+          </span>
+        </label>
+        <form class="grid" (ngSubmit)="save()">
+          <label class="field wide">
+            <span class="small muted">{{ 'Issuer URL' | t }}</span>
+            <input name="issuer" [(ngModel)]="form.issuer" required placeholder="https://…" />
+          </label>
+          <label class="field">
+            <span class="small muted">{{ 'Client ID' | t }}</span>
+            <input name="client_id" [(ngModel)]="form.client_id" required autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="small muted">{{ 'Client secret' | t }}</span>
+            <input name="client_secret" type="password" [(ngModel)]="form.client_secret" autocomplete="new-password"
+              [placeholder]="conn()?.has_secret ? ('Saved: leave empty to keep it' | t) : ''" />
+          </label>
+          <label class="field">
+            <span class="small muted">{{ 'Button text (optional)' | t }}</span>
+            <input name="label" [(ngModel)]="form.label" maxlength="60" [placeholder]="'e.g. Acme SSO' | t" />
+          </label>
+          <div class="actions">
+            <button class="btn primary" type="submit" [disabled]="busy() || !form.issuer.trim() || !form.client_id.trim()">{{ 'Save' | t }}</button>
+          </div>
+        </form>
+      </div>
+
+      @if (conn(); as c) {
+        <div class="pad steps">
+          <h3><span class="n">2</span> {{ 'Your email domains' | t }}</h3>
+          <p class="small muted">{{ 'People with an address on these domains sign in through your provider. Prove each domain with a DNS TXT record.' | t }}</p>
+          @for (d of c.domains; track d.id) {
+            <div class="domain" [class.ok]="d.verified">
+              <div class="grow">
+                <strong>{{ d.domain }}</strong>
+                @if (d.verified) {
+                  <span class="state ok"><app-icon name="check-circle" [size]="14" /> {{ 'Verified' | t }}</span>
+                } @else {
+                  <span class="state">{{ 'Waiting for the DNS record' | t }}</span>
+                  <div class="record small">
+                    <span class="muted">TXT</span>
+                    <code (click)="copy(d.record_name)" [title]="'Copy' | t">{{ d.record_name }}</code>
+                    <code (click)="copy(d.record_value)" [title]="'Copy' | t">{{ d.record_value }}</code>
+                  </div>
+                }
+              </div>
+              @if (!d.verified) {
+                <button class="btn small" type="button" [disabled]="busy()" (click)="verify(d.id)">{{ 'Verify' | t }}</button>
+              }
+              <button class="btn ghost icon small" type="button" [attr.aria-label]="'Remove {domain}' | t: { domain: d.domain }" (click)="removeDomain(d.id)">✕</button>
+            </div>
+          }
+          <form class="inline" (ngSubmit)="addDomain()">
+            <input name="domain" [(ngModel)]="newDomain" [placeholder]="'acme.com'" [attr.aria-label]="'Email domain' | t" />
+            <button class="btn" type="submit" [disabled]="busy() || !newDomain.trim()">{{ 'Add domain' | t }}</button>
+          </form>
+        </div>
+
+        <div class="pad steps">
+          <h3><span class="n">3</span> {{ 'Test, then turn it on' | t }}</h3>
+          <div class="test">
+            <button class="btn" type="button" [disabled]="busy() || !hasVerified()" (click)="test()"><app-icon name="lock" [size]="15" /> {{ 'Test sign-in' | t }}</button>
+            @if (c.tested_at) {
+              <span class="small ok"><app-icon name="check-circle" [size]="14" /> {{ 'Worked on {date} for {email}' | t: { date: (c.tested_at | ldate: 'MMM d, HH:mm'), email: c.tested_by } }}</span>
+            } @else {
+              <span class="small muted">{{ 'Sign in once with your own company account to check the set-up.' | t }}</span>
+            }
+          </div>
+          @if (c.last_error) {
+            <p class="small danger-text"><app-icon name="alert" [size]="14" /> {{ c.last_error }}</p>
+          }
+          <label class="switch">
+            <input type="checkbox" [checked]="c.enabled" [disabled]="busy() || !hasVerified()" (change)="toggle('enabled', $any($event.target).checked)" />
+            <span><strong>{{ 'Offer single sign-on' | t }}</strong><span class="small muted">{{ 'A “Continue with SSO” button appears for your domains on the sign-in page.' | t }}</span></span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" [checked]="c.required" [disabled]="busy() || !c.enabled || !c.tested_at" (change)="toggle('required', $any($event.target).checked)" />
+            <span><strong>{{ 'Require it' | t }}</strong><span class="small muted">{{ 'No password sign-in or sign-up for your domains. Needs a successful test. Instance admins keep a password as a way back in.' | t }}</span></span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" [checked]="c.auto_join" [disabled]="busy()" (change)="toggle('auto_join', $any($event.target).checked)" />
+            <span><strong>{{ 'Add people to this workspace' | t }}</strong><span class="small muted">{{ 'Everyone who signs in with SSO becomes a member; new people get an account on their first sign-in.' | t }}</span></span>
+          </label>
+          <div class="danger-row">
+            @if (confirmingRemove()) {
+              <button class="btn danger small" type="button" (click)="remove()">{{ 'Remove single sign-on' | t }}</button>
+              <button class="btn ghost small" type="button" (click)="confirmingRemove.set(false)">{{ 'Cancel' | t }}</button>
+            } @else {
+              <button class="btn ghost danger small" type="button" (click)="confirmingRemove.set(true)">{{ 'Remove single sign-on' | t }}</button>
+            }
+          </div>
+        </div>
+      }
+    }
+  } @else {
+    <p class="pad muted small">{{ 'Loading…' | t }}</p>
+  }
+</section>

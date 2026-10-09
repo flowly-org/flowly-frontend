@@ -950,3 +950,31 @@ export interface FloPlan {
   projects: { name: string; exists: boolean }[];
   tasks: FloPlanTask[];
 }
+
+export interface SsoDomain {
+  id: number;
+  domain: string;
+  verified: boolean;
+  record_name: string;
+  record_value: string;
+}
+
+export interface SsoConnection {
+  issuer: string;
+  client_id: string;
+  has_secret: boolean;
+  label: string;
+  enabled: boolean;
+  required: boolean;
+  auto_join: boolean;
+  tested_at: string | null;
+  tested_by: string | null;
+  last_error: string;
+  domains: SsoDomain[];
+}
+
+export interface SsoSetup {
+  available: boolean;
+  callback_url: string;
+  connection: SsoConnection | null;
+}

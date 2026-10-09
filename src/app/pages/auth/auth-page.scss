@@ -58,3 +58,31 @@ label {
   color: var(--ink);
   font-size: 0.9rem;
 }
+
+.sso-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sso-note {
+  margin: -4px 0 0;
+  text-align: center;
+}
+
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--line);
+  }
+}

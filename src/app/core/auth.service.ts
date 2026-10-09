@@ -85,6 +85,25 @@ export class AuthService {
   }
 
   /** What an invite code gives (public; for the sign-up form). */
+  /** Whether this email signs in with its organization's SSO (and must). */
+  ssoDiscover(email: string) {
+    return firstValueFrom(
+      this.http.get<{ sso: boolean; required?: boolean; label?: string }>(`${this.config.apiUrl}/auth/sso/discover/`, { params: { email } }),
+    );
+  }
+
+  /** The identity provider's sign-in URL (a workspace admin can pass `test` to try a connection before enabling it). */
+  async ssoStart(body: { email?: string; next?: string; workspace?: number; test?: boolean }): Promise<string> {
+    const res = await firstValueFrom(this.http.post<{ url: string }>(`${this.config.apiUrl}/auth/sso/start/`, body));
+    return res.url;
+  }
+
+  /** Tokens handed back by the SSO callback. */
+  async adoptTokens(access: string, refresh: string): Promise<void> {
+    this.setTokens(access, refresh);
+    await this.loadMe();
+  }
+
   checkCode(code: string) {
     return firstValueFrom(
       this.http.get<{ valid: boolean; plan?: 'pro' | 'pro_plus'; forever?: boolean; days?: number | null; detail?: string }>(

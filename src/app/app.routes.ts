@@ -17,6 +17,10 @@ export const routes: Routes = [
     data: { mode: 'register' },
   },
   {
+    path: 'sso',
+    loadComponent: () => import('./pages/sso/sso-page').then((m) => m.SsoPage),
+  },
+  {
     path: 'oauth/authorize',
     loadComponent: () => import('./pages/oauth/oauth-consent').then((m) => m.OAuthConsent),
   },

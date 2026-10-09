@@ -32,11 +32,48 @@ export class AuthPage {
   protected password = '';
   protected fullName = '';
   protected code = this.route.snapshot.queryParamMap.get('code') ?? '';
+  protected busy = signal(false);
+  protected error = signal<string | null>(null);
   protected codeInfo = signal<{ valid: boolean; plan?: string; forever?: boolean; days?: number | null; detail?: string } | null>(null);
   private codeTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** The email's organization uses single sign-on. */
+  protected sso = signal<{ required?: boolean; label?: string } | null>(null);
+  private ssoTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor() {
     if (this.code) this.checkCode(this.code);
+    const ssoError = this.route.snapshot.queryParamMap.get('sso_error');
+    if (ssoError) this.error.set(ssoError);
+  }
+
+  protected onEmail(value: string) {
+    this.email = value;
+    if (this.ssoTimer) clearTimeout(this.ssoTimer);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value.trim())) {
+      this.sso.set(null);
+      return;
+    }
+    this.ssoTimer = setTimeout(async () => {
+      try {
+        const res = await this.auth.ssoDiscover(value.trim());
+        this.sso.set(res.sso ? res : null);
+      } catch {
+        this.sso.set(null);
+      }
+    }, 400);
+  }
+
+  protected async continueWithSso() {
+    this.busy.set(true);
+    this.error.set(null);
+    try {
+      const next = this.route.snapshot.queryParamMap.get('next') ?? '/';
+      window.location.href = await this.auth.ssoStart({ email: this.email.trim(), next });
+    } catch (err) {
+      this.error.set(errorMessage(err, this.i18n.t('Could not reach your organization\'s sign-in.')));
+      this.busy.set(false);
+    }
   }
 
   protected checkCode(value: string) {
@@ -54,9 +91,6 @@ export class AuthPage {
       }
     }, 350);
   }
-  protected busy = signal(false);
-  protected error = signal<string | null>(null);
-
   async submit() {
     this.busy.set(true);
     this.error.set(null);

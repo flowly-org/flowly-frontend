@@ -54,6 +54,8 @@ import {
   Invitation,
   Membership,
   Project,
+  SsoConnection,
+  SsoSetup,
   FloChat,
   FloPlan,
   RelocateSummary,
@@ -476,6 +478,23 @@ export class ApiService {
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
   }
+  // Single sign-on (Enterprise workspaces)
+  sso(wsId: number) {
+    return this.run(this.http.get<SsoSetup>(this.ws(wsId, 'sso/')));
+  }
+  saveSso(wsId: number, data: Partial<SsoConnection> & { client_secret?: string }) {
+    return this.run(this.http.put<SsoSetup>(this.ws(wsId, 'sso/'), data));
+  }
+  deleteSso(wsId: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, 'sso/')));
+  }
+  ssoDomain(wsId: number, body: { domain: string } | { id: number; verify: true }) {
+    return this.run(this.http.post<SsoSetup>(this.ws(wsId, 'sso/domains/'), body));
+  }
+  removeSsoDomain(wsId: number, id: number) {
+    return this.run(this.http.delete<SsoSetup>(this.ws(wsId, 'sso/domains/'), { params: { id } }));
+  }
+
   /** Whether Flo can chat, and the recent conversation (Telegram, web and setup). */
   floChat() {
     return this.run(this.http.get<FloChat>(this.url('concierge/chat/')));
