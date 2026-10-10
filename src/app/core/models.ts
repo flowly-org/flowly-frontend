@@ -279,6 +279,7 @@ export type IntegrationKind =
   | 'slack_bot'
   | 'github'
   | 'slack'
+  | 'discord'
   | 'outgoing_webhook'
   | 'incoming_webhook'
   | 'email'

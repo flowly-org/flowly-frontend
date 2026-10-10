@@ -23,6 +23,7 @@ interface KindInfo {
 export const KINDS: KindInfo[] = [
   { kind: 'github', label: 'GitHub', icon: '', blurb: 'Issues become tasks; closing or reopening a task updates the issue.' },
   { kind: 'slack', label: 'Slack', icon: 'hash', blurb: 'Post task events to a Slack channel.' },
+  { kind: 'discord', label: 'Discord', icon: 'message', blurb: 'Post task events to a Discord channel, for the whole workspace or one project.' },
   { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: 'arrow-out', blurb: 'POST signed JSON to your URL when tasks change.' },
   { kind: 'incoming_webhook', label: 'Incoming webhook', icon: 'arrow-in', blurb: 'A secret URL any system can call to create or update tasks.' },
   { kind: 'email', label: 'Email in', icon: 'mail', blurb: 'Email an address to create a task.' },
@@ -50,11 +51,12 @@ interface Form {
 const DEFAULT_EVENTS: Partial<Record<IntegrationKind, string[]>> = {
   outgoing_webhook: TASK_EVENTS.map((e) => e.key),
   slack: ['task.created', 'task.completed', 'task.assigned'],
+  discord: ['task.created', 'task.completed', 'task.assigned'],
   telegram_group: ['task.created', 'task.completed', 'task.assigned'],
   slack_bot: ['task.created', 'task.completed', 'task.assigned'],
 };
 /** Kinds that post task events and take an "events" list. */
-export const EVENT_KINDS: IntegrationKind[] = ['outgoing_webhook', 'slack', 'telegram_group', 'slack_bot'];
+export const EVENT_KINDS: IntegrationKind[] = ['outgoing_webhook', 'slack', 'discord', 'telegram_group', 'slack_bot'];
 const TEAM_KINDS: IntegrationKind[] = ['telegram_group', 'slack_bot'];
 
 @Component({

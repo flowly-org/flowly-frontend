@@ -149,6 +149,14 @@
                   <small class="muted">{{ 'In Slack: Apps → Incoming Webhooks → Add to Slack, pick a channel, copy the URL.' | t }}</small>
                 </label>
               }
+              @case ('discord') {
+                <label>
+                  {{ 'Discord channel webhook URL' | t }}
+                  <input name="webhook_url" type="url" [(ngModel)]="f.config['webhook_url']" placeholder="https://discord.com/api/webhooks/…" required
+                    pattern="https://((ptb|canary)\.)?discord(app)?\.com/api(/v[0-9]+)?/webhooks/[0-9]+/[A-Za-z0-9_\-]+/?" />
+                  <small class="muted">{{ 'In Discord: Edit channel → Integrations → Webhooks → New Webhook → Copy Webhook URL. Private tasks are never posted, and nobody gets pinged.' | t }}</small>
+                </label>
+              }
               @case ('incoming_webhook') {
                 <div class="grid2">
                   <label>

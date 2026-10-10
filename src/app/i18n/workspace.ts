@@ -2,6 +2,9 @@ import type { Dict } from './index';
 
 export const WORKSPACE: Dict = {
   it: {
+    "Post task events to a Discord channel, for the whole workspace or one project.": "Pubblica gli eventi delle attività in un canale Discord, per tutto il workspace o un progetto.",
+    "Discord channel webhook URL": "URL del webhook del canale Discord",
+    "In Discord: Edit channel → Integrations → Webhooks → New Webhook → Copy Webhook URL. Private tasks are never posted, and nobody gets pinged.": "In Discord: Modifica canale → Integrazioni → Webhook → Nuovo webhook → Copia URL webhook. Le attività private non vengono mai pubblicate e nessuno viene menzionato.",
     "Single sign-on": "Accesso unico (SSO)",
     "Let your team sign in with your company account (Google Workspace, Microsoft Entra ID, Okta, Keycloak and any OpenID Connect provider), and require it for your email domains. Single sign-on is part of the Enterprise plan.": "Fai accedere il team con l'account aziendale (Google Workspace, Microsoft Entra ID, Okta, Keycloak e qualsiasi provider OpenID Connect) e rendilo obbligatorio per i tuoi domini email. L'SSO fa parte del piano Enterprise.",
     "Your identity provider": "Il tuo provider di identità",
@@ -597,6 +600,9 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} aperte",
   },
   es: {
+    "Post task events to a Discord channel, for the whole workspace or one project.": "Publica los eventos de las tareas en un canal de Discord, para todo el espacio o un proyecto.",
+    "Discord channel webhook URL": "URL del webhook del canal de Discord",
+    "In Discord: Edit channel → Integrations → Webhooks → New Webhook → Copy Webhook URL. Private tasks are never posted, and nobody gets pinged.": "En Discord: Editar canal → Integraciones → Webhooks → Nuevo webhook → Copiar URL del webhook. Las tareas privadas nunca se publican y no se menciona a nadie.",
     "Single sign-on": "Inicio de sesión único",
     "Let your team sign in with your company account (Google Workspace, Microsoft Entra ID, Okta, Keycloak and any OpenID Connect provider), and require it for your email domains. Single sign-on is part of the Enterprise plan.": "Deja que tu equipo entre con la cuenta de la empresa (Google Workspace, Microsoft Entra ID, Okta, Keycloak y cualquier proveedor OpenID Connect) y hazlo obligatorio para tus dominios. El SSO forma parte del plan Enterprise.",
     "Your identity provider": "Tu proveedor de identidad",
@@ -1192,6 +1198,9 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} abiertas",
   },
   fr: {
+    "Post task events to a Discord channel, for the whole workspace or one project.": "Publie les événements des tâches dans un salon Discord, pour tout l’espace ou un projet.",
+    "Discord channel webhook URL": "URL du webhook du salon Discord",
+    "In Discord: Edit channel → Integrations → Webhooks → New Webhook → Copy Webhook URL. Private tasks are never posted, and nobody gets pinged.": "Dans Discord : Modifier le salon → Intégrations → Webhooks → Nouveau webhook → Copier l’URL du webhook. Les tâches privées ne sont jamais publiées et personne n’est mentionné.",
     "Single sign-on": "Authentification unique",
     "Let your team sign in with your company account (Google Workspace, Microsoft Entra ID, Okta, Keycloak and any OpenID Connect provider), and require it for your email domains. Single sign-on is part of the Enterprise plan.": "Permettez à votre équipe de se connecter avec le compte de l’entreprise (Google Workspace, Microsoft Entra ID, Okta, Keycloak et tout fournisseur OpenID Connect), et imposez-le pour vos domaines. L’authentification unique fait partie de l’offre Enterprise.",
     "Your identity provider": "Votre fournisseur d’identité",
@@ -1787,6 +1796,9 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} ouvertes",
   },
   de: {
+    "Post task events to a Discord channel, for the whole workspace or one project.": "Postet Aufgaben-Ereignisse in einen Discord-Kanal, für den ganzen Arbeitsbereich oder ein Projekt.",
+    "Discord channel webhook URL": "Webhook-URL des Discord-Kanals",
+    "In Discord: Edit channel → Integrations → Webhooks → New Webhook → Copy Webhook URL. Private tasks are never posted, and nobody gets pinged.": "In Discord: Kanal bearbeiten → Integrationen → Webhooks → Neuer Webhook → Webhook-URL kopieren. Private Aufgaben werden nie gepostet, und niemand wird erwähnt.",
     "Single sign-on": "Single Sign-on",
     "Let your team sign in with your company account (Google Workspace, Microsoft Entra ID, Okta, Keycloak and any OpenID Connect provider), and require it for your email domains. Single sign-on is part of the Enterprise plan.": "Lass dein Team sich mit dem Firmenkonto anmelden (Google Workspace, Microsoft Entra ID, Okta, Keycloak und jeder OpenID-Connect-Anbieter) und mach es für deine E-Mail-Domains verpflichtend. Single Sign-on ist Teil des Enterprise-Tarifs.",
     "Your identity provider": "Dein Identitätsanbieter",
@@ -2382,6 +2394,9 @@ export const WORKSPACE: Dict = {
     "{n} open": "{n} offen",
   },
   pt: {
+    "Post task events to a Discord channel, for the whole workspace or one project.": "Publica os eventos das tarefas num canal do Discord, para todo o espaço ou um projeto.",
+    "Discord channel webhook URL": "URL do webhook do canal do Discord",
+    "In Discord: Edit channel → Integrations → Webhooks → New Webhook → Copy Webhook URL. Private tasks are never posted, and nobody gets pinged.": "No Discord: Editar canal → Integrações → Webhooks → Novo webhook → Copiar URL do webhook. As tarefas privadas nunca são publicadas e ninguém é mencionado.",
     "Single sign-on": "Início de sessão único",
     "Let your team sign in with your company account (Google Workspace, Microsoft Entra ID, Okta, Keycloak and any OpenID Connect provider), and require it for your email domains. Single sign-on is part of the Enterprise plan.": "Deixe a equipa entrar com a conta da empresa (Google Workspace, Microsoft Entra ID, Okta, Keycloak e qualquer fornecedor OpenID Connect) e torne-o obrigatório para os seus domínios. O SSO faz parte do plano Enterprise.",
     "Your identity provider": "O seu fornecedor de identidade",
