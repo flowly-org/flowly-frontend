@@ -15,6 +15,7 @@
         <button type="button" role="menuitem" (click)="fullVersion()">{{ 'Full version' | t }}</button>
         <button type="button" role="menuitem" (click)="openSettings()">{{ 'Settings' | t }}</button>
         <button type="button" role="menuitem" (click)="auth.logout()">{{ 'Sign out' | t }}</button>
+        <app-server-picker class="servers" />
       </div>
     }
   </header>

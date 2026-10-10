@@ -70,7 +70,7 @@
           [disabled]="k.enterprise && !enterprise()" (click)="startNew(k.kind)"
           [title]="(k.enterprise && !enterprise() ? 'Available with the Enterprise plan: ask your Flowly administrator.' : '') | t">
           <span class="kind-icon" [attr.data-kind]="k.kind" aria-hidden="true">@if (k.icon) { <app-icon [name]="k.icon" [size]="16" /> }</span>
-          <strong>{{ k.label | t }} @if (k.enterprise) {<span class="ent-badge">Enterprise</span>}</strong>
+          <strong>{{ k.label | t }} @if (k.enterprise && auth.plansEnabled()) {<span class="ent-badge">Enterprise</span>}</strong>
           <span class="muted">{{ k.blurb | t }}</span>
         </button>
       }

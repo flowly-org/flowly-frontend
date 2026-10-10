@@ -12,6 +12,8 @@ export interface User {
   plan?: 'free' | 'pro' | 'pro_plus';
   has_pro?: boolean;
   has_pro_plus?: boolean;
+  /** This instance sells plans; false on self-hosted servers (everything unlocked). */
+  plans_enabled?: boolean;
   is_bot?: boolean;
   /** "manual" (an admin), "stripe" (a subscription) or "code" (an invite code). */
   plan_source?: string;

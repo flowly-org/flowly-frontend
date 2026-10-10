@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ServerPicker } from '../../components/server-picker/server-picker';
 import { Icon } from '../../components/icon/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,7 @@ import { I18nService } from '../../core/i18n.service';
 
 @Component({
   selector: 'app-auth-page',
-  imports: [Icon, FormsModule, RouterLink, Logo, TranslatePipe],
+  imports: [ServerPicker, Icon, FormsModule, RouterLink, Logo, TranslatePipe],
   templateUrl: './auth-page.html',
   styleUrl: './auth-page.scss',
 })

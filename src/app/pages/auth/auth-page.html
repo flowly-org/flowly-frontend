@@ -9,6 +9,7 @@
       {{ (isRegister() ? 'Plan each day across all your projects.' : 'Sign in to see your day.') | t }}
     </p>
 
+    <app-server-picker class="servers" />
     <form (ngSubmit)="submit()" #f="ngForm">
       @if (isRegister()) {
         <label>

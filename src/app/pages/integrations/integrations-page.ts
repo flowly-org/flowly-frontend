@@ -1,5 +1,6 @@
 import { JsonPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { AuthService } from '../../core/auth.service';
 import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -67,6 +68,7 @@ const TEAM_KINDS: IntegrationKind[] = ['telegram_group', 'slack_bot'];
 })
 export class IntegrationsPage implements OnInit {
   protected store = inject(WorkspaceStore);
+  protected auth = inject(AuthService);
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);

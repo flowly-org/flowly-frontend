@@ -113,10 +113,11 @@
       <div class="menu" role="menu">
         <div class="menu-email muted">
           {{ auth.user()?.email }}
-          @if (auth.user()?.has_pro) {
+          @if (auth.user()?.has_pro && auth.plansEnabled()) {
             <span class="pro-badge">PRO</span>
           }
         </div>
+        <app-server-picker class="menu-servers" />
         <a class="btn ghost block menu-link" routerLink="/settings" (click)="menuOpen.set(false)"><app-icon name="settings" [size]="16" /> {{ 'Settings & concierge' | t }}</a>
         <button class="btn ghost block menu-link compact-link" type="button" (click)="menuOpen.set(false); compactView()"><app-icon name="phone" [size]="16" /> {{ 'Simple view' | t }}</button>
         <a class="btn ghost block menu-link" routerLink="/apps" (click)="menuOpen.set(false)"><app-icon name="download" [size]="16" /> {{ 'Get the apps' | t }}</a>

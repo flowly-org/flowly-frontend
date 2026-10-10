@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { Observable, firstValueFrom, map, shareReplay, tap } from 'rxjs';
 
 import { ConfigService } from './config.service';
+import { serverKey } from './servers';
 import { AuthResponse, User } from './models';
 
-const ACCESS = 'flowly.access';
-const REFRESH = 'flowly.refresh';
+// One session per server on the mobile app (see servers.ts); the web app has a single one.
+const ACCESS = serverKey('flowly.access');
+const REFRESH = serverKey('flowly.refresh');
 
 function storageGet(key: string): string | null {
   try {
@@ -36,6 +38,8 @@ export class AuthService {
   /** Set by I18nService: use the account's language on a device that has no choice saved yet. */
   adoptLanguage?: (lang: string | undefined) => void;
   readonly isLoggedIn = computed(() => this.user() !== null);
+  /** This instance sells plans (flowly.net). Self-hosted instances don't: everyone has everything, no badges. */
+  readonly plansEnabled = computed(() => this.user()?.plans_enabled === true);
 
   private accessToken = storageGet(ACCESS);
   private refreshToken = storageGet(REFRESH);

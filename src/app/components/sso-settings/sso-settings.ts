@@ -50,6 +50,7 @@ export class SsoSettings implements OnInit {
   protected newDomain = '';
   protected confirmingRemove = signal(false);
 
+  protected readonly plansEnabled = computed(() => this.auth.plansEnabled());
   protected readonly conn = computed(() => this.setup()?.connection ?? null);
   protected readonly hasVerified = computed(() => !!this.conn()?.domains.some((d) => d.verified));
 

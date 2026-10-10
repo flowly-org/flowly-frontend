@@ -74,7 +74,7 @@
         <div class="downloads"><a class="btn" [href]="webUrl">{{ 'Open the web app' | t }}</a></div>
       </section>
       <section class="card">
-        <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="message" [size]="20" /></span><h2>{{ 'Telegram concierge' | t }}</h2><span class="badge soon">PRO</span></div>
+        <div class="card-head"><span class="icon" aria-hidden="true"><app-icon name="message" [size]="20" /></span><h2>{{ 'Telegram concierge' | t }}</h2>@if (auth.plansEnabled()) { <span class="badge soon">PRO</span> }</div>
         <p class="muted">{{ 'A personal assistant that briefs you each morning and adds or moves tasks by chat.' | t }}</p>
         <div class="downloads"><a class="btn" routerLink="/settings" fragment="concierge">{{ 'Link Telegram' | t }}</a></div>
       </section>

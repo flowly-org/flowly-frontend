@@ -1,8 +1,15 @@
 # Flowly – frontend
 
-Angular 22 client for Flowly: plan your day across projects as a kanban board with **swimlanes**.
+Angular 22 client for [Flowly](https://flowly.net), the open-source daily planner: plan your day across projects as a
+kanban board with **swimlanes**, with Flo, the AI concierge, one click away. The same code builds the Android and iOS
+apps (Capacitor).
 
-The Django API lives in the separate `flowly-backend` repository.
+The API lives in [flowly-backend](https://github.com/flowly-org/flowly-backend), which also has the self-hosting guide.
+Licensed under the [GNU AGPL-3.0](LICENSE).
+
+**One build, any server.** The web image reads `config.json` when the container starts (`API_URL`, `API_UPSTREAM`),
+so `ghcr.io/flowly-org/flowly-frontend` works with any backend. The mobile apps keep a list of servers: flowly.net
+first, plus any you add from the sign-in page or the menu (Server → Add), each with its own sign-in.
 
 ## Features
 
@@ -44,7 +51,7 @@ or without a local Node:
 docker run --rm -it -p 4200:4200 -v "$PWD":/app -w /app node:22-alpine sh -c "npm ci && npx ng serve --host 0.0.0.0"
 ```
 
-## Netlify (production)
+## Netlify (flowly.net only)
 
 `netlify.toml` builds the app and proxies `/api`, `/admin` and `/static` to `https://api.flowly.net`, so
 the browser only talks to the Netlify origin. `.github/workflows/deploy.yml` deploys every push to

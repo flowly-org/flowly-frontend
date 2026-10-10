@@ -24,7 +24,7 @@
     </form>
   </section>
 
-  <section [hidden]="tab() !== 'account'" class="panel" id="plan">
+  <section [hidden]="tab() !== 'account' || !auth.plansEnabled()" class="panel" id="plan">
     <h2>{{ 'Plan' | t }}</h2>
     @if (plan(); as p) {
       <div class="plan-box">

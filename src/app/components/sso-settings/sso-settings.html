@@ -1,7 +1,7 @@
 <section class="panel" id="sso">
   <h2>
     <span>{{ 'Single sign-on' | t }}</span>
-    <span class="badge">Enterprise</span>
+    @if (plansEnabled()) { <span class="badge">Enterprise</span> }
   </h2>
 
   @if (setup(); as s) {

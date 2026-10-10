@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { isNative } from './native';
+import { DEFAULT_SERVER, activeServer } from './servers';
 
 interface AppConfig {
   apiUrl: string;
@@ -22,7 +23,7 @@ export class ConfigService {
     } catch {
       // keep defaults
     }
-    // The mobile apps aren't served from Flowly's origin, so a relative API URL can't work there.
-    if (isNative() && !/^https?:/.test(this.config.apiUrl)) this.config.apiUrl = 'https://api.flowly.net/api';
+    // The mobile apps aren't served from a Flowly server: they talk to the one picked on the device.
+    if (isNative()) this.config.apiUrl = (activeServer() ?? DEFAULT_SERVER).apiUrl;
   }
 }

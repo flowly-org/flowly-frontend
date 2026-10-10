@@ -9,6 +9,8 @@ on:
 jobs:
   android:
     runs-on: ubuntu-latest
+    env:
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +25,7 @@ jobs:
       - run: npm run build:mobile
       - run: npx cap sync android
       - name: Build signed APK
+        if: env.HAS_KEYSTORE == 'true'
         working-directory: android
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -36,6 +39,16 @@ jobs:
           ./gradlew assembleRelease --no-daemon
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/Flowly-Android.apk"
           rm -f "$RUNNER_TEMP/flowly.jks"
+      # Forks have no signing key: a debug build installs the same way (Android asks to allow it).
+      - name: Build debug APK (no signing key)
+        if: env.HAS_KEYSTORE != 'true'
+        working-directory: android
+        env:
+          FLOWLY_VERSION_CODE: ${{ github.run_number }}
+          FLOWLY_VERSION_NAME: 0.2.${{ github.run_number }}
+        run: |
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/Flowly-Android.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: flowly-android-apk

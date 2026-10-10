@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ServerPicker } from '../../components/server-picker/server-picker';
 import { Icon } from '../../components/icon/icon';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -29,7 +30,7 @@ type Sheet = { kind: 'add'; text: string } | { kind: 'photo'; text: string } | n
  */
 @Component({
   selector: 'app-mobile-day',
-  imports: [Icon, FormsModule, Logo, SwipeDeck, TranslatePipe, TaskChecklist],
+  imports: [ServerPicker, Icon, FormsModule, Logo, SwipeDeck, TranslatePipe, TaskChecklist],
   providers: [BoardData],
   templateUrl: './mobile-day.html',
   styleUrl: './mobile-day.scss',

@@ -442,3 +442,10 @@
     text-decoration-color: var(--line);
   }
 }
+
+.menu .servers {
+  display: block;
+  padding: 8px;
+  border-top: 1px solid var(--line);
+  min-width: 240px;
+}

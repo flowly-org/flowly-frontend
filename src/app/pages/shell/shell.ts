@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { ServerPicker } from '../../components/server-picker/server-picker';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -25,7 +26,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, Guide, Icon, SearchPalette, FloPanel, FloPlanComponent, TranslatePipe, LocalDatePipe],
+  imports: [ServerPicker, RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Logo, Guide, Icon, SearchPalette, FloPanel, FloPlanComponent, TranslatePipe, LocalDatePipe],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   host: { '[style.--brand]': 'brandColor()', '(document:keydown)': 'shortcut($event)' },
