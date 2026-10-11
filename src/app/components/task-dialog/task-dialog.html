@@ -47,6 +47,13 @@
         @if (t.description) {
           <p class="notes">{{ t.description }}</p>
         }
+        @if (t.mentions?.length) {
+          <dl class="mentions">
+            @for (m of t.mentions; track m.key) {
+              <dt>{{ '@' + m.key }}</dt><dd>{{ m.value }}</dd>
+            }
+          </dl>
+        }
         <app-task-checklist class="checklist" [items]="checklist()" (changed)="saveChecklist($event)" />
         <dl class="facts">
           <dt>{{ 'Status' | t }}</dt>
@@ -143,6 +150,15 @@
       <input class="title-input" name="title" [(ngModel)]="model.title" [placeholder]="'What needs doing?' | t" required autofocus />
     }
     <textarea name="description" [(ngModel)]="model.description" [placeholder]="'Notes (optional)' | t" rows="3"></textarea>
+    @if (usable().length) {
+      <div class="attr-hint">
+        <span class="small muted" [title]="'Placeholders put the value in the task; @ mentions point Flo at it.' | t">{{ 'Attributes:' | t }}</span>
+        @for (a of usable(); track a.id) {
+          <button type="button" class="attr-chip" [title]="a.value" (click)="insert(placeholder(a.key))">{{ placeholder(a.key) }}</button>
+          <button type="button" class="attr-chip at" [title]="a.value" (click)="insert('@' + a.key)">{{ '@' + a.key }}</button>
+        }
+      </div>
+    }
     <app-task-checklist class="checklist" [items]="model.checklist" (changed)="model.checklist = $event; task() && checklist.set($event)" />
 
     <div class="grid">
@@ -158,7 +174,7 @@
       }
       <label>
         {{ 'Project' | t }}
-        <select name="project" [(ngModel)]="model.project">
+        <select name="project" [(ngModel)]="model.project" (ngModelChange)="projectId.set($event)">
           <option [ngValue]="null">{{ 'No project' | t }}</option>
           @for (p of ctx()?.projects ?? []; track p.id) {
             @if (!p.archived || p.id === model.project) {

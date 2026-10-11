@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { SsoSettings } from '../../components/sso-settings/sso-settings';
+import { AttributeEditor } from '../../components/attribute-editor/attribute-editor';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { TranslatePipe } from '../../core/i18n.pipes';
 import { I18nService } from '../../core/i18n.service';
@@ -11,7 +12,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-workspace-settings',
-  imports: [FormsModule, RouterLink, TranslatePipe, SsoSettings],
+  imports: [FormsModule, RouterLink, TranslatePipe, SsoSettings, AttributeEditor],
   template: `
     <div class="page">
       <header>
@@ -73,6 +74,10 @@ import { WorkspaceStore } from '../../core/workspace.store';
         </section>
 
         @if (store.currentId(); as wsId) {
+          <section class="panel">
+            <h2>{{ 'Attributes' | t }}</h2>
+            <app-attribute-editor class="pad" [workspace]="wsId" [canEdit]="store.canManage()" />
+          </section>
           <app-sso-settings [workspace]="wsId" />
         }
 
@@ -94,6 +99,7 @@ import { WorkspaceStore } from '../../core/workspace.store';
     </div>
   `,
   styles: `
+    .pad { padding: 12px 16px; }
     .small { font-size: 0.82rem; }
     .feature.disabled { opacity: 0.55; }
     .switch { position: relative; width: 38px; height: 22px; flex: none; cursor: pointer; }

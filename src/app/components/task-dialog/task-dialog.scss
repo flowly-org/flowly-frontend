@@ -315,3 +315,40 @@ footer {
     &:hover { background: var(--surface-2); }
   }
 }
+
+.mentions {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  font-size: 0.85rem;
+
+  dt { color: var(--accent); font-weight: 600; }
+  dd { margin: 0; white-space: pre-line; }
+}
+
+.attr-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 2px 0 10px;
+}
+
+.attr-chip {
+  font: inherit;
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 1px 6px;
+  cursor: pointer;
+
+  &.at { color: var(--accent); }
+  &:hover { border-color: var(--accent); }
+}

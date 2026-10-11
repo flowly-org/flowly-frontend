@@ -160,8 +160,13 @@ export interface Task {
   ref: string;
   visibility: Visibility;
   workspace: number;
+  /** Shown with {{attributes}} filled in; the raw text is in title_template when it has placeholders. */
   title: string;
   description: string;
+  title_template?: string;
+  description_template?: string;
+  /** Attributes the task points at with @key. */
+  mentions?: { key: string; value: string }[];
   /** Id of a tag in the workspace's status group. */
   status: number;
   /** Id of a tag in the workspace's priority group. */
@@ -983,4 +988,13 @@ export interface SsoSetup {
   available: boolean;
   callback_url: string;
   connection: SsoConnection | null;
+}
+
+/** A custom key/value on a workspace (project null) or a project: {{key}} in tasks, @key for Flo. */
+export interface Attribute {
+  id: number;
+  project: number | null;
+  key: string;
+  value: string;
+  updated_at?: string;
 }

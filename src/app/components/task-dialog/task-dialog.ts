@@ -15,7 +15,7 @@ import { I18nService } from '../../core/i18n.service';
 import { ApiService, errorMessage } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 import { BoardData } from '../../core/board-data';
-import { ChecklistItem, Recurrence, Task, TaskInput, TaskReminder, VISIBILITIES, Visibility, formatMinutes } from '../../core/models';
+import { Attribute, ChecklistItem, Recurrence, Task, TaskInput, TaskReminder, VISIBILITIES, Visibility, formatMinutes } from '../../core/models';
 
 interface FormModel {
   title: string;
@@ -257,13 +257,41 @@ export class TaskDialog implements OnInit {
     this.addReminder();
   }
 
+  /** Attributes usable in this task: the workspace's, with the chosen project's on top. */
+  protected attributes = signal<Attribute[]>([]);
+  protected readonly usable = computed(() => {
+    const byKey = new Map<string, Attribute>();
+    for (const a of this.attributes().filter((a) => a.project === null)) byKey.set(a.key, a);
+    for (const a of this.attributes().filter((a) => a.project !== null && a.project === this.projectId())) byKey.set(a.key, a);
+    return [...byKey.values()];
+  });
+  protected projectId = signal<number | null>(null);
+
+  private async loadAttributes() {
+    try {
+      if (this.wsId()) this.attributes.set(await this.api.attributes(this.wsId()));
+    } catch {
+      this.attributes.set([]);
+    }
+  }
+
+  protected placeholder(key: string) {
+    return '{' + '{' + key + '}' + '}';
+  }
+
+  protected insert(text: string) {
+    this.model.description = (this.model.description ? this.model.description.replace(/\s*$/, ' ') : '') + text;
+  }
+
   /** (Re)fill the form from the task or the defaults. */
   private ngOnInitForm() {
     const src: TaskInput = this.task() ?? this.defaults();
     this.wsId.set(src.workspace ?? this.data.contexts()[0]?.id ?? 0);
+    const t = this.task();
     this.model = {
-      title: src.title ?? '',
-      description: src.description ?? '',
+      // Edit the text as written: {{placeholders}} stay placeholders.
+      title: t?.title_template ?? src.title ?? '',
+      description: t?.description_template ?? src.description ?? '',
       status: src.status ?? null,
       priority: src.priority ?? null,
       project: src.project ?? null,
@@ -279,6 +307,8 @@ export class TaskDialog implements OnInit {
     };
     this.applyTags(src.tags ?? []);
     if (this.model.status === null) this.model.status = this.defaultStatus();
+    this.projectId.set(this.model.project);
+    this.loadAttributes();
   }
 
   private defaultStatus(): number | null {
@@ -298,6 +328,7 @@ export class TaskDialog implements OnInit {
   /** New tasks only: moving to another workspace resets the workspace-specific fields. */
   protected changeWorkspace(id: number) {
     this.wsId.set(id);
+    this.loadAttributes();
     const statusName = this.data.tagById().get(this.model.status ?? -1)?.name.toLowerCase();
     this.model.status = this.statuses().find((s) => s.name.toLowerCase() === statusName)?.id ?? this.defaultStatus();
     this.model.priority = null;

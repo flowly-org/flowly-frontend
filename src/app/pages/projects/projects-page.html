@@ -77,6 +77,7 @@
         </label>
       }
     }
+    <button class="btn ghost small" type="button" (click)="attributesOf.set(p)">{{ 'Attributes' | t }}</button>
     <a class="btn ghost small" [routerLink]="['../timeline']" [queryParams]="{ project: p.id }">{{ 'Timeline' | t }}</a>
     <a class="btn ghost small" routerLink="/insights" [queryParams]="{ scope: 'project', id: p.id }">{{ 'Insights' | t }}</a>
     <a class="btn ghost small" [routerLink]="['../integrations']" [queryParams]="{ project: p.id }">{{ 'Integrations' | t }}</a>
@@ -103,4 +104,15 @@
 
 @if (relocating(); as r) {
   <app-relocate-dialog [project]="r.project" [mode]="r.mode" (done)="relocated(r, $event)" (closed)="relocating.set(null)" />
+}
+
+@if (attributesOf(); as p) {
+  <div class="attr-backdrop" (click)="attributesOf.set(null)"></div>
+  <section class="attr-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Attributes of {name}' | t: { name: p.name }">
+    <header>
+      <h2>{{ 'Attributes of {name}' | t: { name: p.name } }}</h2>
+      <button class="btn ghost icon" type="button" [attr.aria-label]="'Close' | t" (click)="attributesOf.set(null)">✕</button>
+    </header>
+    <app-attribute-editor [workspace]="store.currentId()!" [project]="p.id" [canEdit]="store.canManage()" />
+  </section>
 }

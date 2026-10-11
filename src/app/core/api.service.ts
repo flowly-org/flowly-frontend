@@ -54,6 +54,7 @@ import {
   Invitation,
   Membership,
   Project,
+  Attribute,
   SsoConnection,
   SsoSetup,
   FloChat,
@@ -478,6 +479,19 @@ export class ApiService {
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
   }
+  // Custom attributes (workspace and projects)
+  attributes(wsId: number, project?: number | 'none') {
+    return this.run(this.http.get<Attribute[]>(this.ws(wsId, 'attributes/'), { params: project ? { project } : {} }));
+  }
+  saveAttribute(wsId: number, data: Partial<Attribute>) {
+    return this.run(data.id
+      ? this.http.patch<Attribute>(this.ws(wsId, `attributes/${data.id}/`), data)
+      : this.http.post<Attribute>(this.ws(wsId, 'attributes/'), data));
+  }
+  deleteAttribute(wsId: number, id: number) {
+    return this.run(this.http.delete<void>(this.ws(wsId, `attributes/${id}/`)));
+  }
+
   // Single sign-on (Enterprise workspaces)
   sso(wsId: number) {
     return this.run(this.http.get<SsoSetup>(this.ws(wsId, 'sso/')));

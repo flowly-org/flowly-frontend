@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ImportDialog } from '../../components/import-dialog/import-dialog';
 import { RelocateDialog } from '../../components/relocate-dialog/relocate-dialog';
+import { AttributeEditor } from '../../components/attribute-editor/attribute-editor';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,8 +15,16 @@ import { WorkspaceStore } from '../../core/workspace.store';
 
 @Component({
   selector: 'app-projects-page',
-  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe, ImportDialog, RelocateDialog],
+  imports: [FormsModule, NgTemplateOutlet, RouterLink, TranslatePipe, ImportDialog, RelocateDialog, AttributeEditor],
   templateUrl: './projects-page.html',
+  host: { '(document:keydown.escape)': 'attributesOf.set(null)' },
+  styles: `
+    .attr-backdrop { position: fixed; inset: 0; background: rgb(0 0 0 / 35%); z-index: 99; }
+    .attr-dialog { position: fixed; z-index: 100; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(640px, calc(100% - 32px));
+      max-height: calc(100dvh - 32px); overflow: auto; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow-lg); padding: 0 16px 16px; }
+    .attr-dialog header { display: flex; align-items: center; gap: 10px; padding: 14px 0; }
+    .attr-dialog h2 { flex: 1; margin: 0; font-size: 1.05rem; }
+  `,
 })
 export class ProjectsPage {
   protected store = inject(WorkspaceStore);
@@ -31,6 +40,7 @@ export class ProjectsPage {
   protected editingId = signal<number | null>(null);
   protected editName = '';
   protected confirmingDelete = signal<number | null>(null);
+  protected attributesOf = signal<Project | null>(null);
   protected relocating = signal<{ project: Project; mode: 'move' | 'promote' } | null>(null);
 
   protected readonly active = computed(() => this.store.projects().filter((p) => !p.archived));
