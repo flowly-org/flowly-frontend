@@ -2,6 +2,11 @@ import type { Dict } from './index';
 
 export const SHELL: Dict = {
   it: {
+    "Travel time": "Tempo di viaggio",
+    "Fixed estimate": "Stima fissa",
+    "Real driving time": "Tempo reale in auto",
+    "When no route is known": "Se il percorso non è noto",
+    "Real driving time: your home and your appointments' addresses are looked up on OpenStreetMap (Nominatim and OSRM, or your organization's own servers) and the route by car is computed in the background, plus 5 minutes to park. Until a route is known, or if there is none, the estimate above applies.": "Tempo reale in auto: la tua casa e gli indirizzi degli appuntamenti vengono cercati su OpenStreetMap (Nominatim e OSRM, o i server della tua organizzazione) e il percorso in auto viene calcolato in background, più 5 minuti per parcheggiare. Finché il percorso non è noto, o se non esiste, vale la stima qui sopra.",
     "Server": "Server",
     "Remove {name}": "Rimuovi {name}",
     "Server address": "Indirizzo del server",
@@ -258,6 +263,11 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Errore del server ({status}). Riprova.",
   },
   es: {
+    "Travel time": "Tiempo de viaje",
+    "Fixed estimate": "Estimación fija",
+    "Real driving time": "Tiempo real en coche",
+    "When no route is known": "Si no se conoce la ruta",
+    "Real driving time: your home and your appointments' addresses are looked up on OpenStreetMap (Nominatim and OSRM, or your organization's own servers) and the route by car is computed in the background, plus 5 minutes to park. Until a route is known, or if there is none, the estimate above applies.": "Tiempo real en coche: tu casa y las direcciones de tus citas se buscan en OpenStreetMap (Nominatim y OSRM, o los servidores de tu organización) y la ruta en coche se calcula en segundo plano, más 5 minutos para aparcar. Hasta que se conozca la ruta, o si no la hay, se aplica la estimación de arriba.",
     "Server": "Servidor",
     "Remove {name}": "Quitar {name}",
     "Server address": "Dirección del servidor",
@@ -514,6 +524,11 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Error del servidor ({status}). Inténtalo de nuevo.",
   },
   fr: {
+    "Travel time": "Temps de trajet",
+    "Fixed estimate": "Estimation fixe",
+    "Real driving time": "Temps réel en voiture",
+    "When no route is known": "Si l’itinéraire est inconnu",
+    "Real driving time: your home and your appointments' addresses are looked up on OpenStreetMap (Nominatim and OSRM, or your organization's own servers) and the route by car is computed in the background, plus 5 minutes to park. Until a route is known, or if there is none, the estimate above applies.": "Temps réel en voiture : votre domicile et les adresses de vos rendez-vous sont recherchés sur OpenStreetMap (Nominatim et OSRM, ou les serveurs de votre organisation) et l’itinéraire en voiture est calculé en arrière-plan, plus 5 minutes pour se garer. Tant que l’itinéraire n’est pas connu, ou s’il n’y en a pas, l’estimation ci-dessus s’applique.",
     "Server": "Serveur",
     "Remove {name}": "Retirer {name}",
     "Server address": "Adresse du serveur",
@@ -770,6 +785,11 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Erreur du serveur ({status}). Réessaie.",
   },
   de: {
+    "Travel time": "Fahrzeit",
+    "Fixed estimate": "Feste Schätzung",
+    "Real driving time": "Echte Fahrzeit mit dem Auto",
+    "When no route is known": "Wenn keine Route bekannt ist",
+    "Real driving time: your home and your appointments' addresses are looked up on OpenStreetMap (Nominatim and OSRM, or your organization's own servers) and the route by car is computed in the background, plus 5 minutes to park. Until a route is known, or if there is none, the estimate above applies.": "Echte Fahrzeit: Dein Zuhause und die Adressen deiner Termine werden bei OpenStreetMap gesucht (Nominatim und OSRM oder die Server deiner Organisation), und die Route mit dem Auto wird im Hintergrund berechnet, plus 5 Minuten zum Parken. Solange keine Route bekannt ist oder es keine gibt, gilt die Schätzung oben.",
     "Server": "Server",
     "Remove {name}": "{name} entfernen",
     "Server address": "Serveradresse",
@@ -1026,6 +1046,11 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Serverfehler ({status}). Bitte versuche es erneut.",
   },
   pt: {
+    "Travel time": "Tempo de viagem",
+    "Fixed estimate": "Estimativa fixa",
+    "Real driving time": "Tempo real de carro",
+    "When no route is known": "Quando não há rota conhecida",
+    "Real driving time: your home and your appointments' addresses are looked up on OpenStreetMap (Nominatim and OSRM, or your organization's own servers) and the route by car is computed in the background, plus 5 minutes to park. Until a route is known, or if there is none, the estimate above applies.": "Tempo real de carro: a sua casa e os endereços dos compromissos são procurados no OpenStreetMap (Nominatim e OSRM, ou os servidores da sua organização) e a rota de carro é calculada em segundo plano, mais 5 minutos para estacionar. Até a rota ser conhecida, ou se não existir, aplica-se a estimativa acima.",
     "Server": "Servidor",
     "Remove {name}": "Remover {name}",
     "Server address": "Endereço do servidor",

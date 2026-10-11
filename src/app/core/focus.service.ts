@@ -19,6 +19,7 @@ export const FOCUS_DEFAULTS: FocusOptions = {
   day_end: '18:00',
   block_reminders: true,
   transfer_minutes: 45,
+  travel_mode: 'fixed',
   appointment_briefs: 'off',
   appointment_lead_minutes: 15,
 };

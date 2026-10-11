@@ -2,6 +2,7 @@ import type { Dict } from './index';
 
 export const ADMIN: Dict = {
   it: {
+    "Maps (travel times)": "Mappe (tempi di viaggio)",
     "Activation": "Attivazione",
     "Signed up": "Registrati",
     "Created a task": "Hanno creato un'attività",
@@ -455,6 +456,7 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Uguale ai messaggi dell'utente",
   },
   es: {
+    "Maps (travel times)": "Mapas (tiempos de viaje)",
     "Activation": "Activación",
     "Signed up": "Registrados",
     "Created a task": "Crearon una tarea",
@@ -908,6 +910,7 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Igual que los mensajes del usuario",
   },
   fr: {
+    "Maps (travel times)": "Cartes (temps de trajet)",
     "Activation": "Activation",
     "Signed up": "Inscrits",
     "Created a task": "Ont créé une tâche",
@@ -1361,6 +1364,7 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Comme les messages de l'utilisateur",
   },
   de: {
+    "Maps (travel times)": "Karten (Fahrzeiten)",
     "Activation": "Aktivierung",
     "Signed up": "Registriert",
     "Created a task": "Haben eine Aufgabe erstellt",
@@ -1814,6 +1818,7 @@ export const ADMIN: Dict = {
     "Same as the user's messages": "Wie die Nachrichten des Benutzers",
   },
   pt: {
+    "Maps (travel times)": "Mapas (tempos de viagem)",
     "Activation": "Ativação",
     "Signed up": "Registados",
     "Created a task": "Criaram uma tarefa",

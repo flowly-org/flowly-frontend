@@ -189,7 +189,14 @@
     <p class="small muted">{{ 'Used by “Plan” on My day to find free time around your meetings.' | t }}</p>
     <div class="hours-row">
       <label>
-        <span class="small muted">{{ 'Travel time in town' | t }}</span>
+        <span class="small muted">{{ 'Travel time' | t }}</span>
+        <select [value]="focus.opts().travel_mode" (change)="setFocus({ focus: { travel_mode: $any($event.target).value } })">
+          <option value="fixed">{{ 'Fixed estimate' | t }}</option>
+          <option value="driving">{{ 'Real driving time' | t }}</option>
+        </select>
+      </label>
+      <label>
+        <span class="small muted">{{ (focus.opts().travel_mode === 'driving' ? 'When no route is known' : 'Travel time in town') | t }}</span>
         <span class="hours">
           <input type="number" class="num" min="0" max="240" step="5" [value]="focus.opts().transfer_minutes"
             (change)="setFocus({ focus: { transfer_minutes: +$any($event.target).value } })" [attr.aria-label]="'Travel time in town' | t" />
@@ -216,6 +223,9 @@
       }
     </div>
     <p class="small muted">{{ 'Appointments at an address in your home town take this long to reach (twice as long out of town): it counts as busy time, and Flo tells you when to leave. The briefing has the time, the place with a map link, the notes and the linked tasks.' | t }}</p>
+    @if (focus.opts().travel_mode === 'driving') {
+      <p class="small muted">{{ 'Real driving time: your home and your appointments\' addresses are looked up on OpenStreetMap (Nominatim and OSRM, or your organization\'s own servers) and the route by car is computed in the background, plus 5 minutes to park. Until a route is known, or if there is none, the estimate above applies.' | t }}</p>
+    }
     @if (focus.opts().appointment_briefs !== 'off' && !state()?.telegram?.linked) {
       <p class="small warn-text">{{ 'Telegram isn\'t linked yet, so briefings appear under the bell.' | t }}
         <button type="button" class="btn ghost small" (click)="openTab('flo')">{{ 'Link Telegram' | t }}</button></p>

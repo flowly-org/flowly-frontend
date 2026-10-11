@@ -3,6 +3,7 @@ import type { Dict } from './index';
 /** Board, task card, task dialog and its tabs, bulk add. */
 export const BOARD: Dict = {
   it: {
+    "Leave by {time} (about {n} min by car, parking included).": "Parti entro le {time} (circa {n} min in auto, parcheggio incluso).",
     "High": "Alta",
     "Plan your week with Flo": "Pianifica la settimana con Flo",
     "Here is your week": "Ecco la tua settimana",
@@ -487,6 +488,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} attività",
   },
   es: {
+    "Leave by {time} (about {n} min by car, parking included).": "Sal antes de las {time} (unos {n} min en coche, aparcar incluido).",
     "High": "Alta",
     "Plan your week with Flo": "Planifica tu semana con Flo",
     "Here is your week": "Aquí tienes tu semana",
@@ -971,6 +973,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tareas",
   },
   fr: {
+    "Leave by {time} (about {n} min by car, parking included).": "Partez avant {time} (environ {n} min en voiture, stationnement compris).",
     "High": "Haute",
     "Plan your week with Flo": "Planifiez votre semaine avec Flo",
     "Here is your week": "Voici votre semaine",
@@ -1455,6 +1458,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tâches",
   },
   de: {
+    "Leave by {time} (about {n} min by car, parking included).": "Losfahren bis {time} (etwa {n} Min. mit dem Auto, Parken inklusive).",
     "High": "Hoch",
     "Plan your week with Flo": "Plane deine Woche mit Flo",
     "Here is your week": "Hier ist deine Woche",
@@ -1939,6 +1943,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} Aufgaben",
   },
   pt: {
+    "Leave by {time} (about {n} min by car, parking included).": "Saia até às {time} (cerca de {n} min de carro, estacionamento incluído).",
     "High": "Alta",
     "Plan your week with Flo": "Planeie a sua semana com o Flo",
     "Here is your week": "Aqui está a sua semana",

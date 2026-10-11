@@ -35,6 +35,7 @@ export interface FocusOptions {
   day_end: string;
   block_reminders: boolean;
   transfer_minutes: number;
+  travel_mode: 'fixed' | 'driving';
   appointment_briefs: 'off' | 'in_person' | 'all';
   appointment_lead_minutes: number;
 }
@@ -664,6 +665,8 @@ export interface CalendarEvent {
   /** Travel needed to get there: in the home town, out of town, or none. */
   travel: 'in_town' | 'away' | '';
   travel_minutes: number;
+  /** 'driving': a real route by car; 'fixed': the estimate. */
+  travel_source: 'driving' | 'fixed' | '';
   leave_at: string | null;
   tasks: CalendarTaskRef[];
   suggested?: CalendarTaskRef[];

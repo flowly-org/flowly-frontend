@@ -71,7 +71,9 @@
             @if (e.leave_at) {
               <div class="leave-line small">
                 <app-icon name="route" [size]="14" />
-                @if (e.travel === 'away') {
+                @if (e.travel_source === 'driving') {
+                  {{ 'Leave by {time} (about {n} min by car, parking included).' | t: { n: e.travel_minutes, time: (e.leave_at | ldate: 'HH:mm') } }}
+                } @else if (e.travel === 'away') {
                   {{ 'Out of town: allow at least {n} min. Leave by {time}.' | t: { n: e.travel_minutes, time: (e.leave_at | ldate: 'HH:mm') } }}
                 } @else {
                   {{ 'Leave by {time} (about {n} min to get there).' | t: { n: e.travel_minutes, time: (e.leave_at | ldate: 'HH:mm') } }}

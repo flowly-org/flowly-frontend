@@ -104,7 +104,7 @@
     }
     <section class="panel">
       <h2>{{ 'Service checks' | t }}</h2>
-      @for (svc of [{ s: 'telegram', l: 'Telegram bot' }, { s: 'openrouter', l: 'OpenRouter' }, { s: 's3', l: 'File storage' }, { s: 'github', l: 'GitHub App' }]; track svc.s) {
+      @for (svc of [{ s: 'telegram', l: 'Telegram bot' }, { s: 'openrouter', l: 'OpenRouter' }, { s: 's3', l: 'File storage' }, { s: 'github', l: 'GitHub App' }, { s: 'maps', l: 'Maps (travel times)' }]; track svc.s) {
         <div class="row">
           <strong class="svc">{{ svc.l | t }}</strong>
           <span class="grow check-msg" [class.ok]="checkResult(svc.s)?.ok" [class.fail]="checkResult(svc.s) && !checkResult(svc.s)?.ok">
