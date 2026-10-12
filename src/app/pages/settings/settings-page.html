@@ -663,6 +663,13 @@
           </label>
         </div>
         <div class="row">
+          <label class="check-line">
+            <input type="checkbox" [checked]="s.settings.forward_new_tasks" (change)="update({ forward_new_tasks: $any($event.target).checked })" />
+            <span>{{ 'Forward new tasks that land on my day' | t }}
+              <span class="block small muted">{{ 'Tasks other people, email or integrations add for today, during your working hours. Several at once arrive as one message, and you can reply to move or finish them.' | t }}</span></span>
+          </label>
+        </div>
+        <div class="row">
           <label class="grow">
             <span class="small muted">{{ 'AI model' | t }}</span>
             <select [value]="s.settings.provider ?? ''" (change)="update({ provider: $any($event.target).value ? +$any($event.target).value : null })">

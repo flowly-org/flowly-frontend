@@ -66,7 +66,7 @@ export class Shell {
   protected notifications = inject(NotificationService);
   protected timer = inject(TimerService);
   protected readonly formatDuration = formatDuration;
-  protected readonly icons: Record<string, string> = { urgent: 'alert', assigned: 'pin', comment: 'message', brief: 'day', shared: 'link' };
+  protected readonly icons: Record<string, string> = { urgent: 'alert', assigned: 'pin', comment: 'message', brief: 'day', shared: 'link', new_task: 'inbox' };
 
   /** Colour of the workspace being viewed (default accent on My day). */
   protected readonly brandColor = computed(() => {

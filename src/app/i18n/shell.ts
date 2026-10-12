@@ -2,6 +2,8 @@ import type { Dict } from './index';
 
 export const SHELL: Dict = {
   it: {
+    "Forward new tasks that land on my day": "Inoltrami le nuove attività della giornata",
+    "Tasks other people, email or integrations add for today, during your working hours. Several at once arrive as one message, and you can reply to move or finish them.": "Attività che altre persone, l'email o le integrazioni aggiungono per oggi, durante il tuo orario di lavoro. Più attività insieme arrivano in un solo messaggio, e puoi rispondere per spostarle o completarle.",
     "Travel time": "Tempo di viaggio",
     "Fixed estimate": "Stima fissa",
     "Real driving time": "Tempo reale in auto",
@@ -263,6 +265,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Errore del server ({status}). Riprova.",
   },
   es: {
+    "Forward new tasks that land on my day": "Reenvíame las tareas nuevas que llegan a mi día",
+    "Tasks other people, email or integrations add for today, during your working hours. Several at once arrive as one message, and you can reply to move or finish them.": "Tareas que otras personas, el correo o las integraciones añaden para hoy, en tu horario de trabajo. Varias a la vez llegan en un solo mensaje, y puedes responder para moverlas o terminarlas.",
     "Travel time": "Tiempo de viaje",
     "Fixed estimate": "Estimación fija",
     "Real driving time": "Tiempo real en coche",
@@ -524,6 +528,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Error del servidor ({status}). Inténtalo de nuevo.",
   },
   fr: {
+    "Forward new tasks that land on my day": "Me transférer les nouvelles tâches de ma journée",
+    "Tasks other people, email or integrations add for today, during your working hours. Several at once arrive as one message, and you can reply to move or finish them.": "Les tâches que d’autres personnes, l’e-mail ou les intégrations ajoutent pour aujourd’hui, pendant vos heures de travail. Plusieurs à la fois arrivent en un seul message, et vous pouvez répondre pour les déplacer ou les terminer.",
     "Travel time": "Temps de trajet",
     "Fixed estimate": "Estimation fixe",
     "Real driving time": "Temps réel en voiture",
@@ -785,6 +791,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Erreur du serveur ({status}). Réessaie.",
   },
   de: {
+    "Forward new tasks that land on my day": "Neue Aufgaben für meinen Tag weiterleiten",
+    "Tasks other people, email or integrations add for today, during your working hours. Several at once arrive as one message, and you can reply to move or finish them.": "Aufgaben, die andere, E-Mails oder Integrationen für heute hinzufügen, während deiner Arbeitszeit. Mehrere auf einmal kommen als eine Nachricht, und du kannst antworten, um sie zu verschieben oder abzuschließen.",
     "Travel time": "Fahrzeit",
     "Fixed estimate": "Feste Schätzung",
     "Real driving time": "Echte Fahrzeit mit dem Auto",
@@ -1046,6 +1054,8 @@ export const SHELL: Dict = {
     "Server error ({status}). Please try again.": "Serverfehler ({status}). Bitte versuche es erneut.",
   },
   pt: {
+    "Forward new tasks that land on my day": "Reencaminhar as novas tarefas do meu dia",
+    "Tasks other people, email or integrations add for today, during your working hours. Several at once arrive as one message, and you can reply to move or finish them.": "Tarefas que outras pessoas, o email ou as integrações adicionam para hoje, no seu horário de trabalho. Várias de uma vez chegam numa só mensagem, e pode responder para as mover ou concluir.",
     "Travel time": "Tempo de viagem",
     "Fixed estimate": "Estimativa fixa",
     "Real driving time": "Tempo real de carro",
