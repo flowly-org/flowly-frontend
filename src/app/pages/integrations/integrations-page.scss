@@ -61,6 +61,7 @@
   &[data-kind='github']::before { content: 'GH'; font-size: 0.7rem; }
   &[data-kind='slack'] { background: #4a154b; color: #fff; }
   &[data-kind='discord'] { background: #5865f2; color: #fff; }
+  &[data-kind='stairway'] { background: #0f172a; color: #fff; }
   &[data-kind='outgoing_webhook'] { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
   &[data-kind='incoming_webhook'] { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
   &[data-kind='email'] { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }

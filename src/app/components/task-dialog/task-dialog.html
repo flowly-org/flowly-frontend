@@ -131,6 +131,7 @@
         @if (!v.status?.is_done) {
           <app-task-delegate [task]="t" (finished)="touched.emit(t.id)" (openDiscussion)="tab.set('discussion')" />
         }
+        <app-task-stairway [task]="t" (openDocuments)="tab.set('files')" (changed)="touched.emit(t.id)" />
       </div>
     }
     @if (tab() === 'discussion') {

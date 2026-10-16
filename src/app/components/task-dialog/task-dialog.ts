@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { Icon } from '../icon/icon';
+import { TaskStairway } from '../task-stairway/task-stairway';
 import { FormsModule } from '@angular/forms';
 
 import { RepeatPicker, repeatText } from '../repeat-picker/repeat-picker';
@@ -40,7 +41,7 @@ export const ESTIMATES = [5, 10, 15, 30, 45, 60, 90, 120, 180, 240, 360, 480];
 
 @Component({
   selector: 'app-task-dialog',
-  imports: [Icon, FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TaskDelegate, TaskChecklist, RepeatPicker, TranslatePipe, LocalDatePipe],
+  imports: [TaskStairway, Icon, FormsModule, TaskDiscussion, TaskAttachments, TaskShare, TaskTime, TaskDelegate, TaskChecklist, RepeatPicker, TranslatePipe, LocalDatePipe],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   host: { '(document:keydown.escape)': 'close()' },

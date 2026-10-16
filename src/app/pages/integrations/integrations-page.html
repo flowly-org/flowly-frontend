@@ -291,6 +291,35 @@
                 </label>
                 <p class="hint muted">{{ 'Text pages (Markdown and other wiki formats) are copied every few hours. Flo can search them when you ask, and tasks delegated to the AI agent get the relevant pages as context. A wiki for a project only applies to that project\'s tasks. For a private repository, use a fine-grained token with read-only access to its contents; it is stored encrypted.' | t }}</p>
               }
+              @case ('stairway') {
+                <div class="grid2">
+                  <label>{{ 'Stairway address' | t }} <input name="url" type="url" [(ngModel)]="f.config['url']" placeholder="https://stairway.example.org" required /></label>
+                  <label>
+                    {{ 'Stairway token' | t }}
+                    <input name="apiKey" type="password" [(ngModel)]="f.apiKey" autocomplete="off"
+                      [placeholder]="current()?.info?.['token'] ? ('Saved ({hint}); type to replace' | t: { hint: current()?.info?.['token'] }) : 'STAIRWAY_TOKEN'" />
+                  </label>
+                  <label>{{ 'Agent' | t }}
+                    <select name="agent" [(ngModel)]="f.config['agent']">
+                      <option value="claude">Claude Code</option>
+                      <option value="opencode">opencode</option>
+                      <option value="crush">crush</option>
+                    </select>
+                  </label>
+                  <label>{{ 'Model (opencode, crush)' | t }} <input name="model" [(ngModel)]="f.config['model']" placeholder="deepseek/deepseek-v4.1-flash" [disabled]="(f.config['agent'] || 'claude') === 'claude'" /></label>
+                  <label>{{ 'Permissions' | t }}
+                    <select name="permission_mode" [(ngModel)]="f.config['permission_mode']">
+                      <option value="acceptEdits">{{ 'Edit files freely, ask before commands' | t }}</option>
+                      <option value="default">{{ 'Ask before acting' | t }}</option>
+                      <option value="plan">{{ 'Plan only' | t }}</option>
+                      <option value="bypassPermissions">{{ 'Act without asking' | t }}</option>
+                    </select>
+                  </label>
+                </div>
+                <label>{{ 'Standing instructions (optional)' | t }}
+                  <textarea name="instructions" rows="2" [(ngModel)]="f.config['instructions']" [placeholder]="'e.g. Write in Italian; deliver Markdown and CSV.' | t"></textarea></label>
+                <p class="hint muted">{{ 'Tasks get a “Work on it in Stairway” button: an AI agent works on the task in its own experiment folder on your Stairway server, and its reply and the files in ./deliverables come back to the task for you to review. The token is stored encrypted and never shown again.' | t }}</p>
+              }
               @case ('openrouter') {
                 <div class="grid2">
                   <label>{{ 'Model' | t }} <input name="model" [(ngModel)]="f.config['model']" [placeholder]="'e.g. {example}' | t: { example: 'mistralai/mistral-small-3.2-24b-instruct' }" required /></label>

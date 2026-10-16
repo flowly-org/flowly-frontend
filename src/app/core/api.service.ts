@@ -54,6 +54,7 @@ import {
   Invitation,
   Membership,
   Project,
+  StairwayRun,
   Attribute,
   SsoConnection,
   SsoSetup,
@@ -479,6 +480,17 @@ export class ApiService {
   conciergeBrief(send: boolean) {
     return this.run(this.http.post<{ brief: string }>(this.url('concierge/brief/'), { send }));
   }
+  // Stairway: an AI agent works on a task in its own experiment
+  stairwayRuns(wsId: number, taskId: number) {
+    return this.run(this.http.get<{ available: boolean; runs: StairwayRun[] }>(this.ws(wsId, `tasks/${taskId}/stairway/`)));
+  }
+  stairwayStart(wsId: number, taskId: number, instructions: string) {
+    return this.run(this.http.post<StairwayRun>(this.ws(wsId, `tasks/${taskId}/stairway/`), { instructions }));
+  }
+  stairwayAction(wsId: number, taskId: number, runId: number, action: 'prompt' | 'stop' | 'approve' | 'deny', text = '') {
+    return this.run(this.http.post<StairwayRun>(this.ws(wsId, `tasks/${taskId}/stairway/${runId}/${action}/`), { text }));
+  }
+
   // Custom attributes (workspace and projects)
   attributes(wsId: number, project?: number | 'none') {
     return this.run(this.http.get<Attribute[]>(this.ws(wsId, 'attributes/'), { params: project ? { project } : {} }));

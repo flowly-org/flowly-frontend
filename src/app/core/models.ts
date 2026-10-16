@@ -288,6 +288,7 @@ export type IntegrationKind =
   | 'github'
   | 'slack'
   | 'discord'
+  | 'stairway'
   | 'outgoing_webhook'
   | 'incoming_webhook'
   | 'email'
@@ -997,4 +998,20 @@ export interface Attribute {
   key: string;
   value: string;
   updated_at?: string;
+}
+
+/** A task handed to an AI agent on a Stairway server. */
+export interface StairwayRun {
+  id: number;
+  experiment: string;
+  status: 'working' | 'waiting' | 'review' | 'failed' | 'stopped';
+  session_url: string;
+  editor_url: string | null;
+  last_reply: string;
+  waiting_for: string;
+  replies: number;
+  files: number;
+  error: string;
+  created_at: string;
+  updated_at: string;
 }

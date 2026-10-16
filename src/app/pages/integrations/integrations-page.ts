@@ -24,6 +24,7 @@ interface KindInfo {
 export const KINDS: KindInfo[] = [
   { kind: 'github', label: 'GitHub', icon: '', blurb: 'Issues become tasks; closing or reopening a task updates the issue.' },
   { kind: 'slack', label: 'Slack', icon: 'hash', blurb: 'Post task events to a Slack channel.' },
+  { kind: 'stairway', label: 'Stairway', icon: 'bot', blurb: 'Hand tasks to an AI agent on your Stairway server; its results come back to the task.' },
   { kind: 'discord', label: 'Discord', icon: 'message', blurb: 'Post task events to a Discord channel, for the whole workspace or one project.' },
   { kind: 'outgoing_webhook', label: 'Outgoing webhook', icon: 'arrow-out', blurb: 'POST signed JSON to your URL when tasks change.' },
   { kind: 'incoming_webhook', label: 'Incoming webhook', icon: 'arrow-in', blurb: 'A secret URL any system can call to create or update tasks.' },
@@ -209,7 +210,9 @@ export class IntegrationsPage implements OnInit {
                   ? { source: 'github_wiki', repo: '', path: '', branch: '' }
                   : kind === 'donetick'
                     ? prepDonetick({ base_url: '', labels: [], label_projects: {}, members: {}, write_back: true, create_chores: false })
-                    : {};
+                    : kind === 'stairway'
+                      ? { url: '', agent: 'claude', model: '', permission_mode: 'acceptEdits', instructions: '' }
+                      : {};
     this.form.set({
       id: null,
       kind,
