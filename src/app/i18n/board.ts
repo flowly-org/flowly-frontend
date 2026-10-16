@@ -3,6 +3,7 @@ import type { Dict } from './index';
 /** Board, task card, task dialog and its tabs, bulk add. */
 export const BOARD: Dict = {
   it: {
+    "1 file in Documents": "1 file in Documenti",
     "Waiting for your OK": "In attesa del tuo OK",
     "The agent asks for your OK before going on:": "L'agente chiede il tuo OK prima di continuare:",
     "Allow": "Consenti",
@@ -505,6 +506,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} attività",
   },
   es: {
+    "1 file in Documents": "1 archivo en Documentos",
     "Waiting for your OK": "Esperando tu OK",
     "The agent asks for your OK before going on:": "El agente pide tu OK antes de seguir:",
     "Allow": "Permitir",
@@ -1007,6 +1009,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tareas",
   },
   fr: {
+    "1 file in Documents": "1 fichier dans Documents",
     "Waiting for your OK": "En attente de ton accord",
     "The agent asks for your OK before going on:": "L'agent demande ton accord avant de continuer :",
     "Allow": "Autoriser",
@@ -1509,6 +1512,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} tâches",
   },
   de: {
+    "1 file in Documents": "1 Datei in Dokumente",
     "Waiting for your OK": "Wartet auf dein OK",
     "The agent asks for your OK before going on:": "Der Agent bittet um dein OK, bevor er weitermacht:",
     "Allow": "Erlauben",
@@ -2011,6 +2015,7 @@ export const BOARD: Dict = {
     "{n} tasks": "{n} Aufgaben",
   },
   pt: {
+    "1 file in Documents": "1 arquivo em Documentos",
     "Waiting for your OK": "Aguardando o seu OK",
     "The agent asks for your OK before going on:": "O agente pede o seu OK antes de continuar:",
     "Allow": "Permitir",

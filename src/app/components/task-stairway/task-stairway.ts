@@ -26,7 +26,7 @@ import { Icon } from '../icon/icon';
             <span class="muted">{{ r.experiment }}</span>
             @if (r.session_url) { <a [href]="r.session_url" target="_blank" rel="noopener">{{ 'Open the session' | t }} ↗</a> }
             @if (r.editor_url) { <a [href]="r.editor_url" target="_blank" rel="noopener">{{ 'Files in VS Code' | t }} ↗</a> }
-            @if (r.files) { <button type="button" class="link-btn" (click)="openDocuments.emit()">{{ '{n} files in Documents' | t: { n: r.files } }}</button> }
+            @if (r.files) { <button type="button" class="link-btn" (click)="openDocuments.emit()">{{ (r.files === 1 ? '1 file in Documents' : '{n} files in Documents') | t: { n: r.files } }}</button> }
           </div>
           @if (r.error) { <p class="error small"><app-icon name="alert" [size]="14" /> {{ r.error }}</p> }
           @if (r.status === 'waiting') {
